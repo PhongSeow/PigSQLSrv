@@ -1,5 +1,5 @@
 # PigSQLSrv
-#### [ÖÐÎÄÎÄµµ](https://github.com/PhongSeow/PigSQLSrv/blob/main/README.CN.md)
+#### [ä¸­æ–‡æ–‡æ¡£](https://github.com/PhongSeow/PigSQLSrv/blob/master/README.CN.md)
 PigSQLSrv is a .net tools set library for SQL server development.
 
 ## ***Folders and files description***

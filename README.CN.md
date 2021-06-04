@@ -1,5 +1,6 @@
 # PigSQLSrv
-#### [English Readme](https://github.com/PhongSeow/PigSQLSrv/blob/main/README.md)
+#### [English Readme](https://github.com/PhongSeow/PigSQLSrv/blob/master/README.md)
+
 PigSQLSrv 专门用于 SQL Server .net 开发的工具集类库。
 
 ## ***目录和文件描述***
