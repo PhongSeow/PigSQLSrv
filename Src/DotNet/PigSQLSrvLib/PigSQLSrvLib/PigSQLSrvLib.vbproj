@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PigSQLSrvLib</RootNamespace>
+    <TargetFrameworks>net20;net30;net40;net45;</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Seow Phong</Authors>
+    <Company>Seow Phong Studio</Company>
+    <Copyright>Copyright (c) 2021 Seow Phong</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
+    <PackageIcon>SeowPhongLogo.png</PackageIcon>
+    <RepositoryUrl>https://github.com/PhongSeow/PigTools/tree/main/Src/DotNet/PigSQLSrv</RepositoryUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <Description>An interface class library specially designed for MS-SQL server.
+A .net tools set library for SQL server development.
+Interface similar to ObjAdoDBLib.
+It can run on Windows platforms only.
+</Description>
+    <Version>1.0.1.9</Version>
+    <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="My Project\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="SeowPhongLogo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>3.0.0-preview1.21075.2</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>3.0.0-preview1.21075.2</Version>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
