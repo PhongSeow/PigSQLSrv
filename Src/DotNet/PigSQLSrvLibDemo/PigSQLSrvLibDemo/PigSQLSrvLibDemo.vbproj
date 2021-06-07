@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PigSQLSrvLibDemo</RootNamespace>
+    <TargetFrameworks>net20;net30;net35;net40;net45;</TargetFrameworks>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <Authors>Seow Phong</Authors>
+	  <Company>Seow Phong Studio</Company>
+	  <Product>PigSQLSrvLib Demo Console</Product>
+	  <Description>Demo console program for PigSQLSrvLib
+</Description>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageProjectUrl>https://en.seowphong.com/oss/ObjAdoDB/</PackageProjectUrl>
+	  <RepositoryType>GIT</RepositoryType>
+	  <RepositoryUrl>https://github.com/PhongSeow/ObjAdoDB/tree/master/Src/DotNet/PigSQLSrvLibDemo</RepositoryUrl>
+	  <Version>1.0.1.2</Version>
+	  <PackageTags>PigSQLSrvLib SQLServer</PackageTags>
+	  <PackageReleaseNotes>Add the example to use AllRecordset2JSon.</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="My Project\" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="ObjAdoDBLib">
+      <Version>1.0.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="ObjAdoDBLib">
+      <Version>1.0.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PigSQLSrvLib" Version="1.0.1.10" />
+  </ItemGroup>
+
+</Project>
