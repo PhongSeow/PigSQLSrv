@@ -12,7 +12,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        PigToolsDemo.ConsoleDemo oConsoleDemo = new PigSQLSrvLib.ConsoleDemo() ;
+        PigSQLSrvLib.ConsoleDemo oConsoleDemo = new PigSQLSrvLib.ConsoleDemo() ;
         oConsoleDemo.Main();
     }
 }
