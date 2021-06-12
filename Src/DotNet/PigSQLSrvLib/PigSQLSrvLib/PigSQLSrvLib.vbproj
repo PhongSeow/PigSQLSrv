@@ -17,8 +17,9 @@ A .net tools set library for SQL server development.
 Interface similar to ObjAdoDBLib.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.0.1.10</Version>
+    <Version>1.0.2.2</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows</PackageTags>
+    <PackageReleaseNotes>Add SqlCommand for SQL Server StoredProcedure.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
