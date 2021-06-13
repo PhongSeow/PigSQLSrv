@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PigSQLSrvCoreLibDemo</RootNamespace>
+    <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <Authors>Seow Phong</Authors>
+	  <Company>Seow Phong Studio</Company>
+	  <Product>PigSQLSrvCoreLib Demo Console</Product>
+	  <Description>Demo console program for PigSQLSrvCoreLib</Description>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
+	  <RepositoryType>GIT</RepositoryType>
+	  <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLibDemo</RepositoryUrl>
+	  <Version>1.0.1.3</Version>
+	  <PackageTags>ObjAdoDBLib Windows Linux Ado</PackageTags>
+	  <PackageReleaseNotes></PackageReleaseNotes>
+	  <Copyright>Copyright (c) 2021 Seow Phong</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="My Project\" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="PigSQLSrvCoreLib">
+      <Version>1.0.1.5</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PigSQLSrvCoreLib" Version="1.0.1.5" />
+  </ItemGroup>
+
+</Project>

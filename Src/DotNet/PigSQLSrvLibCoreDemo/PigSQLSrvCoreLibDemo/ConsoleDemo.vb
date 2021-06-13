@@ -1,5 +1,5 @@
 ﻿Imports System.Data
-Imports PigSQLSrvLib
+Imports PigSQLSrvCoreLib
 
 Public Class ConsoleDemo
     Public ConnSQLSrv As ConnSQLSrv

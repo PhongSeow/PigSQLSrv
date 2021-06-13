@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
-    <Version>1.0.1.5</Version>
+    <Version>1.0.2.5</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
@@ -20,6 +20,8 @@ It can run on Windows and Linux platforms .
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageReleaseNotes>Add SqlCommand for SQL Server StoredProcedure.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.2.5</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
