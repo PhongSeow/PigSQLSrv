@@ -28,7 +28,7 @@ Public Class ConsoleDemo
             'Console.WriteLine("Press G to Recordset.NextRecordset")
             'Console.WriteLine("Press H to Test Command")
             'Console.WriteLine("Press I to Test JSon")
-            'Console.WriteLine("Press J to Execute SQL Server StoredProcedure")
+            Console.WriteLine("Press J to Execute SQL Server StoredProcedure")
             Console.WriteLine("Press K to Execute SQL Server SQL statement Text")
             Console.WriteLine("*******************")
             Select Case Console.ReadKey().Key
@@ -209,37 +209,36 @@ Public Class ConsoleDemo
                 '                Exit Do
                 '        End Select
                 '    Loop
-                'Case ConsoleKey.J
-                '    Console.WriteLine("*******************")
-                '    Console.WriteLine("Execute SQL Server StoredProcedure")
-                '    Console.WriteLine("*******************")
-                '    Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_helpdb")
-                '    With oCmdSQLSrvSp
-                '        .ActiveConnection = Me.ConnSQLSrv.Connection
-                '        .AddPara("@dbname", ConnSQLSrv.SQLSrvDataTypeEnum.adNVarchar, 128)
-                '        .ParaValue("@dbname") = "master"
-                '        Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
-                '        Console.WriteLine("Execute")
-                '        Dim rsAny = .Execute()
-                '        If .LastErr <> "" Then
-                '            Console.WriteLine(.LastErr)
-                '        Else
-                '            Console.WriteLine("OK")
-                '            Console.WriteLine("RecordsAffected=" & .RecordsAffected)
-                '            Console.WriteLine("ReturnValue=" & .ReturnValue)
-                '            With rsAny
-                '                Console.WriteLine("Fields.Count=" & .Fields.Count)
-                '                If .Fields.Count > 0 Then
-                '                    Dim i As Integer
-                '                    For i = 0 To .Fields.Count - 1
-                '                        Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                '                    Next
-                '                End If
-                '                Console.WriteLine("PageCount=" & .PageCount)
-                '                Console.WriteLine("EOF=" & .EOF)
-                '            End With
-                '        End If
-                '    End With
+                Case ConsoleKey.J
+                    Console.WriteLine("*******************")
+                    Console.WriteLine("Execute SQL Server StoredProcedure")
+                    Console.WriteLine("*******************")
+                    Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_helpdb")
+                    With oCmdSQLSrvSp
+                        .ActiveConnection = Me.ConnSQLSrv.Connection
+                        .AddPara("@dbname", SqlDbType.NVarChar, 128)
+                        .ParaValue("@dbname") = "master"
+                        Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
+                        Console.WriteLine("Execute")
+                        Dim rsAny = .Execute()
+                        If .LastErr <> "" Then
+                            Console.WriteLine(.LastErr)
+                        Else
+                            Console.WriteLine("OK")
+                            Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                            Console.WriteLine("ReturnValue=" & .ReturnValue)
+                            With rsAny
+                                Console.WriteLine("Fields.Count=" & .Fields.Count)
+                                If .Fields.Count > 0 Then
+                                    Dim i As Integer
+                                    For i = 0 To .Fields.Count - 1
+                                        Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
+                                    Next
+                                End If
+                                Console.WriteLine("EOF=" & .EOF)
+                            End With
+                        End If
+                    End With
                 Case ConsoleKey.K
                     Console.WriteLine("*******************")
                     Console.WriteLine("Execute SQL Server SQL statement Text")
