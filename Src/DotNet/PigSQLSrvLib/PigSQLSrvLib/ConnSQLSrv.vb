@@ -4,17 +4,19 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.3
+'* Version: 1.0.5
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
+'* 1.0.4	20/6/2021	Modify OpenOrKeepActive, Add mConnClose,mConnOpen
+'* 1.0.5	21/6/2021	Modify mIsDBOnline
 '**********************************
 Imports System.Data
 Imports System.Data.SqlClient
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.3"
+	Private Const CLS_VERSION As String = "1.0.5"
 	Public Connection As SqlConnection
 	Private mcstChkDBStatus As CmdSQLSrvText
 
@@ -264,6 +266,24 @@ Public Class ConnSQLSrv
 		End Set
 	End Property
 
+	Private Sub mConnClose()
+		Try
+			Me.Connection.Close()
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("mConnClose", ex)
+		End Try
+	End Sub
+
+	Private Sub mConnOpen()
+		Try
+			Me.Connection.Open()
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("mConnOpen", ex)
+		End Try
+	End Sub
+
 	''' <summary>
 	''' Open or keep the database connection available
 	''' </summary>
@@ -272,6 +292,10 @@ Public Class ConnSQLSrv
 		Try
 			Select Case Me.RunMode
 				Case RunModeEnum.StandAlone
+					If Me.Connection Is Nothing Then
+						strStepName = "New SqlConnection"
+						Me.Connection = New SqlConnection
+					End If
 					With Me.Connection
 						Select Case .State
 							Case ConnectionState.Closed
@@ -284,7 +308,11 @@ Public Class ConnSQLSrv
 								If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 								.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
 								strStepName = "Open"
-								.Open()
+								Me.mConnOpen()
+								If Me.LastErr <> "" Then
+									Me.ConnStatus = ConnStatusEnum.Offline
+									Throw New Exception(Me.LastErr)
+								End If
 								Me.ConnStatus = ConnStatusEnum.PrincipalOnline
 						End Select
 					End With
@@ -316,10 +344,11 @@ Public Class ConnSQLSrv
 					If bolIsConn = True Then
 						If Not Me.Connection Is Nothing Then
 							If Me.Connection.State <> ConnectionState.Closed Then
-								Me.Connection.Close()
+								Me.mConnClose()
 							End If
 							Me.Connection = Nothing
 						End If
+						strStepName = "New SqlConnection"
 						Me.Connection = New SqlConnection
 						With Me.Connection
 							strStepName = "SetConnSQLServer first time"
@@ -331,7 +360,7 @@ Public Class ConnSQLSrv
 							If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 							.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
 							strStepName = "Open first time"
-							.Open()
+							Me.mConnOpen()
 							If Me.LastErr = "" Then
 								If Me.mIsDBOnline = True Then
 									If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
@@ -360,7 +389,7 @@ Public Class ConnSQLSrv
 								If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 								.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
 								strStepName = "Open second time"
-								.Open()
+								Me.mConnOpen()
 								If Me.LastErr = "" Then
 									strStepName = "mIsDBOnline second time"
 									If Me.mIsDBOnline = True Then
@@ -387,7 +416,7 @@ Public Class ConnSQLSrv
 			Me.ClearErr()
 		Catch ex As Exception
 			Me.SetSubErrInf("OpenOrKeepActive", strStepName, ex)
-			Me.ConnStatus = ConnStatusEnum.Unknow
+			If Me.ConnStatus <> ConnStatusEnum.Offline Then Me.ConnStatus = ConnStatusEnum.Unknow
 		End Try
 	End Sub
 
@@ -436,7 +465,7 @@ Public Class ConnSQLSrv
 			If Me.Connection.State <> ConnectionState.Open Then Throw New Exception("The current connection status is " & Me.Connection.State.ToString)
 			If mcstChkDBStatus Is Nothing Then
 				strStepName = "New CmdSQLSrvText"
-				mcstChkDBStatus = New CmdSQLSrvText("SELECT Convert(varchar(50),DatabasePropertyEx(?,'status')) DBStatus")
+				mcstChkDBStatus = New CmdSQLSrvText("SELECT Convert(varchar(50),DatabasePropertyEx(@DBName,'status')) DBStatus")
 				If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
 				strStepName = "AddPara(@DBName)"
 				mcstChkDBStatus.AddPara("@DBName", SqlDbType.NVarChar, 512)
@@ -451,6 +480,7 @@ Public Class ConnSQLSrv
 			rsAny = mcstChkDBStatus.Execute
 			If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
 			Dim strDBStaus As String = UCase(rsAny.Fields.Item("DBStatus").StrValue)
+			rsAny.Close()
 			rsAny = Nothing
 			If strDBStaus = "ONLINE" Then
 				Return True

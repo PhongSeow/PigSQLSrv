@@ -4,15 +4,16 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.2
+'* Version: 1.0.3
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
+'* 1.0.3	21/6/2021	Add Finalize,Close
 '**********************************
 Imports System.Data
 Imports System.Data.SqlClient
 Public Class Recordset
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.2"
+	Private Const CLS_VERSION As String = "1.0.3"
 	Public SqlDataReader As SqlDataReader
 
 	Public Sub New()
@@ -55,6 +56,15 @@ Public Class Recordset
 		End Set
 	End Property
 
+	Public Sub Close()
+		Try
+			Me.SqlDataReader.Close()
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("Close", ex)
+		End Try
+	End Sub
+
 	Public Sub MoveNext()
 		Try
 			If Me.SqlDataReader.Read() = True Then
@@ -72,5 +82,10 @@ Public Class Recordset
 		End Try
 	End Sub
 
-
+	Protected Overrides Sub Finalize()
+		If Me.SqlDataReader Is Nothing Then
+			Me.SqlDataReader.Close()
+		End If
+		MyBase.Finalize()
+	End Sub
 End Class

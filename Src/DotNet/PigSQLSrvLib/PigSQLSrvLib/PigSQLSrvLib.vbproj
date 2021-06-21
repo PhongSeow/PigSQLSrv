@@ -18,9 +18,10 @@ Friendly calling interface for Command of SQL Server StoredProcedure and SQL sta
 Support automatic switch connection of mirror database for high availability.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.0.3.8</Version>
+    <Version>1.0.3.18</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp  Recordset Fields Field Windows High availability Automatic</PackageTags>
-    <PackageReleaseNotes>Optimization ConnSQLSrv to support mirror database connection mode, Automatic switch of high availability.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix bugs for Optimization ConnSQLSrv to support mirror database connection mode, Automatic switch of high availability.
+</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
