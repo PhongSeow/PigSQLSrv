@@ -3,14 +3,15 @@
   <PropertyGroup>
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
-    <Version>1.0.2.5</Version>
+    <Version>1.0.3.6</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
     <Description>An interface class library specially designed for MS-SQL server.
-A .net tools set library for SQL server development.
 Interface similar to ObjAdoDBLib.
-It can run on Windows and Linux platforms .
+Friendly calling interface for Command of SQL Server StoredProcedure and SQL statement Text.
+Support automatic switch connection of mirror database for high availability.
+It can run on Windows and Linux platforms.
 </Description>
     <Copyright>Copyright (c) 2021 Seow Phong</Copyright>
     <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
@@ -18,10 +19,10 @@ It can run on Windows and Linux platforms .
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLib</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core</PackageTags>
+    <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Add SqlCommand for SQL Server StoredProcedure.</PackageReleaseNotes>
-    <AssemblyVersion>1.0.2.5</AssemblyVersion>
+    <PackageReleaseNotes>Optimization ConnSQLSrv to support mirror database connection mode, Automatic switch of high availability.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.3.6</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

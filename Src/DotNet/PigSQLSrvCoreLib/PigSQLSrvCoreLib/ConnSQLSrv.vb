@@ -1,39 +1,38 @@
 ﻿'**********************************
 '* Name: ConnSQLSrv
 '* Author: Seow Phong
-'* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
+'* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.1
+'* Version: 1.0.5
 '* Create Time: 18/5/2021
+'* 1.0.2	18/6/2021	Modify OpenOrKeepActive
+'* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
+'* 1.0.4	20/6/2021	Modify OpenOrKeepActive, Add mConnClose,mConnOpen
+'* 1.0.5	21/6/2021	Modify mIsDBOnline
 '**********************************
 Imports System.Data
 Imports Microsoft.Data.SqlClient
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.1"
+	Private Const CLS_VERSION As String = "1.0.5"
 	Public Connection As SqlConnection
+	Private mcstChkDBStatus As CmdSQLSrvText
 
-
-	'Public Enum SQLSrvProviderEnum
-	'	MicrosoftSQLServer = 90
-	'	MicrosoftSQLServer2012NativeClient = 100
-	'End Enum
+	Public Enum ConnStatusEnum
+		Unknow = 0
+		PrincipalOnline = 10
+		MirrorOnline = 20
+		Offline = 30
+	End Enum
 
 	Public Enum RunModeEnum
 		Mirror = 10
 		StandAlone = 20
 	End Enum
 
-	Public Enum ConnStatusEnum
-		Unknow = 0
-		PrincipalOnline = 10
-		PrincipalAndMirrorOnline = 20
-		PrincipalOnlineMirrorOffline = 30
-		PrincipalOfflineMirrorOnline = 40
-		PrincipalAndMirrorOffline = 50
-	End Enum
+	Private Property mLastConnSQLServer As String
 
 	Private mintRunMode As RunModeEnum
 	Public Property RunMode() As RunModeEnum
@@ -42,6 +41,36 @@ Public Class ConnSQLSrv
 		End Get
 		Friend Set(ByVal value As RunModeEnum)
 			mintRunMode = value
+		End Set
+	End Property
+
+	''' <summary>
+	''' Time to refresh the mirror database, in seconds.
+	''' </summary>
+	Private mintRefMirrSrvTime As Integer = 30
+	Public Property RefMirrSrvTime() As Integer
+		Get
+			Return mintRefMirrSrvTime
+		End Get
+		Set(ByVal value As Integer)
+			If value <= 0 Then
+				mintRefMirrSrvTime = 30
+			Else
+				mintRefMirrSrvTime = value
+			End If
+		End Set
+	End Property
+
+	''' <summary>
+	''' The last time the mirror database was refreshed
+	''' </summary>
+	Private mdteLastRefMirrSrvTime As DateTime
+	Public Property LastRefMirrSrvTime() As DateTime
+		Get
+			Return mdteLastRefMirrSrvTime
+		End Get
+		Friend Set(ByVal value As DateTime)
+			mdteLastRefMirrSrvTime = value
 		End Set
 	End Property
 
@@ -121,13 +150,42 @@ Public Class ConnSQLSrv
 	End Sub
 
 	''' <summary>
+	''' Trusted Connectionst and mirror mode
+	''' </summary>
+	''' <param name="PrincipalSQLServer">Principal SQLServer hostname or ip</param>
+	''' <param name="MirrorSQLServer">Mirror SQLServer hostname or ip</param>
+	''' <param name="CurrDatabase">current database</param>
+	''' <param name="Provider">What driver to use</param>
+	Public Sub New(PrincipalSQLServer As String, MirrorSQLServer As String, CurrDatabase As String)
+		MyBase.New(CLS_VERSION)
+		Me.MirrorSQLServer = MirrorSQLServer
+		Me.mNew(PrincipalSQLServer, CurrDatabase)
+	End Sub
+
+
+	''' <summary>
 	''' Database user password login Connectionst and stand-alone mode
 	''' </summary>
 	''' <param name="SQLServer">SQL Server hostname or ip</param>
-	''' <param name="CurrDatabase">current database</param>
+	''' <param name="DBUser">Database user</param>
+	''' <param name="DBUserPwd">Database user password</param>
 	Public Sub New(SQLServer As String, CurrDatabase As String, DBUser As String, DBUserPwd As String)
 		MyBase.New(CLS_VERSION)
 		Me.mNew(SQLServer, CurrDatabase, DBUser, DBUserPwd)
+	End Sub
+
+	''' <summary>
+	''' Database user password login Connectionst and mirror mode
+	''' </summary>
+	''' <param name="PrincipalSQLServer">Principal SQLServer hostname or ip</param>
+	''' <param name="MirrorSQLServer">Mirror SQLServer hostname or ip</param>
+	''' <param name="CurrDatabase">current database</param>
+	''' <param name="DBUser">Database user</param>
+	''' <param name="DBUserPwd">Database user password</param>
+	Public Sub New(PrincipalSQLServer As String, MirrorSQLServer As String, CurrDatabase As String, DBUser As String, DBUserPwd As String)
+		MyBase.New(CLS_VERSION)
+		Me.MirrorSQLServer = MirrorSQLServer
+		Me.mNew(PrincipalSQLServer, CurrDatabase, DBUser, DBUserPwd)
 	End Sub
 
 	Private mbolIsTrustedConnection As Boolean
@@ -208,15 +266,37 @@ Public Class ConnSQLSrv
 		End Set
 	End Property
 
+	Private Sub mConnClose()
+		Try
+			Me.Connection.Close()
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("mConnClose", ex)
+		End Try
+	End Sub
+
+	Private Sub mConnOpen()
+		Try
+			Me.Connection.Open()
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("mConnOpen", ex)
+		End Try
+	End Sub
+
 	''' <summary>
 	''' Open or keep the database connection available
 	''' </summary>
 	Public Sub OpenOrKeepActive()
 		Dim strStepName As String = ""
 		Try
-			With Me.Connection
-				Select Case Me.RunMode
-					Case RunModeEnum.StandAlone
+			Select Case Me.RunMode
+				Case RunModeEnum.StandAlone
+					If Me.Connection Is Nothing Then
+						strStepName = "New SqlConnection"
+						Me.Connection = New SqlConnection
+					End If
+					With Me.Connection
 						Select Case .State
 							Case ConnectionState.Closed
 								strStepName = "SetConnSQLServer"
@@ -228,19 +308,115 @@ Public Class ConnSQLSrv
 								If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 								.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
 								strStepName = "Open"
-								.Open()
+								Me.mConnOpen()
+								If Me.LastErr <> "" Then
+									Me.ConnStatus = ConnStatusEnum.Offline
+									Throw New Exception(Me.LastErr)
+								End If
 								Me.ConnStatus = ConnStatusEnum.PrincipalOnline
 						End Select
-					Case RunModeEnum.Mirror
-						Throw New Exception("Not support now")
-					Case Else
-						Throw New Exception("Unknow run mode")
-				End Select
-			End With
+					End With
+				Case RunModeEnum.Mirror
+					If Me.MirrorSQLServer = "" Then Throw New Exception("Mirror SQLServer is not defined")
+					Dim bolIsConn As Boolean = False
+					Select Case Me.ConnStatus
+						Case ConnStatusEnum.Unknow, ConnStatusEnum.Offline
+							If Me.mLastConnSQLServer = "" Or mLastConnSQLServer = Me.MirrorSQLServer Then
+								Me.mLastConnSQLServer = Me.PrincipalSQLServer
+							Else
+								Me.mLastConnSQLServer = Me.MirrorSQLServer
+							End If
+							bolIsConn = True
+						Case Else
+							If Math.Abs(DateDiff("s", Me.LastRefMirrSrvTime, Now)) > Me.RefMirrSrvTime Then
+								If Me.mIsDBOnline = True Then
+									Me.LastRefMirrSrvTime = Now
+								Else
+									If Me.ConnStatus = ConnStatusEnum.PrincipalOnline Then
+										Me.mLastConnSQLServer = Me.MirrorSQLServer
+									Else
+										Me.mLastConnSQLServer = Me.PrincipalSQLServer
+									End If
+									bolIsConn = True
+								End If
+							End If
+					End Select
+					If bolIsConn = True Then
+						If Not Me.Connection Is Nothing Then
+							If Me.Connection.State <> ConnectionState.Closed Then
+								Me.mConnClose()
+							End If
+							Me.Connection = Nothing
+						End If
+						strStepName = "New SqlConnection"
+						Me.Connection = New SqlConnection
+						With Me.Connection
+							strStepName = "SetConnSQLServer first time"
+							If Me.IsTrustedConnection = True Then
+								Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.CurrDatabase)
+							Else
+								Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.DBUser, Me.DBUserPwd, Me.CurrDatabase)
+							End If
+							If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+							.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
+							strStepName = "Open first time"
+							Me.mConnOpen()
+							If Me.LastErr = "" Then
+								If Me.mIsDBOnline = True Then
+									If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
+										Me.ConnStatus = ConnStatusEnum.PrincipalOnline
+									Else
+										Me.ConnStatus = ConnStatusEnum.MirrorOnline
+									End If
+									Me.LastRefMirrSrvTime = Now
+								End If
+								bolIsConn = False
+							End If
+						End With
+						If bolIsConn = True Then
+							If Me.mLastConnSQLServer = "" Or mLastConnSQLServer = Me.MirrorSQLServer Then
+								Me.mLastConnSQLServer = Me.PrincipalSQLServer
+							Else
+								Me.mLastConnSQLServer = Me.MirrorSQLServer
+							End If
+							With Me.Connection
+								strStepName = "SetConnSQLServer second time"
+								If Me.IsTrustedConnection = True Then
+									Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.CurrDatabase)
+								Else
+									Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.DBUser, Me.DBUserPwd, Me.CurrDatabase)
+								End If
+								If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+								.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
+								strStepName = "Open second time"
+								Me.mConnOpen()
+								If Me.LastErr = "" Then
+									strStepName = "mIsDBOnline second time"
+									If Me.mIsDBOnline = True Then
+										If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
+											Me.ConnStatus = ConnStatusEnum.PrincipalOnline
+										Else
+											Me.ConnStatus = ConnStatusEnum.MirrorOnline
+										End If
+										Me.LastRefMirrSrvTime = Now
+									Else
+										Me.ConnStatus = ConnStatusEnum.Offline
+										Throw New Exception(Me.LastErr)
+									End If
+								Else
+									Me.ConnStatus = ConnStatusEnum.Offline
+									Throw New Exception(Me.LastErr)
+								End If
+							End With
+						End If
+					End If
+				Case Else
+					Throw New Exception("Unknow run mode")
+			End Select
 			Me.ClearErr()
 		Catch ex As Exception
 			Me.SetSubErrInf("OpenOrKeepActive", strStepName, ex)
-			Me.ConnStatus = ConnStatusEnum.Unknow
+			If Me.ConnStatus <> ConnStatusEnum.Offline Then Me.ConnStatus = ConnStatusEnum.Unknow
 		End Try
 	End Sub
 
@@ -248,7 +424,7 @@ Public Class ConnSQLSrv
 		Get
 			Try
 				Select Case Me.ConnStatus
-					Case ConnStatusEnum.PrincipalAndMirrorOnline, ConnStatusEnum.PrincipalOfflineMirrorOnline, ConnStatusEnum.PrincipalOnline, ConnStatusEnum.PrincipalOnlineMirrorOffline
+					Case ConnStatusEnum.PrincipalOnline, ConnStatusEnum.MirrorOnline
 						Return True
 					Case Else
 						Return False
@@ -281,5 +457,40 @@ Public Class ConnSQLSrv
 			Me.SetSubErrInf("mSetConnSQLServer", ex)
 		End Try
 	End Sub
+
+	Private Function mIsDBOnline() As Boolean
+		Dim strStepName As String = ""
+		Try
+			If Me.Connection Is Nothing Then Throw New Exception("No connection established")
+			If Me.Connection.State <> ConnectionState.Open Then Throw New Exception("The current connection status is " & Me.Connection.State.ToString)
+			If mcstChkDBStatus Is Nothing Then
+				strStepName = "New CmdSQLSrvText"
+				mcstChkDBStatus = New CmdSQLSrvText("SELECT Convert(varchar(50),DatabasePropertyEx(@DBName,'status')) DBStatus")
+				If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
+				strStepName = "AddPara(@DBName)"
+				mcstChkDBStatus.AddPara("@DBName", SqlDbType.NVarChar, 512)
+				If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
+				strStepName = "Set ActiveConnection"
+				mcstChkDBStatus.ActiveConnection = Me.Connection
+				If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
+			End If
+			Dim rsAny As Recordset
+			mcstChkDBStatus.ParaValue("@DBName") = Me.CurrDatabase
+			strStepName = "Execute"
+			rsAny = mcstChkDBStatus.Execute
+			If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
+			Dim strDBStaus As String = UCase(rsAny.Fields.Item("DBStatus").StrValue)
+			rsAny.Close()
+			rsAny = Nothing
+			If strDBStaus = "ONLINE" Then
+				Return True
+			Else
+				Return False
+			End If
+		Catch ex As Exception
+			Me.SetSubErrInf("mIsDBOnline", strStepName, ex)
+			Return False
+		End Try
+	End Function
 
 End Class
