@@ -266,7 +266,7 @@ Public Class ConsoleDemo
                         .ParaValue("@dbname") = "master"
                         Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
                         Console.WriteLine("Execute")
-                        Dim rsAny = .Execute()
+                        Dim rsAny As Recordset = .Execute()
                         If .LastErr <> "" Then
                             Console.WriteLine(.LastErr)
                         Else
@@ -284,6 +284,8 @@ Public Class ConsoleDemo
                                 Console.WriteLine("EOF=" & .EOF)
                             End With
                         End If
+                        rsAny.Close()
+                        rsAny = Nothing
                     End With
                 Case ConsoleKey.K
                     Console.WriteLine("*******************")
@@ -296,13 +298,13 @@ Public Class ConsoleDemo
                         .ParaValue("@name") = "master"
                         Console.WriteLine("ParaValue(@name)=" & .ParaValue("@name"))
                         Console.WriteLine("Execute")
-                        Me.RS = .Execute()
+                        Dim oRS As Recordset = .Execute()
                         If .LastErr <> "" Then
                             Console.WriteLine(.LastErr)
                         Else
                             Console.WriteLine("OK")
                             Console.WriteLine("RecordsAffected=" & .RecordsAffected)
-                            With Me.RS
+                            With oRS
                                 Console.WriteLine("Fields.Count=" & .Fields.Count)
                                 If .Fields.Count > 0 Then
                                     Dim i As Integer
@@ -313,6 +315,8 @@ Public Class ConsoleDemo
                                 Console.WriteLine("EOF=" & .EOF)
                             End With
                         End If
+                        oRS.Close()
+                        oRS = Nothing
                     End With
             End Select
         Loop
