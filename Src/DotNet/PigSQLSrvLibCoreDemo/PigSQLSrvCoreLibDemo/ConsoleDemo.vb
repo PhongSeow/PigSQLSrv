@@ -7,6 +7,7 @@ Public Class ConsoleDemo
     Public SQL As String
     Public RS As Recordset
     Public DBSrv As String = "localhost"
+    Public MirrDBSrv As String = "localhost"
     Public DBUser As String = "sa"
     Public DBPwd As String = ""
     Public CurrDB As String = "master"
@@ -36,30 +37,74 @@ Public Class ConsoleDemo
                 Case ConsoleKey.Q
                     Exit Do
                 Case ConsoleKey.A
-                    Console.WriteLine("Input SQL Server:" & Me.DBSrv)
-                    Me.DBSrv = Console.ReadLine()
-                    If Me.DBSrv = "" Then Me.DBSrv = "localhost"
-                    Console.WriteLine("SQL Server=" & Me.DBSrv)
-                    Console.WriteLine("Input Default DB:" & Me.CurrDB)
-                    Me.CurrDB = Console.ReadLine()
-                    If Me.CurrDB = "" Then Me.CurrDB = "master"
-                    Console.WriteLine("Default DB=" & Me.CurrDB)
-                    Console.WriteLine("Is Trusted Connection ? (Y/n)")
-                    Me.InpStr = Console.ReadLine()
-                    Select Case Me.InpStr
-                        Case "Y", "y", ""
-                            Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.CurrDB)
-                        Case Else
-                            Console.WriteLine("Input DB User:" & Me.DBUser)
-                            Me.DBUser = Console.ReadLine()
-                            If Me.DBUser = "" Then Me.DBUser = "sa"
-                            Console.WriteLine("DB User=" & Me.DBUser)
-                            Console.WriteLine("Input DB Password:")
-                            Me.DBPwd = Console.ReadLine()
-                            Console.WriteLine("DB Password=" & Me.DBPwd)
-                            Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
-                    End Select
-                    Me.ConnSQLSrv.ConnectionTimeout = 5
+                    Console.WriteLine("*******************")
+                    Console.WriteLine("Set Connection String")
+                    Console.WriteLine("*******************")
+                    Console.WriteLine("Press Q to Up")
+                    Console.WriteLine("Press A to SQL Server(StandAlone mode)")
+                    Console.WriteLine("Press B to SQL Server(Mirror mode)")
+                    Do While True
+                        Me.CurrConsoleKey = Console.ReadKey().Key
+                        Select Case Me.CurrConsoleKey
+                            Case ConsoleKey.Q
+                                Exit Do
+                            Case ConsoleKey.A
+                                Console.WriteLine("Input SQL Server:" & Me.DBSrv)
+                                Me.DBSrv = Console.ReadLine()
+                                If Me.DBSrv = "" Then Me.DBSrv = "localhost"
+                                Console.WriteLine("SQL Server=" & Me.DBSrv)
+                                Console.WriteLine("Input Default DB:" & Me.CurrDB)
+                                Me.CurrDB = Console.ReadLine()
+                                If Me.CurrDB = "" Then Me.CurrDB = "master"
+                                Console.WriteLine("Default DB=" & Me.CurrDB)
+                                Console.WriteLine("Is Trusted Connection ? (Y/n)")
+                                Me.InpStr = Console.ReadLine()
+                                Select Case Me.InpStr
+                                    Case "Y", "y", ""
+                                        Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.CurrDB)
+                                    Case Else
+                                        Console.WriteLine("Input DB User:" & Me.DBUser)
+                                        Me.DBUser = Console.ReadLine()
+                                        If Me.DBUser = "" Then Me.DBUser = "sa"
+                                        Console.WriteLine("DB User=" & Me.DBUser)
+                                        Console.WriteLine("Input DB Password:")
+                                        Me.DBPwd = Console.ReadLine()
+                                        Console.WriteLine("DB Password=" & Me.DBPwd)
+                                        Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
+                                End Select
+                                Me.ConnSQLSrv.ConnectionTimeout = 5
+                                Exit Do
+                            Case ConsoleKey.B
+                                Console.WriteLine("Input Principal SQLServer:" & Me.DBSrv)
+                                Me.DBSrv = Console.ReadLine()
+                                If Me.DBSrv = "" Then Me.DBSrv = "localhost"
+                                Console.WriteLine("Principal SQLServer=" & Me.DBSrv)
+                                Console.WriteLine("Input Mirror SQLServer:" & Me.MirrDBSrv)
+                                Me.MirrDBSrv = Console.ReadLine()
+                                If Me.MirrDBSrv = "" Then Me.MirrDBSrv = "localhost"
+                                Console.WriteLine("MirrorSQLServer SQLServer=" & Me.MirrDBSrv)
+                                Console.WriteLine("Input Default DB:" & Me.CurrDB)
+                                Me.CurrDB = Console.ReadLine()
+                                If Me.CurrDB = "" Then Me.CurrDB = "master"
+                                Console.WriteLine("Default DB=" & Me.CurrDB)
+                                Console.WriteLine("Is Trusted Connection ? (Y/n)")
+                                Me.InpStr = Console.ReadLine()
+                                Select Case Me.InpStr
+                                    Case "Y", "y", ""
+                                        Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.MirrDBSrv, Me.CurrDB)
+                                    Case Else
+                                        Console.WriteLine("Input DB User:" & Me.DBUser)
+                                        Me.DBUser = Console.ReadLine()
+                                        If Me.DBUser = "" Then Me.DBUser = "sa"
+                                        Console.WriteLine("DB User=" & Me.DBUser)
+                                        Console.WriteLine("Input DB Password:")
+                                        Me.DBPwd = Console.ReadLine()
+                                        Console.WriteLine("DB Password=" & Me.DBPwd)
+                                        Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.MirrDBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
+                                End Select
+                                Exit Do
+                        End Select
+                    Loop
                 Case ConsoleKey.B
                     Console.WriteLine("#################")
                     Console.WriteLine("Open Connection")
@@ -221,7 +266,7 @@ Public Class ConsoleDemo
                         .ParaValue("@dbname") = "master"
                         Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
                         Console.WriteLine("Execute")
-                        Dim rsAny = .Execute()
+                        Dim rsAny As Recordset = .Execute()
                         If .LastErr <> "" Then
                             Console.WriteLine(.LastErr)
                         Else
@@ -239,6 +284,8 @@ Public Class ConsoleDemo
                                 Console.WriteLine("EOF=" & .EOF)
                             End With
                         End If
+                        rsAny.Close()
+                        rsAny = Nothing
                     End With
                 Case ConsoleKey.K
                     Console.WriteLine("*******************")
@@ -251,13 +298,13 @@ Public Class ConsoleDemo
                         .ParaValue("@name") = "master"
                         Console.WriteLine("ParaValue(@name)=" & .ParaValue("@name"))
                         Console.WriteLine("Execute")
-                        Me.RS = .Execute()
+                        Dim oRS As Recordset = .Execute()
                         If .LastErr <> "" Then
                             Console.WriteLine(.LastErr)
                         Else
                             Console.WriteLine("OK")
                             Console.WriteLine("RecordsAffected=" & .RecordsAffected)
-                            With Me.RS
+                            With oRS
                                 Console.WriteLine("Fields.Count=" & .Fields.Count)
                                 If .Fields.Count > 0 Then
                                     Dim i As Integer
@@ -268,6 +315,8 @@ Public Class ConsoleDemo
                                 Console.WriteLine("EOF=" & .EOF)
                             End With
                         End If
+                        oRS.Close()
+                        oRS = Nothing
                     End With
             End Select
         Loop
