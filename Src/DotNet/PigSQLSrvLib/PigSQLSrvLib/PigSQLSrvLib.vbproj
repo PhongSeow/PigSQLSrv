@@ -16,12 +16,12 @@
 Interface similar to ObjAdoDBLib.
 Friendly calling interface for Command of SQL Server StoredProcedure and SQL statement Text.
 Support automatic switch connection of mirror database for high availability.
+Support the transformation of query results into JSON.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.0.3.18</Version>
+    <Version>1.0.4.6</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp  Recordset Fields Field Windows High availability Automatic</PackageTags>
-    <PackageReleaseNotes>Fix bugs for Optimization ConnSQLSrv to support mirror database connection mode, Automatic switch of high availability.
-</PackageReleaseNotes>
+    <PackageReleaseNotes>Add function Recordset.Row2JSon for generate the row content of the result set as JSON.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
