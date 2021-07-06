@@ -2,7 +2,7 @@
 VB.net
 Module Program
     Sub Main(args As String())
-        Dim oConsoleDemo As New PigSQLSrvCoreLib.ConsoleDemo
+        Dim oConsoleDemo As New PigSQLSrvCoreLibDemo.ConsoleDemo
         oConsoleDemo.Main()
     End Sub
 End Module
@@ -12,7 +12,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        PigSQLSrvCoreLib.ConsoleDemo oConsoleDemo = new PigSQLSrvCoreLib.ConsoleDemo() ;
+        PigSQLSrvCoreLibDemo.ConsoleDemo oConsoleDemo = new PigSQLSrvCoreLibDemo.ConsoleDemo() ;
         oConsoleDemo.Main();
     }
 }
