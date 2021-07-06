@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
-    <Version>1.0.3.6</Version>
+    <Version>1.0.4.3</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
@@ -11,6 +11,7 @@
 Interface similar to ObjAdoDBLib.
 Friendly calling interface for Command of SQL Server StoredProcedure and SQL statement Text.
 Support automatic switch connection of mirror database for high availability.
+Support the transformation of query results into JSON.
 It can run on Windows and Linux platforms.
 </Description>
     <Copyright>Copyright (c) 2021 Seow Phong</Copyright>
@@ -19,10 +20,10 @@ It can run on Windows and Linux platforms.
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLib</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability</PackageTags>
+    <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability JSON</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Optimization ConnSQLSrv to support mirror database connection mode, Automatic switch of high availability.</PackageReleaseNotes>
-    <AssemblyVersion>1.0.3.6</AssemblyVersion>
+    <PackageReleaseNotes>Add function Recordset.Row2JSon for generate the row content of the result set as JSON.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.4.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
