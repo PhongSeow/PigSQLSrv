@@ -24,12 +24,11 @@ Public Class ConsoleDemo
             Console.WriteLine("Press A to Set SQL Server Connection String")
             Console.WriteLine("Press B to OpenOrKeepActive Connection")
             Console.WriteLine("Press C to Show Connection Information")
-            'Console.WriteLine("Press D to Create Recordset with Execute")
-            Console.WriteLine("Press E to Show Recordset Information")
-            Console.WriteLine("Press F to Recordset.MoveNext")
+            'Console.WriteLine("Press E to Show Recordset Information")
+            'Console.WriteLine("Press F to Recordset.MoveNext")
             'Console.WriteLine("Press G to Recordset.NextRecordset")
             'Console.WriteLine("Press H to Test Command")
-            'Console.WriteLine("Press I to Test JSon")
+            Console.WriteLine("Press I to Test JSon")
             Console.WriteLine("Press J to Execute SQL Server StoredProcedure")
             Console.WriteLine("Press K to Execute SQL Server SQL statement Text")
             Console.WriteLine("*******************")
@@ -107,7 +106,7 @@ Public Class ConsoleDemo
                     Loop
                 Case ConsoleKey.B
                     Console.WriteLine("#################")
-                    Console.WriteLine("Open Connection")
+                    Console.WriteLine("OpenOrKeepActive Connection")
                     Console.WriteLine("#################")
                     With Me.ConnSQLSrv
                         Console.WriteLine("OpenOrKeepActive:")
@@ -126,48 +125,41 @@ Public Class ConsoleDemo
                     Console.WriteLine("State=" & Me.ConnSQLSrv.Connection.State)
                     Console.WriteLine("ConnStatus=" & Me.ConnSQLSrv.ConnStatus)
                     Console.WriteLine("IsDBConnReady=" & Me.ConnSQLSrv.IsDBConnReady)
-                Case ConsoleKey.D
-                    'Console.WriteLine("#################")
-                    'Console.WriteLine("Create Recordset with Execute")
-                    'Console.WriteLine("#################")
-                    'Console.WriteLine("Input SQL:")
-                    'Me.SQL = Console.ReadLine()
-                    'With Me.ConnSQLSrv
-                    '    Console.WriteLine("Execute:")
-                    '    Me.RS = .Execute(SQL)
-                    '    If .LastErr <> "" Then
-                    '        Console.WriteLine(.LastErr)
-                    '    Else
-                    '        Console.WriteLine("OK")
-                    '    End If
-                    'End With
                 Case ConsoleKey.E
                     Console.WriteLine("#################")
                     Console.WriteLine("Show Recordset Information")
                     Console.WriteLine("#################")
-                    With Me.RS
-                        Console.WriteLine("Fields.Count=" & .Fields.Count)
-                        If .Fields.Count > 0 Then
-                            Dim i As Integer
-                            For i = 0 To .Fields.Count - 1
-                                Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                                Console.WriteLine(".Fields.Item(" & i & ").Type=" & .Fields.Item(i).Type.ToString)
-                            Next
-                        End If
-                        Console.WriteLine("EOF=" & .EOF)
-                    End With
-                Case ConsoleKey.F
-                    Console.WriteLine("#################")
-                    Console.WriteLine("Recordset.MoveNext")
-                    Console.WriteLine("#################")
-                    With Me.RS
-                        .MoveNext()
-                        If .LastErr <> "" Then
-                            Console.WriteLine("MoveNext Error:" & .LastErr)
-                        Else
-                            Console.WriteLine("MoveNext OK")
-                        End If
-                    End With
+                    If Me.RS Is Nothing Then
+                        Console.WriteLine("Me.RS Is Nothing")
+                    Else
+                        With Me.RS
+                            Console.WriteLine("Fields.Count=" & .Fields.Count)
+                            If .Fields.Count > 0 Then
+                                Dim i As Integer
+                                For i = 0 To .Fields.Count - 1
+                                    Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
+                                    Console.WriteLine(".Fields.Item(" & i & ").Type=" & .Fields.Item(i).Type.ToString)
+                                Next
+                            End If
+                            Console.WriteLine("EOF=" & .EOF)
+                        End With
+                    End If
+                'Case ConsoleKey.F
+                '    Console.WriteLine("#################")
+                '    Console.WriteLine("Recordset.MoveNext")
+                '    Console.WriteLine("#################")
+                '    If Me.RS Is Nothing Then
+                '        Console.WriteLine("Me.RS Is Nothing")
+                '    Else
+                '        With Me.RS
+                '            .MoveNext()
+                '            If .LastErr <> "" Then
+                '                Console.WriteLine("MoveNext Error:" & .LastErr)
+                '            Else
+                '                Console.WriteLine("MoveNext OK")
+                '            End If
+                '        End With
+                '    End If
                 Case ConsoleKey.G
                     'Console.WriteLine("#################")
                     'Console.WriteLine("Recordset.NextRecordset")
@@ -228,96 +220,114 @@ Public Class ConsoleDemo
                 '        End If
                 '        .Parameters.Delete("@dbname")
                 '    End With
-                'Case ConsoleKey.I
-                '    Console.WriteLine("*******************")
-                '    Console.WriteLine("Test JSon")
-                '    Console.WriteLine("*******************")
-                '    Console.WriteLine("Press Q to Up")
-                '    Console.WriteLine("Press A to Convert current row to JSON")
-                '    Console.WriteLine("Press B to Convert current recordset to JSON")
-                '    Console.WriteLine("Press C to Convert all recordset to JSON")
-                '    Do While True
-                '        Me.CurrConsoleKey = Console.ReadKey().Key
-                '        Select Case Me.CurrConsoleKey
-                '            Case ConsoleKey.Q
-                '                Exit Do
-                '            Case ConsoleKey.A
-                '                Console.WriteLine(Me.RS.Row2JSon)
-                '                If Me.RS.LastErr <> "" Then Console.WriteLine(Me.RS.LastErr)
-                '                Exit Do
-                '            Case ConsoleKey.B
-                '                Console.WriteLine(Me.RS.Recordset2JSon(10))
-                '                If Me.RS.LastErr <> "" Then Console.WriteLine(Me.RS.LastErr)
-                '                Exit Do
-                '            Case ConsoleKey.C
-                '                Console.WriteLine(Me.RS.AllRecordset2JSon())
-                '                If Me.RS.LastErr <> "" Then Console.WriteLine(Me.RS.LastErr)
-                '                Exit Do
-                '        End Select
-                '    Loop
+                Case ConsoleKey.I
+                    If Me.ConnSQLSrv.IsDBConnReady = False Then
+                        Console.WriteLine(" Connection is not ready please OpenOrKeepActive")
+                    Else
+                        Console.WriteLine("*******************")
+                        Console.WriteLine("Test JSon")
+                        Console.WriteLine("*******************")
+                        Console.WriteLine("Press Q to Up")
+                        Console.WriteLine("Press A to Convert current row to JSON")
+                        'Console.WriteLine("Press B to Convert current recordset to JSON")
+                        'Console.WriteLine("Press C to Convert all recordset to JSON")
+                        Do While True
+                            Me.CurrConsoleKey = Console.ReadKey().Key
+                            Select Case Me.CurrConsoleKey
+                                Case ConsoleKey.Q
+                                    Exit Do
+                                Case ConsoleKey.A
+                                    Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_who")
+                                    With oCmdSQLSrvSp
+                                        .ActiveConnection = Me.ConnSQLSrv.Connection
+                                        Console.WriteLine("Execute")
+                                        Me.RS = .Execute()
+                                        If .LastErr <> "" Then
+                                            Console.WriteLine(.LastErr)
+                                        Else
+                                            Console.WriteLine("OK")
+                                            Console.WriteLine("Row2JSon=" & Me.RS.Row2JSon())
+                                            Me.RS.MoveNext()
+                                            Console.WriteLine("Row2JSon=" & Me.RS.Row2JSon())
+                                        End If
+                                        Me.RS.Close()
+                                        Me.RS = Nothing
+                                        Exit Do
+                                    End With
+                            End Select
+                        Loop
+                    End If
                 Case ConsoleKey.J
-                    Console.WriteLine("*******************")
-                    Console.WriteLine("Execute SQL Server StoredProcedure")
-                    Console.WriteLine("*******************")
-                    Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_helpdb")
-                    With oCmdSQLSrvSp
-                        .ActiveConnection = Me.ConnSQLSrv.Connection
-                        .AddPara("@dbname", SqlDbType.NVarChar, 128)
-                        .ParaValue("@dbname") = "master"
-                        Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
-                        Console.WriteLine("Execute")
-                        Dim rsAny As Recordset = .Execute()
-                        If .LastErr <> "" Then
-                            Console.WriteLine(.LastErr)
-                        Else
-                            Console.WriteLine("OK")
-                            Console.WriteLine("RecordsAffected=" & .RecordsAffected)
-                            Console.WriteLine("ReturnValue=" & .ReturnValue)
-                            With rsAny
-                                Console.WriteLine("Fields.Count=" & .Fields.Count)
-                                If .Fields.Count > 0 Then
-                                    Dim i As Integer
-                                    For i = 0 To .Fields.Count - 1
-                                        Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                                    Next
-                                End If
-                                Console.WriteLine("EOF=" & .EOF)
-                            End With
-                        End If
-                        rsAny.Close()
-                        rsAny = Nothing
-                    End With
+                    If Me.ConnSQLSrv.IsDBConnReady = False Then
+                        Console.WriteLine(" Connection is not ready please OpenOrKeepActive")
+                    Else
+                        Console.WriteLine("*******************")
+                        Console.WriteLine("Execute SQL Server StoredProcedure")
+                        Console.WriteLine("*******************")
+                        Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_helpdb")
+                        With oCmdSQLSrvSp
+                            .ActiveConnection = Me.ConnSQLSrv.Connection
+                            .AddPara("@dbname", SqlDbType.NVarChar, 128)
+                            .ParaValue("@dbname") = "master"
+                            Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
+                            Console.WriteLine("Execute")
+                            Dim rsAny As Recordset = .Execute()
+                            If .LastErr <> "" Then
+                                Console.WriteLine(.LastErr)
+                            Else
+                                Console.WriteLine("OK")
+                                Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                                Console.WriteLine("ReturnValue=" & .ReturnValue)
+                                With rsAny
+                                    Console.WriteLine("Fields.Count=" & .Fields.Count)
+                                    If .Fields.Count > 0 Then
+                                        Dim i As Integer
+                                        For i = 0 To .Fields.Count - 1
+                                            Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
+                                        Next
+                                    End If
+                                    Console.WriteLine("EOF=" & .EOF)
+                                End With
+                            End If
+                            rsAny.Close()
+                            rsAny = Nothing
+                        End With
+                    End If
                 Case ConsoleKey.K
-                    Console.WriteLine("*******************")
-                    Console.WriteLine("Execute SQL Server SQL statement Text")
-                    Console.WriteLine("*******************")
-                    Dim oCmdSQLSrvText As New CmdSQLSrvText("select * from master.dbo.sysdatabases where name = @name")
-                    With oCmdSQLSrvText
-                        .ActiveConnection = Me.ConnSQLSrv.Connection
-                        .AddPara("@name", SqlDbType.VarChar, 128)
-                        .ParaValue("@name") = "master"
-                        Console.WriteLine("ParaValue(@name)=" & .ParaValue("@name"))
-                        Console.WriteLine("Execute")
-                        Dim oRS As Recordset = .Execute()
-                        If .LastErr <> "" Then
-                            Console.WriteLine(.LastErr)
-                        Else
-                            Console.WriteLine("OK")
-                            Console.WriteLine("RecordsAffected=" & .RecordsAffected)
-                            With oRS
-                                Console.WriteLine("Fields.Count=" & .Fields.Count)
-                                If .Fields.Count > 0 Then
-                                    Dim i As Integer
-                                    For i = 0 To .Fields.Count - 1
-                                        Console.WriteLine(".Fields(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                                    Next
-                                End If
-                                Console.WriteLine("EOF=" & .EOF)
-                            End With
-                        End If
-                        oRS.Close()
-                        oRS = Nothing
-                    End With
+                    If Me.ConnSQLSrv.IsDBConnReady = False Then
+                        Console.WriteLine(" Connection is not ready please OpenOrKeepActive")
+                    Else
+                        Console.WriteLine("*******************")
+                        Console.WriteLine("Execute SQL Server SQL statement Text")
+                        Console.WriteLine("*******************")
+                        Dim oCmdSQLSrvText As New CmdSQLSrvText("select * from master.dbo.sysdatabases where name = @name")
+                        With oCmdSQLSrvText
+                            .ActiveConnection = Me.ConnSQLSrv.Connection
+                            .AddPara("@name", SqlDbType.VarChar, 128)
+                            .ParaValue("@name") = "master"
+                            Console.WriteLine("ParaValue(@name)=" & .ParaValue("@name"))
+                            Console.WriteLine("Execute")
+                            Dim oRS As Recordset = .Execute()
+                            If .LastErr <> "" Then
+                                Console.WriteLine(.LastErr)
+                            Else
+                                Console.WriteLine("OK")
+                                Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                                With oRS
+                                    Console.WriteLine("Fields.Count=" & .Fields.Count)
+                                    If .Fields.Count > 0 Then
+                                        Dim i As Integer
+                                        For i = 0 To .Fields.Count - 1
+                                            Console.WriteLine(".Fields(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
+                                        Next
+                                    End If
+                                    Console.WriteLine("EOF=" & .EOF)
+                                End With
+                            End If
+                            oRS.Close()
+                            oRS = Nothing
+                        End With
+                    End If
             End Select
         Loop
     End Sub

@@ -3,7 +3,7 @@
 '* Author: Seow Phong
 '* Describe: Simple JSON class.
 '* Home Url: http://www.seowphong.com
-'* Version: 1.0.12
+'* Version: 1.0.13
 '* Create Time: 8/8/2019
 '* 1.0.2    10/8/2020   Code changed from VB6 to VB.NET
 '* 1.0.3    12/8/2020   Some Function debugging 
@@ -15,12 +15,13 @@
 '* 1.0.9    1/10/2020   Fix AddArrayEleValue,add AddArrayEleBegin
 '* 1.0.10   10/3/2020   Use PigBaseMini，and add IsGetValueErrRetNothing
 '* 1.0.11   4/4/2021   Modify AddArrayEleBegin,mSrc2JSonStr,mJSonStr2Src,mLng2Date
-'* 1.0.12   8/7/2021   Remove parsing function
+'* 1.0.12   5/7/2021   Remove parsing function
+'* 1.0.13   6/7/2021   Modify mLng2Date,AddEle,mDate2Lng
 '*******************************************************
 Imports System.Text
 Public Class PigJSon
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.0.12"
+    Private Const CLS_VERSION As String = "1.0.13"
 
     ''' <summary>The type of the JSON element</summary>
     Public Enum xpJSonEleType
@@ -82,16 +83,16 @@ Public Class PigJSon
         End Get
     End Property
 
-    Private Function mDate2Lng(DateValue As DateTime, IsLocalTime As Boolean) As Long
+    ''' <summary>
+    ''' Gets the number of microseconds of Greenwich mean time for the current time|获取当前时间的格林威治时间微秒数
+    ''' </summary>
+    ''' <param name="DateValue"></param>
+    ''' <returns></returns>
+    Private Function mDate2Lng(DateValue As DateTime) As Long
         Dim dteStart As New DateTime(1970, 1, 1)
         Dim mtsTimeDiff As TimeSpan = DateValue - dteStart
         Try
-            If IsLocalTime = True Then
-                mDate2Lng = mtsTimeDiff.TotalMilliseconds
-            Else
-                mDate2Lng = mtsTimeDiff.TotalMilliseconds - System.TimeZone.CurrentTimeZone.GetUtcOffset(Now).Hours * 3600000
-            End If
-            Me.ClearErr()
+            Return mtsTimeDiff.TotalMilliseconds
         Catch ex As Exception
             Me.SetSubErrInf("mDate2Lng", ex)
             Return 0
@@ -155,30 +156,14 @@ Public Class PigJSon
         End Try
     End Sub
 
-    ''' <summary>Add a non array element (date value)</summary>
-    ''' <param name="EleKey">The key of the element, An empty string represents an array element without a key value.</param>
-    ''' <param name="DateValue">The date value of the element, default is local time.</param>
-    ''' <param name="IsFirstEle">Is it the first element</param>
-    Public Overloads Sub AddEle(EleKey As String, DateValue As DateTime, Optional IsFirstEle As Boolean = False)
-        Try
-            Dim lngDate As Long = Me.mDate2Lng(DateValue, True)
-            If Me.LastErr <> "" Then Err.Raise(-1, , Me.LastErr)
-            Dim strRet = Me.mAddEle(EleKey, lngDate.ToString, IsFirstEle, False)
-            If strRet <> "" Then Err.Raise(-1, , strRet)
-            Me.ClearErr()
-        Catch ex As Exception
-            Me.SetSubErrInf("AddEle.DateValue", ex)
-        End Try
-    End Sub
 
     ''' <summary>Add a non array element (date value, need to specify whether it is a local time)</summary>
     ''' <param name="EleKey">The key of the element, An empty string represents an array element without a key value.</param>
     ''' <param name="DateValue">The date value of the element</param>
-    ''' <param name="IsLocalTime">Is it local time</param>
     ''' <param name="IsFirstEle">Is it the first element</param>
-    Public Overloads Sub AddEle(EleKey As String, DateValue As DateTime, IsLocalTime As Boolean, Optional IsFirstEle As Boolean = False)
+    Public Overloads Sub AddEle(EleKey As String, DateValue As DateTime, Optional IsFirstEle As Boolean = False)
         Try
-            Dim lngDate As Long = Me.mDate2Lng(DateValue, IsLocalTime)
+            Dim lngDate As Long = Me.mDate2Lng(DateValue)
             If Me.LastErr <> "" Then Err.Raise(-1, , Me.LastErr)
             Dim strRet = Me.mAddEle(EleKey, lngDate.ToString, IsFirstEle, False)
             If strRet <> "" Then Err.Raise(-1, , strRet)
@@ -188,27 +173,29 @@ Public Class PigJSon
         End Try
     End Sub
 
-
-    Private Function mLng2Date(LngValue As Long, IsLocalTime As Boolean) As DateTime
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <param name="LngValue">The number of milliseconds since 1970-1-1</param>
+    ''' <param name="IsLocalTime">Convert to local time</param>
+    ''' <returns></returns>
+    Private Function mLng2Date(LngValue As Long, Optional IsLocalTime As Boolean = True) As DateTime
         Dim dteStart As New DateTime(1970, 1, 1)
         Try
+            Dim intHourAdd As Integer = 0
             If IsLocalTime = True Then
-                mLng2Date = dteStart.AddMilliseconds(LngValue - System.TimeZone.CurrentTimeZone.GetUtcOffset(Now).Hours * 3600000)
-            Else
-                mLng2Date = dteStart.AddMilliseconds(LngValue)
+                Dim oTimeZoneInfo As System.TimeZoneInfo
+                oTimeZoneInfo = System.TimeZoneInfo.Local
+                intHourAdd = oTimeZoneInfo.GetUtcOffset(Now).Hours
             End If
+
+            Return dteStart.AddSeconds(LngValue + intHourAdd * 3600)
             Me.ClearErr()
         Catch ex As Exception
+            Return dteStart
             Me.SetSubErrInf("mLng2Date", ex)
-            If Me.IsGetValueErrRetNothing = True Then
-                Return Nothing
-            Else
-                Return DateTime.MinValue
-            End If
         End Try
     End Function
-
-
 
 
     ''' <summary>Add a JSON symbol</summary>
