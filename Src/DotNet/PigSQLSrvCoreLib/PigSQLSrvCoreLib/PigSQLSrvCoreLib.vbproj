@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
-    <Version>1.0.4.3</Version>
+    <Version>1.0.4.8</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
@@ -22,8 +22,8 @@ It can run on Windows and Linux platforms.
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability JSON</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Add function Recordset.Row2JSon for generate the row content of the result set as JSON.</PackageReleaseNotes>
-    <AssemblyVersion>1.0.4.3</AssemblyVersion>
+    <PackageReleaseNotes>Fix bugs that identify Windows and Linux operating system types.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.4.8</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
