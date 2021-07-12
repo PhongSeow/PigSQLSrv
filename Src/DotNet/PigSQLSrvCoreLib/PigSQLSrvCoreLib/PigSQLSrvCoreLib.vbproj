@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
-    <Version>1.0.4.8</Version>
+    <Version>1.0.4.9</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>

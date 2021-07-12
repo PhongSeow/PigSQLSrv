@@ -19,7 +19,7 @@
 '* 1.0.13   6/7/2021   Modify mLng2Date,AddEle,mDate2Lng
 '*******************************************************
 Imports System.Text
-Public Class PigJSon
+Public Class PigJSonLite
     Inherits PigBaseMini
     Private Const CLS_VERSION As String = "1.0.13"
 

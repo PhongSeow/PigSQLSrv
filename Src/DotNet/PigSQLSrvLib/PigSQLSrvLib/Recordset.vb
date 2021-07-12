@@ -4,17 +4,18 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.4
+'* Version: 1.0.5
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
 '* 1.0.4	2/7/2021	Add IsTrimJSonValue,Row2JSon
+'* 1.0.5	9/7/2021	Modify Row2JSon
 '**********************************
 Imports System.Data
 Imports System.Data.SqlClient
 Public Class Recordset
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.4"
+	Private Const CLS_VERSION As String = "1.0.5"
 	Public SqlDataReader As SqlDataReader
 
 	Public Sub New()
@@ -88,7 +89,7 @@ Public Class Recordset
 	''' </summary>
 	Public Function Row2JSon() As String
 		Try
-			Dim pjMain As New PigJSon
+			Dim pjMain As New PigJSonLite
 			With pjMain
 				If Me.EOF = False Then
 					For i = 0 To Me.Fields.Count - 1
@@ -103,7 +104,7 @@ Public Class Recordset
 							.AddEle(strName, strValue)
 						End If
 					Next
-					.AddSymbol(PigJSon.xpSymbolType.EleEndFlag)
+					.AddSymbol(PigJSonLite.xpSymbolType.EleEndFlag)
 				End If
 			End With
 			Row2JSon = pjMain.MainJSonStr

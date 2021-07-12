@@ -3,7 +3,7 @@
 '* Author: Seow Phong
 '* Describe: Simple JSON class.
 '* Home Url: http://www.seowphong.com
-'* Version: 1.0.13
+'* Version: 1.0.14
 '* Create Time: 8/8/2019
 '* 1.0.2    10/8/2020   Code changed from VB6 to VB.NET
 '* 1.0.3    12/8/2020   Some Function debugging 
@@ -17,11 +17,12 @@
 '* 1.0.11   4/4/2021   Modify AddArrayEleBegin,mSrc2JSonStr,mJSonStr2Src,mLng2Date
 '* 1.0.12   5/7/2021   Remove parsing function
 '* 1.0.13   6/7/2021   Modify mLng2Date,AddEle,mDate2Lng
+'* 1.0.14   9/7/2021   Modify mLng2Date,mDate2Lng
 '*******************************************************
 Imports System.Text
-Public Class PigJSon
+Public Class PigJSonLite
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.0.13"
+    Private Const CLS_VERSION As String = "1.0.14"
 
     ''' <summary>The type of the JSON element</summary>
     Public Enum xpJSonEleType
@@ -184,12 +185,16 @@ Public Class PigJSon
         Try
             Dim intHourAdd As Integer = 0
             If IsLocalTime = True Then
+#If NETCOREAPP Or NET5_0_OR_GREATER Or NET40_OR_GREATER Then
                 Dim oTimeZoneInfo As System.TimeZoneInfo
                 oTimeZoneInfo = System.TimeZoneInfo.Local
                 intHourAdd = oTimeZoneInfo.GetUtcOffset(Now).Hours
+#Else
+                intHourAdd = System.TimeZone.CurrentTimeZone.GetUtcOffset(Now).Hours
+#End If
             End If
 
-            Return dteStart.AddSeconds(LngValue + intHourAdd * 3600)
+            Return dteStart.AddMilliseconds(LngValue + intHourAdd * 3600000)
             Me.ClearErr()
         Catch ex As Exception
             Return dteStart

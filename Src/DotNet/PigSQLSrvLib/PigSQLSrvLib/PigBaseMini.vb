@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Basic lightweight Edition
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.22
+'* Version: 1.0.23
 '* Create Time: 31/8/2019
 '*1.0.2  1/10/2019   Add mGetSubErrInf 
 '*1.0.3  4/11/2019   Add LastErr
@@ -26,7 +26,8 @@
 '*1.0.19 27/1/2021   Change KeyInf,ClearErr Public to Friend, modify 
 '*1.0.20 20/2/2021   Fix bug mstrKeyInf is nothing
 '*1.0.21 25/2/2021   Fix bug mstrLastErr is nothing
-'*1.0.22 25/2/2021   Modify New for fix bugs that identify Windows and Linux operating system types.
+'*1.0.22 6/7/2021   Modify New 
+'*1.0.23 9/7/2021   Modify New for fix bugs that identify Windows and Linux operating system types.
 '************************************
 Imports System.Runtime.InteropServices
 Public Class PigBaseMini
@@ -50,7 +51,7 @@ Public Class PigBaseMini
         mstrClsName = Me.GetType.Name.ToString()
         mstrClsVersion = Version
 
-#If NET5_0 Or NETCOREAPP3_1 Then
+#If NETCOREAPP Or NET5_0_OR_GREATER Then
         mbolIsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
 #Else
         mbolIsWindows = True
