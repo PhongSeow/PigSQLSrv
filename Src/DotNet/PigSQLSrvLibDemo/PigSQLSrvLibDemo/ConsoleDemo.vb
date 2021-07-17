@@ -270,6 +270,7 @@ Public Class ConsoleDemo
                             .AddPara("@dbname", SqlDbType.NVarChar, 128)
                             .ParaValue("@dbname") = "master"
                             Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
+                            Console.WriteLine("DebugStr=" & .DebugStr)
                             Console.WriteLine("Execute")
                             Dim rsAny As Recordset = .Execute()
                             If .LastErr <> "" Then
@@ -306,6 +307,7 @@ Public Class ConsoleDemo
                             .AddPara("@name", SqlDbType.VarChar, 128)
                             .ParaValue("@name") = "master"
                             Console.WriteLine("ParaValue(@name)=" & .ParaValue("@name"))
+                            Console.WriteLine("DebugStr=" & .DebugStr)
                             Console.WriteLine("Execute")
                             Dim oRS As Recordset = .Execute()
                             If .LastErr <> "" Then
