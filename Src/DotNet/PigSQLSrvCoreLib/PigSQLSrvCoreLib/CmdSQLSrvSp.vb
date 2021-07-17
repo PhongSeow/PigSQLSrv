@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.8
+'* Version: 1.0.9
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -13,18 +13,20 @@
 '* 1.0.6	16/5/2021	SQLSrvDataTypeEnum move to ConnSQLSrv, Modify Execute,ParaValue,ActiveConnection
 '* 1.0.7	12/6/2021	Move to PigSQLSrvLib
 '* 1.0.8	13/6/2021	Move to PigSQLSrvCoreLib
+'* 1.0.9	17/7/2021	Add DebugStr,mSQLStr,Modify New
 '**********************************
 Imports System.Data
 Imports Microsoft.Data.SqlClient
 Public Class CmdSQLSrvSp
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.8"
+	Private Const CLS_VERSION As String = "1.0.9"
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
 		MyBase.New(CLS_VERSION)
 		Dim strStepName As String = ""
 		Try
+			mstrSpName = SpName
 			moSqlCommand = New SqlCommand
 			With moSqlCommand
 				.CommandType = CommandType.StoredProcedure
@@ -167,5 +169,45 @@ Public Class CmdSQLSrvSp
 		End Try
 	End Sub
 
+	''' <summary>
+	''' Returns debugging information for executing SQL statements
+	''' </summary>
+	Public ReadOnly Property DebugStr() As String
+		Get
+			Dim strStepName As String = ""
+			Try
+				strStepName = "SpName"
+				Dim strDebugStr As String = "EXEC " & Me.SpName & " "
+				Dim bolIsBegin As Boolean = False
+				If Not moSqlCommand.Parameters Is Nothing Then
+					For Each oSqlParameter As SqlParameter In moSqlCommand.Parameters
+						With oSqlParameter
+							If .Direction <> ParameterDirection.ReturnValue Then
+								strStepName = "Parameters(" & .ParameterName & ")"
+								If bolIsBegin = True Then
+									strDebugStr &= " , "
+								Else
+									bolIsBegin = True
+								End If
+								strDebugStr &= .ParameterName & "=" & mSQLStr(.Value.ToString)
+							End If
+						End With
+					Next
+				End If
+				Return strDebugStr
+			Catch ex As Exception
+				Me.SetSubErrInf("DebugStr", strStepName, ex)
+				Return ""
+			End Try
+		End Get
+	End Property
+	Private Function mSQLStr(SrcValue As String, Optional IsNotNull As Boolean = False) As String
+		SrcValue = Replace(SrcValue, "'", "''")
+		If UCase(SrcValue) = "NULL" And IsNotNull = False Then
+			mSQLStr = "NULL"
+		Else
+			mSQLStr = "'" & SrcValue & "'"
+		End If
+	End Function
 
 End Class
