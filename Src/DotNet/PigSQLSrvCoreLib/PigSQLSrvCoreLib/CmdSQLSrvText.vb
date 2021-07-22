@@ -94,24 +94,11 @@ Public Class CmdSQLSrvText
 	Public Function Execute() As Recordset
 		Dim strStepName As String = ""
 		Try
-			Execute = New Recordset
-			With Execute
-				strStepName = "ExecuteReader"
-				.SqlDataReader = moSqlCommand.ExecuteReader()
-				mlngRecordsAffected = .SqlDataReader.RecordsAffected
-				strStepName = "New Fields"
-				.Fields = New Fields
-				For i = 0 To .SqlDataReader.FieldCount - 1
-					strStepName = "Fields.Add（" & i & ")"
-					.Fields.Add(.SqlDataReader.GetName(i), i)
-					If .Fields.LastErr <> "" Then Throw New Exception(.Fields.LastErr)
-				Next
-				If .SqlDataReader.HasRows = True Then
-					strStepName = "MoveNext"
-					.MoveNext()
-					If .LastErr <> "" Then Throw New Exception(.LastErr)
-				End If
-			End With
+			strStepName = "ExecuteReader"
+			Dim oSqlDataReader As SqlDataReader = moSqlCommand.ExecuteReader()
+			strStepName = "New Recordset"
+			Execute = New Recordset(oSqlDataReader)
+			If Execute.LastErr <> "" Then Throw New Exception(Execute.LastErr)
 			Me.ClearErr()
 		Catch ex As Exception
 			Me.SetSubErrInf("Execute", ex)
@@ -119,15 +106,15 @@ Public Class CmdSQLSrvText
 		End Try
 	End Function
 
-	''' <summary>
-	''' Records Affected by the execution of the Stored Procedure
-	''' </summary>
-	Private mlngRecordsAffected As Long
-	Public ReadOnly Property RecordsAffected() As Long
-		Get
-			Return mlngRecordsAffected
-		End Get
-	End Property
+	'''' <summary>
+	'''' Records Affected by the execution of the Stored Procedure
+	'''' </summary>
+	'Private mlngRecordsAffected As Long
+	'Public ReadOnly Property RecordsAffected() As Long
+	'	Get
+	'		Return mlngRecordsAffected
+	'	End Get
+	'End Property
 
 	Public Property ParaValue(ParaName As String) As Object
 		Get

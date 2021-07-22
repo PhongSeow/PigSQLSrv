@@ -12,8 +12,8 @@
 '* 1.0.5	28/4/2021	Add ActiveConnection,AddPara,ParaValue,Execute
 '* 1.0.6	16/5/2021	SQLSrvDataTypeEnum move to ConnSQLSrv, Modify Execute,ParaValue,ActiveConnection
 '* 1.0.7	12/6/2021	Move to PigSQLSrvLib
-'* 1.0.8	13/6/2021	Move to PigSQLSrvCoreLib
-'* 1.0.9	17/7/2021	Add DebugStr,mSQLStr,Modify New
+'* 1.0.8	17/7/2021	Add DebugStr,mSQLStr,Modify New
+'* 1.0.9	19/7/2021	Modify Execute
 '**********************************
 Imports System.Data
 Imports Microsoft.Data.SqlClient
@@ -67,44 +67,58 @@ Public Class CmdSQLSrvSp
 		End Get
 	End Property
 
-	''' <summary>
-	''' Records Affected by the execution of the Stored Procedure
-	''' </summary>
-	Private mlngRecordsAffected As Long
-	Public ReadOnly Property RecordsAffected() As Long
-		Get
-			Return mlngRecordsAffected
-		End Get
-	End Property
-
+	'''' <summary>
+	'''' Records Affected by the execution of the Stored Procedure
+	'''' </summary>
+	'Private mlngRecordsAffected As Long
+	'Public ReadOnly Property RecordsAffected() As Long
+	'	Get
+	'		Return mlngRecordsAffected
+	'	End Get
+	'End Property
 
 	Public Function Execute() As Recordset
 		Dim strStepName As String = ""
 		Try
-			Execute = New Recordset
-			With Execute
-				strStepName = "ExecuteReader"
-				.SqlDataReader = moSqlCommand.ExecuteReader()
-				mlngRecordsAffected = .SqlDataReader.RecordsAffected
-				strStepName = "New Fields"
-				.Fields = New Fields
-				For i = 0 To .SqlDataReader.FieldCount - 1
-					strStepName = "Fields.Add（" & i & ")"
-					.Fields.Add(.SqlDataReader.GetName(i), i)
-					If .Fields.LastErr <> "" Then Throw New Exception(.Fields.LastErr)
-				Next
-				If .SqlDataReader.HasRows = True Then
-					strStepName = "MoveNext"
-					.MoveNext()
-					If .LastErr <> "" Then Throw New Exception(.LastErr)
-				End If
-			End With
+			strStepName = "ExecuteReader"
+			Dim oSqlDataReader As SqlDataReader = moSqlCommand.ExecuteReader()
+			strStepName = "New Recordset"
+			Execute = New Recordset(oSqlDataReader)
+			If Execute.LastErr <> "" Then Throw New Exception(Execute.LastErr)
 			Me.ClearErr()
 		Catch ex As Exception
 			Me.SetSubErrInf("Execute", ex)
 			Return Nothing
 		End Try
 	End Function
+
+	'Public Function Execute() As Recordset
+	'	Dim strStepName As String = ""
+	'	Try
+	'		Execute = New Recordset
+	'		'With Execute
+	'		'	strStepName = "ExecuteReader"
+	'		'	.SqlDataReader = moSqlCommand.ExecuteReader()
+	'		'	mlngRecordsAffected = .SqlDataReader.RecordsAffected
+	'		'	strStepName = "New Fields"
+	'		'	.Fields = New Fields
+	'		'	For i = 0 To .SqlDataReader.FieldCount - 1
+	'		'		strStepName = "Fields.Add（" & i & ")"
+	'		'		.Fields.Add(.SqlDataReader.GetName(i), .SqlDataReader.GetFieldType(i).Name, i)
+	'		'		If .Fields.LastErr <> "" Then Throw New Exception(.Fields.LastErr)
+	'		'	Next
+	'		'	If .SqlDataReader.HasRows = True Then
+	'		'		strStepName = "MoveNext"
+	'		'		.MoveNext()
+	'		'		If .LastErr <> "" Then Throw New Exception(.LastErr)
+	'		'	End If
+	'		'End With
+	'		Me.ClearErr()
+	'	Catch ex As Exception
+	'		Me.SetSubErrInf("Execute", ex)
+	'		Return Nothing
+	'	End Try
+	'End Function
 
 	Public Property ParaValue(ParaName As String) As Object
 		Get

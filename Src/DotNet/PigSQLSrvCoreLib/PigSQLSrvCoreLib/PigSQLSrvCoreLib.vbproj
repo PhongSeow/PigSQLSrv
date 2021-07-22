@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net5.0;netcoreapp3.1;</TargetFrameworks>
-    <Version>1.0.5.2</Version>
+    <Version>1.0.6.8</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
@@ -22,8 +22,8 @@ It can run on Windows and Linux platforms.
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability JSON</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Add debug string for CmdSQLSrvSp and CmdSQLSrvText.</PackageReleaseNotes>
-    <AssemblyVersion>1.0.5.2</AssemblyVersion>
+    <PackageReleaseNotes>Add NextRecordset and Optimize the processing of SqlDataReader.</PackageReleaseNotes>
+    <AssemblyVersion>1.0.6.8</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
