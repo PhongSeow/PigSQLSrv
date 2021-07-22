@@ -3,9 +3,12 @@ Imports PigSQLSrvLib
 
 Public Class ConsoleDemo
     Public ConnSQLSrv As ConnSQLSrv
+    Public CmdSQLSrvSp As CmdSQLSrvSp
+    Public CmdSQLSrvText As CmdSQLSrvText
     Public ConnStr As String
     Public SQL As String
     Public RS As Recordset
+    Public RS2 As Recordset
     Public DBSrv As String = "localhost"
     Public MirrDBSrv As String = "localhost"
     Public DBUser As String = "sa"
@@ -24,9 +27,10 @@ Public Class ConsoleDemo
             Console.WriteLine("Press A to Set SQL Server Connection String")
             Console.WriteLine("Press B to OpenOrKeepActive Connection")
             Console.WriteLine("Press C to Show Connection Information")
-            'Console.WriteLine("Press E to Show Recordset Information")
-            'Console.WriteLine("Press F to Recordset.MoveNext")
-            'Console.WriteLine("Press G to Recordset.NextRecordset")
+            Console.WriteLine("Press D to Create Recordset with Execute")
+            Console.WriteLine("Press E to Show Recordset Information")
+            Console.WriteLine("Press F to Recordset.MoveNext")
+            Console.WriteLine("Press G to Recordset.NextRecordset")
             'Console.WriteLine("Press H to Test Command")
             Console.WriteLine("Press I to Test JSon")
             Console.WriteLine("Press J to Execute SQL Server StoredProcedure")
@@ -125,6 +129,30 @@ Public Class ConsoleDemo
                     Console.WriteLine("State=" & Me.ConnSQLSrv.Connection.State)
                     Console.WriteLine("ConnStatus=" & Me.ConnSQLSrv.ConnStatus)
                     Console.WriteLine("IsDBConnReady=" & Me.ConnSQLSrv.IsDBConnReady)
+                Case ConsoleKey.D
+                    Console.WriteLine("#################")
+                    Console.WriteLine("Create Recordset with Execute")
+                    Console.WriteLine("#################")
+                    Console.WriteLine("Input SQL:")
+                    Me.SQL = Console.ReadLine()
+                    If Not Me.RS Is Nothing Then
+                        Me.RS.Close()
+                    End If
+                    Me.CmdSQLSrvText = Nothing
+                    Me.CmdSQLSrvText = New CmdSQLSrvText(Me.SQL)
+                    With Me.CmdSQLSrvText
+                        If .LastErr <> "" Then
+                            Console.WriteLine(.LastErr)
+                        Else
+                            .ActiveConnection = Me.ConnSQLSrv.Connection
+                            Me.RS = .Execute()
+                            If .LastErr <> "" Then
+                                Console.WriteLine(.LastErr)
+                            Else
+                                Console.WriteLine("OK")
+                            End If
+                        End If
+                    End With
                 Case ConsoleKey.E
                     Console.WriteLine("#################")
                     Console.WriteLine("Show Recordset Information")
@@ -133,54 +161,64 @@ Public Class ConsoleDemo
                         Console.WriteLine("Me.RS Is Nothing")
                     Else
                         With Me.RS
-                            Console.WriteLine("Fields.Count=" & .Fields.Count)
-                            If .Fields.Count > 0 Then
-                                Dim i As Integer
-                                For i = 0 To .Fields.Count - 1
-                                    Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                                    Console.WriteLine(".Fields.Item(" & i & ").Type=" & .Fields.Item(i).Type.ToString)
-                                Next
-                            End If
                             Console.WriteLine("EOF=" & .EOF)
+                            If .EOF = False Then
+                                Console.WriteLine("Fields.Count=" & .Fields.Count)
+                                If .Fields.Count > 0 Then
+                                    Dim i As Integer
+                                    For i = 0 To .Fields.Count - 1
+                                        Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
+                                        Console.WriteLine(".Fields.Item(" & i & ").Type=" & .Fields.Item(i).TypeName)
+                                    Next
+                                End If
+                            End If
                         End With
                     End If
-                'Case ConsoleKey.F
-                '    Console.WriteLine("#################")
-                '    Console.WriteLine("Recordset.MoveNext")
-                '    Console.WriteLine("#################")
-                '    If Me.RS Is Nothing Then
-                '        Console.WriteLine("Me.RS Is Nothing")
-                '    Else
-                '        With Me.RS
-                '            .MoveNext()
-                '            If .LastErr <> "" Then
-                '                Console.WriteLine("MoveNext Error:" & .LastErr)
-                '            Else
-                '                Console.WriteLine("MoveNext OK")
-                '            End If
-                '        End With
-                '    End If
+                Case ConsoleKey.F
+                    Console.WriteLine("#################")
+                    Console.WriteLine("Recordset.MoveNext")
+                    Console.WriteLine("#################")
+                    If Me.RS Is Nothing Then
+                        Console.WriteLine("Me.RS Is Nothing")
+                    Else
+                        With Me.RS
+                            .MoveNext()
+                            If .LastErr <> "" Then
+                                Console.WriteLine("MoveNext Error:" & .LastErr)
+                            Else
+                                Console.WriteLine("MoveNext OK")
+                            End If
+                        End With
+                    End If
                 Case ConsoleKey.G
-                    'Console.WriteLine("#################")
-                    'Console.WriteLine("Recordset.NextRecordset")
-                    'Console.WriteLine("#################")
-                    'Me.RS = Me.RS.NextRecordset
-                    'With Me.RS
-                    '    'Dim oRs As Recordset = .NextRecordset
-                    '    If .LastErr <> "" Then
-                    '        Console.WriteLine("Error:" & .LastErr)
-                    '    Else
-                    '        Console.WriteLine("OK")
-                    '        Console.WriteLine("Fields.Count=" & .Fields.Count)
-                    '        If .Fields.Count > 0 Then
-                    '            Dim i As Integer
-                    '            For i = 0 To .Fields.Count - 1
-                    '                Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                    '            Next
-                    '        End If
-                    '        Console.WriteLine("EOF=" & .EOF)
-                    '    End If
-                    'End With
+                    Console.WriteLine("#################")
+                    Console.WriteLine("Recordset.NextRecordset")
+                    Console.WriteLine("#################")
+                    Me.RS2 = Me.RS.NextRecordset
+                    If Me.RS.LastErr <> "" Then
+                        Console.WriteLine("Error:" & Me.RS.LastErr)
+                    ElseIf Me.RS2 Is Nothing Then
+                        Console.WriteLine("NextRecordset is nothing")
+                    Else
+                        Console.WriteLine("OK")
+                        Me.RS = Me.RS2
+                        With Me.RS
+                            If .LastErr <> "" Then
+                                Console.WriteLine("Error:" & .LastErr)
+                            Else
+                                Console.WriteLine("EOF=" & .EOF)
+                                If .EOF = False Then
+                                    Console.WriteLine("Fields.Count=" & .Fields.Count)
+                                    If .Fields.Count > 0 Then
+                                        Dim i As Integer
+                                        For i = 0 To .Fields.Count - 1
+                                            Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
+                                        Next
+                                    End If
+                                End If
+                            End If
+                        End With
+                    End If
                 'Case ConsoleKey.H
                 '    Console.WriteLine("#################")
                 '    Console.WriteLine("Test Command")
@@ -277,7 +315,7 @@ Public Class ConsoleDemo
                                 Console.WriteLine(.LastErr)
                             Else
                                 Console.WriteLine("OK")
-                                Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                                Console.WriteLine("RecordsAffected=" & rsAny.RecordsAffected)
                                 Console.WriteLine("ReturnValue=" & .ReturnValue)
                                 With rsAny
                                     Console.WriteLine("Fields.Count=" & .Fields.Count)
@@ -314,7 +352,7 @@ Public Class ConsoleDemo
                                 Console.WriteLine(.LastErr)
                             Else
                                 Console.WriteLine("OK")
-                                Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                                Console.WriteLine("RecordsAffected=" & oRS.RecordsAffected)
                                 With oRS
                                     Console.WriteLine("Fields.Count=" & .Fields.Count)
                                     If .Fields.Count > 0 Then
