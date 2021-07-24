@@ -6,9 +6,9 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "PigSQLSrvCoreLibDemo/1.0.5.2": {
+      "PigSQLSrvCoreLibDemo/1.0.6.2": {
         "dependencies": {
-          "PigSQLSrvCoreLib": "1.0.5.2"
+          "PigSQLSrvCoreLib": "1.0.6.8"
         },
         "runtime": {
           "PigSQLSrvCoreLibDemo.dll": {}
@@ -163,14 +163,14 @@
           }
         }
       },
-      "PigSQLSrvCoreLib/1.0.5.2": {
+      "PigSQLSrvCoreLib/1.0.6.8": {
         "dependencies": {
           "Microsoft.Data.SqlClient": "2.1.2"
         },
         "runtime": {
           "lib/netcoreapp3.1/PigSQLSrvCoreLib.dll": {
-            "assemblyVersion": "1.0.5.2",
-            "fileVersion": "1.0.5.2"
+            "assemblyVersion": "1.0.6.8",
+            "fileVersion": "1.0.6.8"
           }
         }
       },
@@ -307,7 +307,7 @@
     }
   },
   "libraries": {
-    "PigSQLSrvCoreLibDemo/1.0.5.2": {
+    "PigSQLSrvCoreLibDemo/1.0.6.2": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -396,12 +396,12 @@
       "path": "microsoft.win32.systemevents/4.7.0",
       "hashPath": "microsoft.win32.systemevents.4.7.0.nupkg.sha512"
     },
-    "PigSQLSrvCoreLib/1.0.5.2": {
+    "PigSQLSrvCoreLib/1.0.6.8": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-q/Q26FAt5l3KzXxeQD43h/B+FgFY/lZYLYScirD0ZbW86TSTVlFFpjkbUUnitf4wmus83fYWldeAahQLPr/6zQ==",
-      "path": "pigsqlsrvcorelib/1.0.5.2",
-      "hashPath": "pigsqlsrvcorelib.1.0.5.2.nupkg.sha512"
+      "sha512": "sha512-dPd2gIlzjFIaVQ3Wej/9mjXDRqPtlrlJEfvIwoQI86YEjZHvsfsQuA13+4PIQCiBR/pCyrARGUvQnBv8FIXx1Q==",
+      "path": "pigsqlsrvcorelib/1.0.6.8",
+      "hashPath": "pigsqlsrvcorelib.1.0.6.8.nupkg.sha512"
     },
     "System.Configuration.ConfigurationManager/4.7.0": {
       "type": "package",
