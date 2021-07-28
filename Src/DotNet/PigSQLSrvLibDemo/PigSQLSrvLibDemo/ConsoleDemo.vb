@@ -168,7 +168,9 @@ Public Class ConsoleDemo
                                     Dim i As Integer
                                     For i = 0 To .Fields.Count - 1
                                         Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                                        Console.WriteLine(".Fields.Item(" & i & ").Type=" & .Fields.Item(i).TypeName)
+                                        Console.WriteLine(".Fields.Item(" & i & ").TypeName=" & .Fields.Item(i).TypeName)
+                                        Console.WriteLine(".Fields.Item(" & i & ").FieldTypeName=" & .Fields.Item(i).FieldTypeName)
+                                        Console.WriteLine(".Fields.Item(" & i & ").DataCategory=" & .Fields.Item(i).DataCategory)
                                     Next
                                 End If
                             End If
