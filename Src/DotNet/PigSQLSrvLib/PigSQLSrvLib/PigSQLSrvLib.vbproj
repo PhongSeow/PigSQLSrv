@@ -19,9 +19,9 @@ Support automatic switch connection of mirror database for high availability.
 Support the transformation of query results into JSON.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.0.7.16</Version>
+    <Version>1.0.8.8</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON</PackageTags>
-    <PackageReleaseNotes>Add NextRecordset and Optimize the processing of SqlDataReader.</PackageReleaseNotes>
+    <PackageReleaseNotes>Optimize data type processing and fix some bugs.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

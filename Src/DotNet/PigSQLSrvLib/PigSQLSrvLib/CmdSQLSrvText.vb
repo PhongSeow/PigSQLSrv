@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.7
+'* Version: 1.0.8
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -12,12 +12,13 @@
 '* 1.0.5	6/6/2021	Modify AddPara,Execute
 '* 1.0.6	21/6/2021	Modify Execute
 '* 1.0.7	17/7/2021	Add DebugStr,mSQLStr
+'* 1.0.8	28/7/2021	Modify DebugStr
 '**********************************
 Imports System.Data
 Imports System.Data.SqlClient
 Public Class CmdSQLSrvText
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.7"
+	Private Const CLS_VERSION As String = "1.0.8"
 	Public Property SQLText As String
 	Private moSqlCommand As SqlCommand
 

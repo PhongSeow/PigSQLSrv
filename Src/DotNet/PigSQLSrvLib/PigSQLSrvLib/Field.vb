@@ -4,14 +4,15 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.3
+'* Version: 1.0.4
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
-'* 1.0.3	21/7/2021	Modify New,DataCategory, add 
+'* 1.0.3	21/7/2021	Modify New,DataCategory
+'* 1.0.4	28/7/2021	Modify New,DataCategory, add FieldTypeName
 '**********************************
 Public Class Field
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.2"
+	Private Const CLS_VERSION As String = "1.0.4"
 
 
 	Public Enum DataCategoryEnum
@@ -24,33 +25,34 @@ Public Class Field
 	End Enum
 
 
-	Public Sub New(Name As String, TypeName As String, Index As Long)
+	Public Sub New(Name As String, TypeName As String, FieldTypeName As String, Index As Long)
 		MyBase.New(CLS_VERSION)
 		Me.Name = Name
 		Me.Index = Index
 		Me.TypeName = TypeName
+		Me.FieldTypeName = FieldTypeName
 	End Sub
 
 	Public ReadOnly Property Name As String
 	Public ReadOnly Property Index As Long
 	Public ReadOnly Property TypeName As String
+	Public ReadOnly Property FieldTypeName As String
 
 	Public ReadOnly Property DataCategory() As DataCategoryEnum
 		Get
 			Try
-				'Select Case Me.Type
-				'	Case SqlDbType.Char, SqlDbType.VarChar, SqlDbType.NChar, SqlDbType.NVarChar
-				'		DataCategory = DataCategoryEnum.StrValue
-				'	Case SqlDbType.BigInt, SqlDbType.TinyInt, SqlDbType.SmallInt, SqlDbType.TinyInt
-				'		DataCategory = DataCategoryEnum.IntValue
-				'	Case SqlDbType.Decimal, SqlDbType.Real, SqlDbType.Float
-				'		DataCategory = DataCategoryEnum.DecValue
-				'	Case SqlDbType.DateTime
-				'		DataCategory = DataCategoryEnum.DateValue
-				'	Case Else
-				'		DataCategory = DataCategoryEnum.OtherValue
-				'End Select
-				Return DataCategoryEnum.OtherValue
+				Select Case Me.FieldTypeName
+					Case "String", "Guid"
+						DataCategory = DataCategoryEnum.StrValue
+					Case "Int64", "Boolean", "Int32", "Int16"
+						DataCategory = DataCategoryEnum.IntValue
+					Case "Decimal", "Double", "Single"
+						DataCategory = DataCategoryEnum.DecValue
+					Case "DateTime", ""
+						DataCategory = DataCategoryEnum.DateValue
+					Case Else
+						DataCategory = DataCategoryEnum.OtherValue
+				End Select
 			Catch ex As Exception
 				Me.SetSubErrInf("DataCategory.Get", ex)
 				Return DataCategoryEnum.OtherValue
@@ -58,12 +60,12 @@ Public Class Field
 		End Get
 	End Property
 
-	'Private mintSqlDbType As SqlDbType
-	'Public ReadOnly Property Type() As SqlDbType
-	'	Get
-	'		Return mintSqlDbType
-	'	End Get
-	'End Property
+	Private mintSqlDbType As SqlDbType
+	Public ReadOnly Property Type() As SqlDbType
+		Get
+			Return mintSqlDbType
+		End Get
+	End Property
 
 
 	Public ReadOnly Property DecValue() As Decimal

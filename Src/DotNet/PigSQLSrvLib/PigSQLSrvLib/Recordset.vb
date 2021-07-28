@@ -177,7 +177,7 @@ Public Class Recordset
 				.Fields = New Fields
 				For i = 0 To moSqlDataReader.FieldCount - 1
 					strStepName = "Fields.Add（" & i & ")"
-					.Fields.Add(moSqlDataReader.GetName(i), moSqlDataReader.GetFieldType(i).Name, i)
+					.Fields.Add(moSqlDataReader.GetName(i), moSqlDataReader.GetDataTypeName(i), moSqlDataReader.GetFieldType(i).Name, i)
 					If .Fields.LastErr <> "" Then Throw New Exception(.Fields.LastErr)
 				Next
 				If moSqlDataReader.HasRows = True Then
