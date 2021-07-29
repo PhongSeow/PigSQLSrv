@@ -12,9 +12,9 @@
 	  <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
 	  <RepositoryType>GIT</RepositoryType>
 	  <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLibDemo</RepositoryUrl>
-	  <Version>1.0.6.2</Version>
+	  <Version>1.0.7.1</Version>
 	  <PackageTags>ObjAdoDBLib SQLServer Windows Linux Ado Core Mirror automatic high availability JSON</PackageTags>
-	  <PackageReleaseNotes>Add NextRecordset and Optimize the processing of SqlDataReader.</PackageReleaseNotes>
+	  <PackageReleaseNotes>Optimize data type processing.</PackageReleaseNotes>
 	  <Copyright>Copyright (c) 2021 Seow Phong</Copyright>
   </PropertyGroup>
 
@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigSQLSrvCoreLib" Version="1.0.6.8" />
+    <PackageReference Include="PigSQLSrvCoreLib" Version="1.0.7.3" />
   </ItemGroup>
 
 </Project>
