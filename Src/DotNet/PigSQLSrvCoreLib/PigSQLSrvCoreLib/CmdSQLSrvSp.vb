@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.9
+'* Version: 1.0.10
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -14,12 +14,14 @@
 '* 1.0.7	12/6/2021	Move to PigSQLSrvLib
 '* 1.0.8	17/7/2021	Add DebugStr,mSQLStr,Modify New
 '* 1.0.9	19/7/2021	Modify Execute
+'* 1.0.10	28/7/2021	Modify DebugStr
 '**********************************
 Imports System.Data
 Imports Microsoft.Data.SqlClient
+
 Public Class CmdSQLSrvSp
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.9"
+	Private Const CLS_VERSION As String = "1.0.10"
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
@@ -203,7 +205,19 @@ Public Class CmdSQLSrvSp
 								Else
 									bolIsBegin = True
 								End If
-								strDebugStr &= .ParameterName & "=" & mSQLStr(.Value.ToString)
+								strDebugStr &= .ParameterName & "="
+								Select Case GetDataCategoryBySqlDbType(.SqlDbType)
+									Case Field.DataCategoryEnum.BooleanValue
+										strDebugStr &= CStr(.Value)
+									Case Field.DataCategoryEnum.DateValue
+										strDebugStr &= mSQLStr(.Value.ToString)
+									Case Field.DataCategoryEnum.IntValue, Field.DataCategoryEnum.DecValue
+										strDebugStr &= CStr(.Value)
+									Case Field.DataCategoryEnum.StrValue
+										strDebugStr &= mSQLStr(.Value.ToString)
+									Case Field.DataCategoryEnum.OtherValue
+										strDebugStr &= mSQLStr(.Value.ToString)
+								End Select
 							End If
 						End With
 					Next

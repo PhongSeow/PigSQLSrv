@@ -4,15 +4,16 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Field 的集合类|Collection class of field
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.2
+'* Version: 1.0.3
 '* Create Time: 6/6/2021
-'* 1.0.2	21/7/2021	Modify Add,
+'* 1.0.2	21/7/2021	Modify Add
+'* 1.0.3	28/7/2021	Modify Add
 '************************************
 
 Public Class Fields
     Inherits PigBaseMini
     Implements IEnumerable(Of Field)
-    Private Const CLS_VERSION As String = "1.0.1"
+    Private Const CLS_VERSION As String = "1.0.3"
 
     Private moList As New List(Of Field)
 
@@ -75,11 +76,11 @@ Public Class Fields
         End Try
     End Sub
 
-    Public Function Add(Name As String, TypeName As String, Index As Long) As Field
+    Public Function Add(Name As String, TypeName As String, FieldTypeName As String, Index As Long) As Field
         Dim strStepName As String = ""
         Try
             strStepName = "New Field"
-            Dim oField As New Field(Name, TypeName, Index)
+            Dim oField As New Field(Name, TypeName, FieldTypeName, Index)
             If oField.LastErr <> "" Then Throw New Exception(oField.LastErr)
             strStepName = "Add"
             moList.Add(oField)
