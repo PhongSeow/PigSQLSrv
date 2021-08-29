@@ -4,20 +4,25 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.6
+'* Version: 1.1
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
 '* 1.0.4	2/7/2021	Add IsTrimJSonValue,Row2JSon
 '* 1.0.5	9/7/2021	Modify Row2JSon
 '* 1.0.6	21/7/2021	Add Move,NextRecordset,Init, modify MoveNext,Finalize
+'* 1.0.7	29/7/2021	Add Recordset2JSon,Recordset2SimpleJSonArray,MaxToJSonRows,mRecordset2JSon,AllRecordset2JSon
+'* 1.1		29/8/2021   Add support for .net core
 '**********************************
 Imports System.Data
+#If NETFRAMEWORK Then
+Imports System.Data.SqlClient
+#Else
 Imports Microsoft.Data.SqlClient
-
+#End If
 Public Class Recordset
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.6"
+	Private Const CLS_VERSION As String = "1.1.2"
 	Private moSqlDataReader As SqlDataReader
 
 	Public Sub New()
@@ -148,6 +153,137 @@ Public Class Recordset
 	End Function
 
 	''' <summary>
+	''' Convert current recordset to JSON|当前结果集转换成JSON
+	''' </summary>
+	Public Function Recordset2JSon() As String
+		Return Me.mRecordset2JSon()
+	End Function
+
+	''' <summary>
+	''' Convert current recordset to JSON|当前结果集转换成JSON
+	''' </summary>
+	Public Function Recordset2JSon(TopRows As Long) As String
+		Return Me.mRecordset2JSon(TopRows)
+	End Function
+
+	Private Function mRecordset2JSon(Optional TopRows As Long = -1) As String
+		Dim strStepName As String = ""
+		Try
+			Dim intRowNo As Integer = 0
+			strStepName = "New PigJSon"
+			Dim pjMain As New PigJSonLite
+			If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
+			pjMain.AddArrayEleBegin("ROW", True)
+			Do While Not Me.EOF
+				If intRowNo >= Me.MaxToJSonRows Then Exit Do
+				If TopRows > 0 Then
+					If intRowNo >= TopRows Then Exit Do
+				End If
+				strStepName = "Row2JSon"
+				Dim strRowJSon As String = Me.Row2JSon
+				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+				If intRowNo = 0 Then
+					pjMain.AddArrayEleValue(strRowJSon, True)
+				Else
+					pjMain.AddArrayEleValue(strRowJSon)
+				End If
+				intRowNo += 1
+				strStepName = "MoveNext"
+				Me.MoveNext()
+				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+			Loop
+			pjMain.AddSymbol(PigJSonLite.xpSymbolType.ArrayEndFlag)
+			pjMain.AddEle("TotalRows", intRowNo)
+			pjMain.AddEle("IsEOF", Me.EOF)
+			pjMain.AddSymbol(PigJSonLite.xpSymbolType.EleEndFlag)
+			mRecordset2JSon = pjMain.MainJSonStr
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("mRecordset2JSon", strStepName, ex)
+			Return ""
+		End Try
+	End Function
+
+	''' <summary>
+	''' Convert recordset to simple JSON array, The returned result cannot be used as a standalone JSON.|当前结果集转换成简单的JSON数组，返回结果不能作为独立的 JSon 使用。
+	''' </summary>
+	Public Function Recordset2SimpleJSonArray() As String
+		Dim strStepName As String = ""
+		Try
+			Dim intRowNo As Integer = 0
+			strStepName = "New PigJSonLite"
+			Dim pjMain As New PigJSonLite
+			If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
+			Do While Not Me.EOF
+				If intRowNo >= Me.MaxToJSonRows Then Exit Do
+				strStepName = "Row2JSon"
+				Dim strRowJSon As String = Me.Row2JSon
+				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+				If intRowNo = 0 Then
+					pjMain.AddArrayEleValue(strRowJSon, True)
+				Else
+					pjMain.AddArrayEleValue(strRowJSon)
+				End If
+				intRowNo += 1
+				strStepName = "MoveNext"
+				Me.MoveNext()
+				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+			Loop
+			'pjMain.AddSymbol(PigJSonLite.xpSymbolType.ArrayEndFlag)
+			Recordset2SimpleJSonArray = pjMain.MainJSonStr
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("Recordset2SimpleJSonArray", ex)
+			Return ""
+		End Try
+	End Function
+
+	''' <summary>
+	''' Convert all recordset to JSON|所有结果集转换成JSON
+	''' </summary>
+	''' <returns></returns>
+	Public Function AllRecordset2JSon() As String
+		Dim strStepName As String = ""
+		Try
+			Dim intRSNo As Integer = 0
+			strStepName = "New PigJSonLite"
+			Dim pjMain As New PigJSonLite
+			If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
+			pjMain.AddArrayEleBegin("RS", True)
+			Dim strRsJSon As String
+			strStepName = "Me.Recordset2JSon"
+			strRsJSon = Me.Recordset2JSon(Me.MaxToJSonRows)
+			If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+			pjMain.AddArrayEleValue(strRsJSon, True)
+			intRSNo = 1
+			strStepName = "Me.NextRecordset"
+			Dim rsParent As Recordset = Nothing
+			Dim rsSub As Recordset = Me.NextRecordset
+			Do While Not rsSub Is Nothing
+				strStepName = "rs.Recordset2JSon"
+				strRsJSon = rsSub.Recordset2JSon(Me.MaxToJSonRows)
+				If rsSub.LastErr <> "" Then Throw New Exception(rsSub.LastErr)
+				pjMain.AddArrayEleValue(strRsJSon)
+				intRSNo += 1
+				rsParent = rsSub
+				strStepName = "rs.NextRecordset"
+				rsSub = Nothing
+				rsSub = rsParent.NextRecordset
+				If rsParent.LastErr <> "" Then Exit Do
+			Loop
+			pjMain.AddSymbol(PigJSonLite.xpSymbolType.ArrayEndFlag)
+			pjMain.AddEle("TotalRS", intRSNo)
+			pjMain.AddSymbol(PigJSonLite.xpSymbolType.EleEndFlag)
+			AllRecordset2JSon = pjMain.MainJSonStr
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("AllRecordset2JSon", ex)
+			Return ""
+		End Try
+	End Function
+
+
+	''' <summary>
 	''' Whether to remove the space before and after the value is converted to JSON
 	''' </summary>
 	Private mbolIsTrimJSonValue As Boolean = True
@@ -212,6 +348,19 @@ Public Class Recordset
 		Get
 			Return mlngRecordsAffected
 		End Get
+	End Property
+
+	''' <summary>
+	''' The maximum number of rows to convert the Recordset to JSON
+	''' </summary>
+	Private mlngMaxToJSonRows As Long = 1024
+	Public Property MaxToJSonRows() As Long
+		Get
+			Return mlngMaxToJSonRows
+		End Get
+		Set(ByVal value As Long)
+			mlngMaxToJSonRows = value
+		End Set
 	End Property
 
 End Class

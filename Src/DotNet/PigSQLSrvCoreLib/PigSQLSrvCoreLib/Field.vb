@@ -4,17 +4,22 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.4
+'* Version: 1.1
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
 '* 1.0.4	28/7/2021	Modify New,DataCategory, add FieldTypeName
+'* 1.1		29/8/2021   Add support for .net core
 '**********************************
 Imports System.Data
+#If NETFRAMEWORK Then
+Imports System.Data.SqlClient
+#Else
 Imports Microsoft.Data.SqlClient
+#End If
 Public Class Field
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.4"
+	Private Const CLS_VERSION As String = "1.1.2"
 
 
 	Public Enum DataCategoryEnum

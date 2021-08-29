@@ -1,5 +1,10 @@
 ﻿Imports System.Data
+#If NETFRAMEWORK Then
+Imports System.Data.SqlClient
+#Else
 Imports Microsoft.Data.SqlClient
+#End If
+
 Module modPigSQLSrvLib
 
 	Public Function GetDataCategoryBySqlDbType(SqlDbType As SqlDbType) As Field.DataCategoryEnum

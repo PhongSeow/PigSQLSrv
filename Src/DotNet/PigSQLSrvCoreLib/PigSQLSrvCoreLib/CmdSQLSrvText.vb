@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.8
+'* Version: 1.1
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -13,13 +13,18 @@
 '* 1.0.6	21/6/2021	Modify Execute
 '* 1.0.7	17/7/2021	Add DebugStr,mSQLStr
 '* 1.0.8	28/7/2021	Modify DebugStr
+'* 1.0.9	1/8/2021	Modify DebugStr
+'* 1.1		29/8/2021   Add support for .net core
 '**********************************
 Imports System.Data
+#If NETFRAMEWORK Then
+Imports System.Data.SqlClient
+#Else
 Imports Microsoft.Data.SqlClient
-
+#End If
 Public Class CmdSQLSrvText
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.8"
+	Private Const CLS_VERSION As String = "1.1.1"
 	Public Property SQLText As String
 	Private moSqlCommand As SqlCommand
 
@@ -150,14 +155,26 @@ Public Class CmdSQLSrvText
 				If Not moSqlCommand.Parameters Is Nothing Then
 					For Each oSqlParameter As SqlParameter In moSqlCommand.Parameters
 						With oSqlParameter
-							If .Direction <> ParameterDirection.ReturnValue Then
+							If .Direction <> ParameterDirection.ReturnValue And Not .Value Is Nothing Then
 								strStepName = "Parameters(" & .ParameterName & ")"
 								If bolIsBegin = True Then
 									strDebugStr &= " , "
 								Else
 									bolIsBegin = True
 								End If
-								strDebugStr &= .ParameterName & "=" & mSQLStr(.Value.ToString)
+								strDebugStr &= .ParameterName & "="
+								Select Case GetDataCategoryBySqlDbType(.SqlDbType)
+									Case Field.DataCategoryEnum.BooleanValue
+										strDebugStr &= CStr(.Value)
+									Case Field.DataCategoryEnum.DateValue
+										strDebugStr &= mSQLStr(.Value.ToString)
+									Case Field.DataCategoryEnum.IntValue, Field.DataCategoryEnum.DecValue
+										strDebugStr &= CStr(.Value)
+									Case Field.DataCategoryEnum.StrValue
+										strDebugStr &= mSQLStr(.Value.ToString)
+									Case Field.DataCategoryEnum.OtherValue
+										strDebugStr &= mSQLStr(.Value.ToString)
+								End Select
 							End If
 						End With
 					Next
