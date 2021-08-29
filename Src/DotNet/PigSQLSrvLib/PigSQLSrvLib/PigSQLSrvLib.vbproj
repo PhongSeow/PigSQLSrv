@@ -19,9 +19,9 @@ Support automatic switch connection of mirror database for high availability.
 Support the transformation of query results into JSON.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.0.8.8</Version>
+    <Version>1.1.8</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON</PackageTags>
-    <PackageReleaseNotes>Optimize data type processing and fix some bugs.</PackageReleaseNotes>
+    <PackageReleaseNotes>Use the unified source code with PigSQLSrvCoreLib.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,18 +33,6 @@ It can run on Windows platforms only.
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="Microsoft.Data.SqlClient">
-      <Version>3.0.0-preview1.21075.2</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.Data.SqlClient">
-      <Version>3.0.0-preview1.21075.2</Version>
-    </PackageReference>
   </ItemGroup>
 
 </Project>

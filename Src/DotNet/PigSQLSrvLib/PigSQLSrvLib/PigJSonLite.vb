@@ -3,7 +3,7 @@
 '* Author: Seow Phong
 '* Describe: Simple JSON class.
 '* Home Url: http://www.seowphong.com
-'* Version: 1.0.14
+'* Version: 1.0.13
 '* Create Time: 8/8/2019
 '* 1.0.2    10/8/2020   Code changed from VB6 to VB.NET
 '* 1.0.3    12/8/2020   Some Function debugging 
@@ -17,12 +17,12 @@
 '* 1.0.11   4/4/2021   Modify AddArrayEleBegin,mSrc2JSonStr,mJSonStr2Src,mLng2Date
 '* 1.0.12   5/7/2021   Remove parsing function
 '* 1.0.13   6/7/2021   Modify mLng2Date,AddEle,mDate2Lng
-'* 1.0.14   9/7/2021   Modify mLng2Date,mDate2Lng
+'* 1.0.14   27/8/2021   Modify mLng2Date for NETCOREAPP3_1_OR_GREATER
 '*******************************************************
 Imports System.Text
 Public Class PigJSonLite
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.0.14"
+    Private Const CLS_VERSION As String = "1.0.14.1"
 
     ''' <summary>The type of the JSON element</summary>
     Public Enum xpJSonEleType
@@ -180,27 +180,39 @@ Public Class PigJSonLite
     ''' <param name="LngValue">The number of milliseconds since 1970-1-1</param>
     ''' <param name="IsLocalTime">Convert to local time</param>
     ''' <returns></returns>
+#If NET40_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
     Private Function mLng2Date(LngValue As Long, Optional IsLocalTime As Boolean = True) As DateTime
         Dim dteStart As New DateTime(1970, 1, 1)
         Try
             Dim intHourAdd As Integer = 0
-            If IsLocalTime = True Then
-#If NETCOREAPP Or NET5_0_OR_GREATER Or NET40_OR_GREATER Then
+            If IsLocalTime = False Then
                 Dim oTimeZoneInfo As System.TimeZoneInfo
                 oTimeZoneInfo = System.TimeZoneInfo.Local
                 intHourAdd = oTimeZoneInfo.GetUtcOffset(Now).Hours
-#Else
-                intHourAdd = System.TimeZone.CurrentTimeZone.GetUtcOffset(Now).Hours
-#End If
             End If
 
-            Return dteStart.AddMilliseconds(LngValue + intHourAdd * 3600000)
+            Return dteStart.AddSeconds(LngValue + intHourAdd * 3600)
             Me.ClearErr()
         Catch ex As Exception
             Return dteStart
             Me.SetSubErrInf("mLng2Date", ex)
         End Try
     End Function
+#Else
+    Private Function mLng2Date(LngValue As Long, Optional IsLocalTime As Boolean = True) As DateTime
+        Dim dteStart As New DateTime(1970, 1, 1)
+        Try
+            If IsLocalTime = False Then
+                mLng2Date = dteStart.AddMilliseconds(LngValue - System.TimeZone.CurrentTimeZone.GetUtcOffset(Now).Hours * 3600000)
+            Else
+                mLng2Date = dteStart.AddMilliseconds(LngValue)
+            End If
+        Catch ex As Exception
+            Me.SetSubErrInf("mLng2Date", ex)
+            Return DateTime.MinValue
+        End Try
+    End Function
+#End If
 
 
     ''' <summary>Add a JSON symbol</summary>

@@ -4,20 +4,25 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0.6
+'* Version: 1.1
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
 '* 1.0.4	20/6/2021	Modify OpenOrKeepActive, Add mConnClose,mConnOpen
 '* 1.0.5	21/6/2021	Modify mIsDBOnline
 '* 1.0.6	21/7/2021	Modify mSetConnSQLServer
+'* 1.1		29/8/2021   Add support for .net core
 '**********************************
 Imports System.Data
+#If NETFRAMEWORK Then
 Imports System.Data.SqlClient
+#Else
+Imports Microsoft.Data.SqlClient
+#End If
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.0.6"
+	Private Const CLS_VERSION As String = "1.1.6"
 	Public Connection As SqlConnection
 	Private mcstChkDBStatus As CmdSQLSrvText
 

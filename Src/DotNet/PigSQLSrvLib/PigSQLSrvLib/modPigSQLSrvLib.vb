@@ -1,5 +1,9 @@
 ﻿Imports System.Data
+#If NETFRAMEWORK Then
 Imports System.Data.SqlClient
+#Else
+Imports Microsoft.Data.SqlClient
+#End If
 
 Module modPigSQLSrvLib
 
