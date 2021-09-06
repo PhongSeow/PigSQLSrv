@@ -35,6 +35,7 @@ Public Class ConsoleDemo
             Console.WriteLine("Press I to Test JSon")
             Console.WriteLine("Press J to Execute SQL Server StoredProcedure")
             Console.WriteLine("Press K to Execute SQL Server SQL statement Text")
+            Console.WriteLine("Press L to SQLSrvTools")
             Console.WriteLine("*******************")
             Select Case Console.ReadKey().Key
                 Case ConsoleKey.Q
@@ -269,31 +270,97 @@ Public Class ConsoleDemo
                         Console.WriteLine("*******************")
                         Console.WriteLine("Press Q to Up")
                         Console.WriteLine("Press A to Convert current row to JSON")
-                        'Console.WriteLine("Press B to Convert current recordset to JSON")
-                        'Console.WriteLine("Press C to Convert all recordset to JSON")
+                        Console.WriteLine("Press B to Convert current recordset to JSON")
+                        Console.WriteLine("Press C to Convert all recordset to JSON")
+                        Console.WriteLine("Press D to Convert current recordset to Simple JSON Array")
                         Do While True
                             Me.CurrConsoleKey = Console.ReadKey().Key
                             Select Case Me.CurrConsoleKey
                                 Case ConsoleKey.Q
                                     Exit Do
-                                Case ConsoleKey.A
-                                    Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_who")
-                                    With oCmdSQLSrvSp
-                                        .ActiveConnection = Me.ConnSQLSrv.Connection
-                                        Console.WriteLine("Execute")
-                                        Me.RS = .Execute()
-                                        If .LastErr <> "" Then
-                                            Console.WriteLine(.LastErr)
-                                        Else
-                                            Console.WriteLine("OK")
-                                            Console.WriteLine("Row2JSon=" & Me.RS.Row2JSon())
-                                            Me.RS.MoveNext()
-                                            Console.WriteLine("Row2JSon=" & Me.RS.Row2JSon())
-                                        End If
-                                        Me.RS.Close()
-                                        Me.RS = Nothing
-                                        Exit Do
-                                    End With
+                                Case Else
+                                    Dim oConsoleKey As ConsoleKey = Me.CurrConsoleKey
+                                    Console.WriteLine("Input SQL:")
+                                    Dim strSQL As String = Console.ReadLine
+                                    Dim oCmdSQLSrvText As CmdSQLSrvText = New CmdSQLSrvText(strSQL)
+                                    If oCmdSQLSrvText.LastErr <> "" Then
+                                        Console.WriteLine(oCmdSQLSrvText.LastErr)
+                                    Else
+                                        Select Case oConsoleKey
+                                            Case ConsoleKey.A
+                                                With oCmdSQLSrvText
+                                                    .ActiveConnection = Me.ConnSQLSrv.Connection
+                                                    Console.WriteLine("Execute")
+                                                    Me.RS = .Execute()
+                                                    If .LastErr <> "" Then
+                                                        Console.WriteLine(.LastErr)
+                                                    Else
+                                                        Console.WriteLine("OK")
+                                                        If Me.RS.EOF = True Then
+                                                            Console.WriteLine("EOF=" & Me.RS.EOF)
+                                                        End If
+                                                        Console.WriteLine("Row2JSon=" & Me.RS.Row2JSon())
+                                                    End If
+                                                    Me.RS.Close()
+                                                    Me.RS = Nothing
+                                                    Exit Do
+                                                End With
+                                            Case ConsoleKey.B
+                                                With oCmdSQLSrvText
+                                                    .ActiveConnection = Me.ConnSQLSrv.Connection
+                                                    Console.WriteLine("Execute")
+                                                    Me.RS = .Execute()
+                                                    If .LastErr <> "" Then
+                                                        Console.WriteLine(.LastErr)
+                                                    Else
+                                                        Console.WriteLine("OK")
+                                                        If Me.RS.EOF = True Then
+                                                            Console.WriteLine("EOF=" & Me.RS.EOF)
+                                                        End If
+                                                        Console.WriteLine("Recordset2JSon=" & Me.RS.Recordset2JSon)
+                                                    End If
+                                                    Me.RS.Close()
+                                                    Me.RS = Nothing
+                                                    Exit Do
+                                                End With
+                                            Case ConsoleKey.C
+                                                With oCmdSQLSrvText
+                                                    .ActiveConnection = Me.ConnSQLSrv.Connection
+                                                    Console.WriteLine("Execute")
+                                                    Me.RS = .Execute()
+                                                    If .LastErr <> "" Then
+                                                        Console.WriteLine(.LastErr)
+                                                    Else
+                                                        Console.WriteLine("OK")
+                                                        If Me.RS.EOF = True Then
+                                                            Console.WriteLine("EOF=" & Me.RS.EOF)
+                                                        End If
+                                                        Console.WriteLine("AllRecordset2JSon=" & Me.RS.AllRecordset2JSon)
+                                                    End If
+                                                    Me.RS.Close()
+                                                    Me.RS = Nothing
+                                                    Exit Do
+                                                End With
+                                            Case ConsoleKey.D
+                                                With oCmdSQLSrvText
+                                                    .ActiveConnection = Me.ConnSQLSrv.Connection
+                                                    Console.WriteLine("Execute")
+                                                    Me.RS = .Execute()
+                                                    If .LastErr <> "" Then
+                                                        Console.WriteLine(.LastErr)
+                                                    Else
+                                                        Console.WriteLine("OK")
+                                                        If Me.RS.EOF = True Then
+                                                            Console.WriteLine("EOF=" & Me.RS.EOF)
+                                                        End If
+                                                        Console.WriteLine("Recordset2SimpleJSonArray=" & Me.RS.Recordset2SimpleJSonArray)
+                                                    End If
+                                                    Me.RS.Close()
+                                                    Me.RS = Nothing
+                                                    Exit Do
+                                                End With
+                                        End Select
+                                    End If
                             End Select
                         Loop
                     End If
@@ -308,7 +375,7 @@ Public Class ConsoleDemo
                         With oCmdSQLSrvSp
                             .ActiveConnection = Me.ConnSQLSrv.Connection
                             .AddPara("@dbname", SqlDbType.NVarChar, 128)
-                            .ParaValue("@dbname") = "master"
+                            '.ParaValue("@dbname") = "master"
                             Console.WriteLine("ParaValue(@dbname)=" & .ParaValue("@dbname"))
                             Console.WriteLine("DebugStr=" & .DebugStr)
                             Console.WriteLine("Execute")
@@ -368,6 +435,24 @@ Public Class ConsoleDemo
                             End If
                             oRS.Close()
                             oRS = Nothing
+                        End With
+                    End If
+                Case ConsoleKey.L
+                    If Me.ConnSQLSrv Is Nothing Then
+                        Console.WriteLine("ConnSQLSrv Is Nothing")
+                    ElseIf Me.ConnSQLSrv.IsDBConnReady = False Then
+                        Console.WriteLine("Me.ConnSQLSrv.IsDBConnReady = False")
+                    Else
+                        Dim oSQLSrvTools As New SQLSrvTools(Me.ConnSQLSrv)
+                        With oSQLSrvTools
+                            Console.WriteLine(".IsDatabaseExists(master)=" & .IsDatabaseExists("master"))
+                            Console.WriteLine("Input TabName")
+                            Dim strTabName As String = Console.ReadLine
+                            Console.WriteLine(".IsDatabaseExists(" & strTabName & ")=" & .IsDBObjExists(SQLSrvTools.enmDBObjType.UserTable, strTabName))
+                            Console.WriteLine("Input DBUser")
+                            Dim strDBUser As String = Console.ReadLine
+                            Console.WriteLine(".IsDatabaseExists(" & strDBUser & ")=" & .IsDBUserExists(strDBUser))
+                            Console.WriteLine(".IsLoginUserExists(sa)" & .IsLoginUserExists("sa"))
                         End With
                     End If
             End Select
