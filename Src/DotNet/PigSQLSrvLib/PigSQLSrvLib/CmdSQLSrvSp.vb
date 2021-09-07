@@ -93,15 +93,6 @@ Public Class CmdSQLSrvSp
 		End Try
 	End Function
 
-	Public Function ExecuteNonQuery() As String
-		Try
-			Me.RecordsAffected = moSqlCommand.ExecuteNonQuery()
-			Return "OK"
-		Catch ex As Exception
-			Me.RecordsAffected = -1
-			Return Me.GetSubErrInf("ExecuteNonQuery", ex)
-		End Try
-	End Function
 
 
 	Public Property ParaValue(ParaName As String) As Object
@@ -232,5 +223,17 @@ Public Class CmdSQLSrvSp
 			mlngRecordsAffected = value
 		End Set
 	End Property
+
+	Public Function ExecuteNonQuery() As String
+		Const SUB_NAME As String = "ExecuteNonQuery"
+		Try
+			Me.RecordsAffected = moSqlCommand.ExecuteNonQuery
+			Return "OK"
+		Catch ex As Exception
+			Me.RecordsAffected = -1
+			Me.PrintDebugLog(SUB_NAME, "Catch ex As Exception", Me.DebugStr)
+			Return Me.GetSubErrInf(SUB_NAME, ex)
+		End Try
+	End Function
 
 End Class

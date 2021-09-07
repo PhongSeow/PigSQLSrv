@@ -19,9 +19,9 @@ Support automatic switch connection of mirror database for high availability.
 Support the transformation of query results into JSON.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.2.8</Version>
-    <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON</PackageTags>
-    <PackageReleaseNotes>Add RecordsAffected of CmdSQLSrvText and CmdSQLSrvSp.</PackageReleaseNotes>
+    <Version>1.3.3</Version>
+    <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON mirror database</PackageTags>
+    <PackageReleaseNotes>Add RecordsAffected  and ExecuteNonQuery of CmdSQLSrvText and CmdSQLSrvSp.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
