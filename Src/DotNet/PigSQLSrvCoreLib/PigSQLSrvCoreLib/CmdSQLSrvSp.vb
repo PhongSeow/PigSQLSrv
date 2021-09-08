@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.1
+'* Version: 1.2
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -17,6 +17,7 @@
 '* 1.0.10	28/7/2021	Modify DebugStr
 '* 1.0.11	1/8/2021	Modify DebugStr
 '* 1.1		29/8/2021   Add support for .net core
+'* 1.2		4/9/2021	Add RecordsAffected,ExecuteNonQuery, Modify Execute
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -26,7 +27,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class CmdSQLSrvSp
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.1.1"
+	Private Const CLS_VERSION As String = "1.2.2"
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
@@ -74,15 +75,6 @@ Public Class CmdSQLSrvSp
 		End Get
 	End Property
 
-	'''' <summary>
-	'''' Records Affected by the execution of the Stored Procedure
-	'''' </summary>
-	'Private mlngRecordsAffected As Long
-	'Public ReadOnly Property RecordsAffected() As Long
-	'	Get
-	'		Return mlngRecordsAffected
-	'	End Get
-	'End Property
 
 	Public Function Execute() As Recordset
 		Dim strStepName As String = ""
@@ -92,40 +84,16 @@ Public Class CmdSQLSrvSp
 			strStepName = "New Recordset"
 			Execute = New Recordset(oSqlDataReader)
 			If Execute.LastErr <> "" Then Throw New Exception(Execute.LastErr)
+			Me.RecordsAffected = -1
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("Execute", ex)
+			Me.SetSubErrInf("Execute", strStepName, ex)
+			Me.RecordsAffected = -1
 			Return Nothing
 		End Try
 	End Function
 
-	'Public Function Execute() As Recordset
-	'	Dim strStepName As String = ""
-	'	Try
-	'		Execute = New Recordset
-	'		'With Execute
-	'		'	strStepName = "ExecuteReader"
-	'		'	.SqlDataReader = moSqlCommand.ExecuteReader()
-	'		'	mlngRecordsAffected = .SqlDataReader.RecordsAffected
-	'		'	strStepName = "New Fields"
-	'		'	.Fields = New Fields
-	'		'	For i = 0 To .SqlDataReader.FieldCount - 1
-	'		'		strStepName = "Fields.Add（" & i & ")"
-	'		'		.Fields.Add(.SqlDataReader.GetName(i), .SqlDataReader.GetFieldType(i).Name, i)
-	'		'		If .Fields.LastErr <> "" Then Throw New Exception(.Fields.LastErr)
-	'		'	Next
-	'		'	If .SqlDataReader.HasRows = True Then
-	'		'		strStepName = "MoveNext"
-	'		'		.MoveNext()
-	'		'		If .LastErr <> "" Then Throw New Exception(.LastErr)
-	'		'	End If
-	'		'End With
-	'		Me.ClearErr()
-	'	Catch ex As Exception
-	'		Me.SetSubErrInf("Execute", ex)
-	'		Return Nothing
-	'	End Try
-	'End Function
+
 
 	Public Property ParaValue(ParaName As String) As Object
 		Get
@@ -241,6 +209,31 @@ Public Class CmdSQLSrvSp
 		Else
 			mSQLStr = "'" & SrcValue & "'"
 		End If
+	End Function
+
+	'''' <summary>
+	'''' Records Affected by the execution of the Stored Procedure
+	'''' </summary>
+	Private mlngRecordsAffected As Long
+	Public Property RecordsAffected As Long
+		Get
+			Return mlngRecordsAffected
+		End Get
+		Friend Set(value As Long)
+			mlngRecordsAffected = value
+		End Set
+	End Property
+
+	Public Function ExecuteNonQuery() As String
+		Const SUB_NAME As String = "ExecuteNonQuery"
+		Try
+			Me.RecordsAffected = moSqlCommand.ExecuteNonQuery
+			Return "OK"
+		Catch ex As Exception
+			Me.RecordsAffected = -1
+			Me.PrintDebugLog(SUB_NAME, "Catch ex As Exception", Me.DebugStr)
+			Return Me.GetSubErrInf(SUB_NAME, ex)
+		End Try
 	End Function
 
 End Class

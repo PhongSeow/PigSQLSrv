@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.1
+'* Version: 1.3
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -15,6 +15,8 @@
 '* 1.0.8	28/7/2021	Modify DebugStr
 '* 1.0.9	1/8/2021	Modify DebugStr
 '* 1.1		29/8/2021   Add support for .net core
+'* 1.2		4/9/2021	Add RecordsAffected
+'* 1.3		7/9/2021	Add ExecuteNonQuery
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -24,7 +26,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class CmdSQLSrvText
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.1.1"
+	Private Const CLS_VERSION As String = "1.3.2"
 	Public Property SQLText As String
 	Private moSqlCommand As SqlCommand
 
@@ -97,6 +99,17 @@ Public Class CmdSQLSrvText
 		End Try
 	End Sub
 
+	Public Function ExecuteNonQuery() As String
+		Const SUB_NAME As String = "ExecuteNonQuery"
+		Try
+			Me.RecordsAffected = moSqlCommand.ExecuteNonQuery
+			Return "OK"
+		Catch ex As Exception
+			Me.RecordsAffected = -1
+			Me.PrintDebugLog(SUB_NAME, "Catch ex As Exception", Me.DebugStr)
+			Return Me.GetSubErrInf(SUB_NAME, ex)
+		End Try
+	End Function
 
 	Public Function Execute() As Recordset
 		Dim strStepName As String = ""
@@ -106,22 +119,15 @@ Public Class CmdSQLSrvText
 			strStepName = "New Recordset"
 			Execute = New Recordset(oSqlDataReader)
 			If Execute.LastErr <> "" Then Throw New Exception(Execute.LastErr)
+			Me.RecordsAffected = moSqlCommand.ExecuteNonQuery
 			Me.ClearErr()
 		Catch ex As Exception
 			Me.SetSubErrInf("Execute", ex)
+			Me.RecordsAffected = -1
 			Return Nothing
 		End Try
 	End Function
 
-	'''' <summary>
-	'''' Records Affected by the execution of the Stored Procedure
-	'''' </summary>
-	'Private mlngRecordsAffected As Long
-	'Public ReadOnly Property RecordsAffected() As Long
-	'	Get
-	'		Return mlngRecordsAffected
-	'	End Get
-	'End Property
 
 	Public Property ParaValue(ParaName As String) As Object
 		Get
@@ -195,5 +201,18 @@ Public Class CmdSQLSrvText
 			mSQLStr = "'" & SrcValue & "'"
 		End If
 	End Function
+
+	'''' <summary>
+	'''' Records Affected by the execution of the Stored Procedure
+	'''' </summary>
+	Private mlngRecordsAffected As Long
+	Public Property RecordsAffected As Long
+		Get
+			Return mlngRecordsAffected
+		End Get
+		Friend Set(value As Long)
+			mlngRecordsAffected = value
+		End Set
+	End Property
 
 End Class
