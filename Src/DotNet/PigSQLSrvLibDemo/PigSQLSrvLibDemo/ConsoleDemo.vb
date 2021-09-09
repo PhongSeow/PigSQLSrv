@@ -1,5 +1,9 @@
 ﻿Imports System.Data
+#If NETFRAMEWORK Then
 Imports PigSQLSrvLib
+#Else
+Imports PigSQLSrvCoreLib
+#End If
 
 Public Class ConsoleDemo
     Public ConnSQLSrv As ConnSQLSrv
@@ -31,7 +35,7 @@ Public Class ConsoleDemo
             Console.WriteLine("Press E to Show Recordset Information")
             Console.WriteLine("Press F to Recordset.MoveNext")
             Console.WriteLine("Press G to Recordset.NextRecordset")
-            'Console.WriteLine("Press H to Test Command")
+            Console.WriteLine("Press H to Test ExecuteNonQuery")
             Console.WriteLine("Press I to Test JSon")
             Console.WriteLine("Press J to Execute SQL Server StoredProcedure")
             Console.WriteLine("Press K to Execute SQL Server SQL statement Text")
@@ -153,6 +157,7 @@ Public Class ConsoleDemo
                                 Console.WriteLine("OK")
                             End If
                         End If
+                        Console.WriteLine("RecordsAffected=" & .RecordsAffected)
                     End With
                 Case ConsoleKey.E
                     Console.WriteLine("#################")
@@ -222,45 +227,36 @@ Public Class ConsoleDemo
                             End If
                         End With
                     End If
-                'Case ConsoleKey.H
-                '    Console.WriteLine("#################")
-                '    Console.WriteLine("Test Command")
-                '    Console.WriteLine("#################")
-                '    Dim oCommand As New Command
-                '    With oCommand
-                '        Console.WriteLine("Set ActiveConnection")
-                '        .ActiveConnection = Me.ConnSQLSrv.Connection
-                '        Console.WriteLine("CommandText=""select * from master.dbo.sysdatabases where name = ?")
-                '        .CommandText = "select * from master.dbo.sysdatabases where name = ?"
-                '        Console.WriteLine("CreateParameter @dbname=""master""")
-                '        .Parameters.Append(.CreateParameter("@dbname", Field.DataTypeEnum.adVarChar, Parameter.ParameterDirectionEnum.adParamInput, 128, "master"))
-                '        .Parameters.Item("@dbname").Value = "WxWorkDB"
-                '        Console.WriteLine("Parameters.Item(@dbname).Value=" & .Parameters.Item("@dbname").Value)
-                '        If .LastErr <> "" Then
-                '            Console.WriteLine(.LastErr)
-                '        Else
-                '            Console.WriteLine("OK")
-                '        End If
-                '        Console.WriteLine("Execute")
-                '        Dim rsAny = .Execute()
-                '        If .LastErr <> "" Then
-                '            Console.WriteLine(.LastErr)
-                '        Else
-                '            Console.WriteLine("OK")
-                '            With rsAny
-                '                Console.WriteLine("Fields.Count=" & .Fields.Count)
-                '                If .Fields.Count > 0 Then
-                '                    Dim i As Integer
-                '                    For i = 0 To .Fields.Count - 1
-                '                        Console.WriteLine(".Fields.Item(" & i & ").Name=" & .Fields.Item(i).Name & "[" & .Fields.Item(i).Value.ToString & "]")
-                '                    Next
-                '                End If
-                '                Console.WriteLine("PageCount=" & .PageCount)
-                '                Console.WriteLine("EOF=" & .EOF)
-                '            End With
-                '        End If
-                '        .Parameters.Delete("@dbname")
-                '    End With
+                Case ConsoleKey.H
+                    Console.WriteLine("#################")
+                    Console.WriteLine("Test ExecuteNonQuery")
+                    Console.WriteLine("#################")
+                    Console.WriteLine("Input SQL:")
+                    Me.SQL = Console.ReadLine()
+                    Dim oCmdSQLSrvText As New CmdSQLSrvText(Me.SQL)
+                    With oCmdSQLSrvText
+                        .ActiveConnection = Me.ConnSQLSrv.Connection
+                        .ExecuteNonQuery()
+                        If .LastErr <> "" Then
+                            Console.WriteLine(.LastErr)
+                        Else
+                            Console.WriteLine("OK")
+                        End If
+                        Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                    End With
+                    Console.WriteLine("Input SpName:")
+                    Me.SQL = Console.ReadLine()
+                    Dim oCmdSQLSrvSp As New CmdSQLSrvSp(Me.SQL)
+                    With oCmdSQLSrvSp
+                        .ActiveConnection = Me.ConnSQLSrv.Connection
+                        .ExecuteNonQuery()
+                        If .LastErr <> "" Then
+                            Console.WriteLine(.LastErr)
+                        Else
+                            Console.WriteLine("OK")
+                        End If
+                        Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                    End With
                 Case ConsoleKey.I
                     If Me.ConnSQLSrv.IsDBConnReady = False Then
                         Console.WriteLine(" Connection is not ready please OpenOrKeepActive")
