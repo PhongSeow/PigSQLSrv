@@ -4,9 +4,11 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.0
+'* Version: 1.2
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
+'* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
+'* 1.2		20/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -16,7 +18,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class SQLSrvTools
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.0.5"
+    Private Const CLS_VERSION As String = "1.2.3"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum enmDBObjType
@@ -58,7 +60,7 @@ Public Class SQLSrvTools
                 Case Else
                     Throw New Exception("Cannot support")
             End Select
-            Dim strSQL As String = "select 1 from sysobjects where name=@ObjName and xtype=@DBObjType"
+            Dim strSQL As String = "select 1 from sysobjects WITH(NOLOCK) where name=@ObjName and xtype=@DBObjType"
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
@@ -67,6 +69,7 @@ Public Class SQLSrvTools
                 .AddPara("@DBObjType", SqlDbType.VarChar, 10)
                 .ParaValue("@ObjName") = ObjName
                 .ParaValue("@DBObjType") = strXType
+                strStepName = "Execute"
                 Dim rsAny = .Execute()
                 If .LastErr <> "" Then
                     Me.PrintDebugLog(SUB_NAME, strStepName, .DebugStr)
@@ -77,6 +80,9 @@ Public Class SQLSrvTools
                 Else
                     IsDBObjExists = True
                 End If
+                strStepName = "rsAny.Close"
+                rsAny.Close()
+                rsAny = Nothing
             End With
             oCmdSQLSrvText = Nothing
         Catch ex As Exception
@@ -90,13 +96,14 @@ Public Class SQLSrvTools
         Const SUB_NAME As String = "IsDatabaseExists"
         Dim strStepName As String = ""
         Try
-            Dim strSQL As String = "select 1 from master.dbo.sysdatabases where name=@DBName"
+            Dim strSQL As String = "select 1 from master.dbo.sysdatabases WITH(NOLOCK) where name=@DBName"
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
                 .ActiveConnection = Me.moConnSQLSrv.Connection
                 .AddPara("@DBName", SqlDbType.VarChar, 512)
                 .ParaValue("@DBName") = DBName
+                strStepName = "Execute"
                 Dim rsAny = .Execute()
                 If .LastErr <> "" Then
                     Me.PrintDebugLog(SUB_NAME, strStepName, .DebugStr)
@@ -107,6 +114,9 @@ Public Class SQLSrvTools
                 Else
                     Return True
                 End If
+                strStepName = "rsAny.Close"
+                rsAny.Close()
+                rsAny = Nothing
             End With
         Catch ex As Exception
             Me.SetSubErrInf(SUB_NAME, strStepName, ex)
@@ -118,13 +128,14 @@ Public Class SQLSrvTools
         Const SUB_NAME As String = "IsLoginUserExists"
         Dim strStepName As String = ""
         Try
-            Dim strSQL As String = "select 1 from master.dbo.syslogins where name=@LoginName"
+            Dim strSQL As String = "select 1 from master.dbo.syslogins WITH(NOLOCK) where name=@LoginName"
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
                 .ActiveConnection = Me.moConnSQLSrv.Connection
                 .AddPara("@LoginName", SqlDbType.VarChar, 512)
                 .ParaValue("@LoginName") = LoginName
+                strStepName = "Execute"
                 Dim rsAny = .Execute()
                 If .LastErr <> "" Then
                     Me.PrintDebugLog(SUB_NAME, strStepName, .DebugStr)
@@ -135,6 +146,9 @@ Public Class SQLSrvTools
                 Else
                     Return True
                 End If
+                strStepName = "rsAny.Close"
+                rsAny.Close()
+                rsAny = Nothing
             End With
         Catch ex As Exception
             Me.SetSubErrInf(SUB_NAME, strStepName, ex)
@@ -146,13 +160,14 @@ Public Class SQLSrvTools
         Const SUB_NAME As String = "IsDBUserExists"
         Dim strStepName As String = ""
         Try
-            Dim strSQL As String = "select 1 from sysusers where name=@DBUserName and islogin=1"
+            Dim strSQL As String = "select 1 from sysusers WITH(NOLOCK) where name=@DBUserName and islogin=1"
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
                 .ActiveConnection = Me.moConnSQLSrv.Connection
                 .AddPara("@DBUserName", SqlDbType.VarChar, 512)
                 .ParaValue("@DBUserName") = DBUserName
+                strStepName = "Execute"
                 Dim rsAny = .Execute()
                 If .LastErr <> "" Then
                     Me.PrintDebugLog(SUB_NAME, strStepName, .DebugStr)
@@ -163,6 +178,9 @@ Public Class SQLSrvTools
                 Else
                     Return True
                 End If
+                strStepName = "rsAny.Close"
+                rsAny.Close()
+                rsAny = Nothing
             End With
         Catch ex As Exception
             Me.SetSubErrInf(SUB_NAME, strStepName, ex)
