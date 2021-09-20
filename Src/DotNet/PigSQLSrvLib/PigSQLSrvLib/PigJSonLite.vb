@@ -3,7 +3,7 @@
 '* Author: Seow Phong
 '* Describe: Simple JSON class.
 '* Home Url: http://www.seowphong.com
-'* Version: 1.0.13
+'* Version: 1.1
 '* Create Time: 8/8/2019
 '* 1.0.2    10/8/2020   Code changed from VB6 to VB.NET
 '* 1.0.3    12/8/2020   Some Function debugging 
@@ -18,11 +18,12 @@
 '* 1.0.12   5/7/2021   Remove parsing function
 '* 1.0.13   6/7/2021   Modify mLng2Date,AddEle,mDate2Lng
 '* 1.0.14   27/8/2021   Modify mLng2Date for NETCOREAPP3_1_OR_GREATER
+'* 1.1      14/9/2021  Modify xpJSonEleType,mAddJSonStr, and add AddOneObjectEle
 '*******************************************************
 Imports System.Text
 Public Class PigJSonLite
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.0.14.1"
+    Private Const CLS_VERSION As String = "1.1.6"
 
     ''' <summary>The type of the JSON element</summary>
     Public Enum xpJSonEleType
@@ -36,6 +37,8 @@ Public Class PigJSonLite
         EleValue = 20
         ''' <summary>The value of the array element, which does not need to be escaped</summary>
         ArrayValue = 100
+        ''' <summary>The value of the object element, which does not need to be escaped</summary>
+        ObjectValue = 110
     End Enum
 
     ''' <summary>Separator or control symbol in JSON</summary>
@@ -392,7 +395,7 @@ Public Class PigJSonLite
                         sbJSonStr.Append(ColName)
                         sbJSonStr.Append(""":")
                     End If
-                Case xpJSonEleType.EleValue, xpJSonEleType.ArrayValue
+                Case xpJSonEleType.EleValue, xpJSonEleType.ArrayValue, xpJSonEleType.ObjectValue
                     Select Case JSonEleType
                         Case xpJSonEleType.EleValue
                             If IsChgCtlStr = True Then mSrc2CtlStr(ColValue)
@@ -400,7 +403,7 @@ Public Class PigJSonLite
                             sbJSonStr.Append("""")
                             sbJSonStr.Append(ColValue)
                             sbJSonStr.Append("""")
-                        Case xpJSonEleType.ArrayValue
+                        Case xpJSonEleType.ArrayValue, xpJSonEleType.ObjectValue
                             sbJSonStr.Append(ColValue)
                     End Select
                 Case Else
@@ -475,5 +478,28 @@ Public Class PigJSonLite
         Me.Reset()
     End Sub
 
+    ''' <summary>Add one object JSON element</summary>
+    ''' <param name="EleKey">The key of the element</param>
+    ''' <param name="ObjectEleValue">The object string value of the element</param>
+    ''' <param name="IsFirstEle">Is it the first element</param>
+    Public Overloads Sub AddOneObjectEle(EleKey As String, ObjectEleValue As String, Optional IsFirstEle As Boolean = False)
+        Dim strStepName As String = "", strRet As String = ""
+        Try
+            strStepName = "Check EleKey"
+            If EleKey = "" Then Err.Raise(-1, , "Need EleKey")
+            If IsFirstEle = True Then
+                strRet = mAddJSonStr(msbMain, xpJSonEleType.FristEle, EleKey, "")
+            Else
+                strRet = mAddJSonStr(msbMain, xpJSonEleType.NotFristEle, EleKey, "")
+            End If
+            If strRet <> "OK" Then Err.Raise(-1, , strRet)
+            strStepName = "Add EleValue"
+            strRet = mAddJSonStr(msbMain, xpJSonEleType.ObjectValue, "", ObjectEleValue)
+            If strRet <> "OK" Then Err.Raise(-1, , strRet)
+            Me.ClearErr()
+        Catch ex As Exception
+            Me.SetSubErrInf("AddObjectEleValue", strStepName, ex)
+        End Try
+    End Sub
 
 End Class

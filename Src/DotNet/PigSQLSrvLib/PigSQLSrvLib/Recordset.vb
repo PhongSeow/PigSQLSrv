@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.1
+'* Version: 1.2
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -13,6 +13,7 @@
 '* 1.0.6	21/7/2021	Add Move,NextRecordset,Init, modify MoveNext,Finalize
 '* 1.0.7	29/7/2021	Add Recordset2JSon,Recordset2SimpleJSonArray,MaxToJSonRows,mRecordset2JSon,AllRecordset2JSon
 '* 1.1		29/8/2021   Add support for .net core
+'* 1.2		29/8/2021   Modify Close
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -22,7 +23,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class Recordset
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.1.2"
+	Private Const CLS_VERSION As String = "1.2.2"
 	Private moSqlDataReader As SqlDataReader
 
 	Public Sub New()
@@ -72,7 +73,7 @@ Public Class Recordset
 
 	Public Sub Close()
 		Try
-			If moSqlDataReader Is Nothing Then
+			If Not moSqlDataReader Is Nothing Then
 				If moSqlDataReader.IsClosed = False Then
 					moSqlDataReader.Close()
 				End If
