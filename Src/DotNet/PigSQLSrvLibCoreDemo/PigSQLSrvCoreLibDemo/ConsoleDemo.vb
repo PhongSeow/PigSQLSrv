@@ -1,8 +1,10 @@
 ﻿Imports System.Data
 #If NETFRAMEWORK Then
 Imports PigSQLSrvLib
+Imports System.Data.SqlClient
 #Else
 Imports PigSQLSrvCoreLib
+Imports Microsoft.Data.SqlClient
 #End If
 
 Public Class ConsoleDemo
@@ -40,6 +42,7 @@ Public Class ConsoleDemo
             Console.WriteLine("Press J to Execute SQL Server StoredProcedure")
             Console.WriteLine("Press K to Execute SQL Server SQL statement Text")
             Console.WriteLine("Press L to SQLSrvTools")
+            Console.WriteLine("Press M to Test MultipleActiveResultSets")
             Console.WriteLine("*******************")
             Select Case Console.ReadKey().Key
                 Case ConsoleKey.Q
@@ -442,13 +445,65 @@ Public Class ConsoleDemo
                         Dim oSQLSrvTools As New SQLSrvTools(Me.ConnSQLSrv)
                         With oSQLSrvTools
                             Console.WriteLine(".IsDatabaseExists(master)=" & .IsDatabaseExists("master"))
+                            If .LastErr <> "" Then Console.WriteLine(.LastErr)
                             Console.WriteLine("Input TabName")
                             Dim strTabName As String = Console.ReadLine
                             Console.WriteLine(".IsDatabaseExists(" & strTabName & ")=" & .IsDBObjExists(SQLSrvTools.enmDBObjType.UserTable, strTabName))
+                            If .LastErr <> "" Then Console.WriteLine(.LastErr)
                             Console.WriteLine("Input DBUser")
                             Dim strDBUser As String = Console.ReadLine
                             Console.WriteLine(".IsDatabaseExists(" & strDBUser & ")=" & .IsDBUserExists(strDBUser))
-                            Console.WriteLine(".IsLoginUserExists(sa)" & .IsLoginUserExists("sa"))
+                            If .LastErr <> "" Then Console.WriteLine(.LastErr)
+                            Console.WriteLine(".IsLoginUserExists(sa)=" & .IsLoginUserExists("sa"))
+                            If .LastErr <> "" Then Console.WriteLine(.LastErr)
+                        End With
+                    End If
+                Case ConsoleKey.M
+                    If Me.ConnSQLSrv Is Nothing Then
+                        Console.WriteLine("ConnSQLSrv Is Nothing")
+                    Else
+                        Dim oCmdSQLSrvText1 As New CmdSQLSrvText("select * from sysusers")
+                        Dim oCmdSQLSrvText2 As New CmdSQLSrvText("select * from sysobjects")
+                        Dim oCmdSQLSrvText3 As New CmdSQLSrvText("create table t1(f1 int)")
+                        Dim rs1 As Recordset, rs2 As Recordset
+                        With oCmdSQLSrvText3
+                            .ActiveConnection = Me.ConnSQLSrv.Connection
+                            Console.WriteLine("oCmdSQLSrvText3.ExecuteNonQuery")
+                            .ExecuteNonQuery()
+                            If .LastErr <> "" Then
+                                Console.WriteLine(.LastErr)
+                            Else
+                                Console.WriteLine("OK")
+                                Console.WriteLine("RecordsAffected=" & .RecordsAffected)
+                            End If
+                        End With
+                        With oCmdSQLSrvText1
+                            .ActiveConnection = Me.ConnSQLSrv.Connection
+                            Console.WriteLine("oCmdSQLSrvText1.Execute")
+                            rs1 = .Execute
+                            If .LastErr <> "" Then
+                                Console.WriteLine(.LastErr)
+                            Else
+                                Console.WriteLine("OK")
+                                With rs1
+                                    Console.WriteLine("EOF=" & .EOF)
+                                    Console.WriteLine("Row2JSon=" & .Row2JSon)
+                                End With
+                            End If
+                        End With
+                        With oCmdSQLSrvText2
+                            .ActiveConnection = Me.ConnSQLSrv.Connection
+                            Console.WriteLine("oCmdSQLSrvText2.Execute")
+                            rs2 = .Execute
+                            If .LastErr <> "" Then
+                                Console.WriteLine(.LastErr)
+                            Else
+                                Console.WriteLine("OK")
+                                With rs2
+                                    Console.WriteLine("EOF=" & .EOF)
+                                    Console.WriteLine("Row2JSon=" & .Row2JSon)
+                                End With
+                            End If
                         End With
                     End If
             End Select
