@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.4
+'* Version: 1.5
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -18,8 +18,10 @@
 '* 1.2		4/9/2021	Add RecordsAffected
 '* 1.3		7/9/2021	Add ExecuteNonQuery
 '* 1.4		19/9/2021	Modify Execute
+'* 1.5		24/9/2021	Add KeyName,CacheQuery
 '**********************************
 Imports System.Data
+Imports PigKeyCacheLib
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
 #Else
@@ -27,7 +29,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class CmdSQLSrvText
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.4.1"
+	Private Const CLS_VERSION As String = "1.5.5"
 	Public Property SQLText As String
 	Private moSqlCommand As SqlCommand
 
@@ -91,15 +93,6 @@ Public Class CmdSQLSrvText
 	End Sub
 
 
-	Private Sub mGetRow()
-		Try
-
-			Me.ClearErr()
-		Catch ex As Exception
-			Me.SetSubErrInf("mGetRow", ex)
-		End Try
-	End Sub
-
 	Public Function ExecuteNonQuery() As String
 		Const SUB_NAME As String = "ExecuteNonQuery"
 		Try
@@ -148,6 +141,26 @@ Public Class CmdSQLSrvText
 			End Try
 		End Set
 	End Property
+
+	''' <summary>
+	''' 用于缓存的键值名称|The name of the key value used for caching
+	''' </summary>
+	''' <param name="HeadPartName">键值名称前缀部分|Prefix part of key name</param>
+	''' <returns></returns>
+	Public ReadOnly Property KeyName(Optional HeadPartName As String = "") As String
+		Get
+			Try
+				Dim oPigMD5 As New PigToolsLiteLib.PigMD5(Me.DebugStr, PigToolsLiteLib.PigMD5.enmTextType.UTF8)
+				KeyName = oPigMD5.PigMD5
+				If HeadPartName <> "" Then KeyName = HeadPartName & "." & KeyName
+				oPigMD5 = Nothing
+			Catch ex As Exception
+				Me.SetSubErrInf("KeyName", ex)
+				Return ""
+			End Try
+		End Get
+	End Property
+
 
 	''' <summary>
 	''' Returns debugging information for executing SQL statements
@@ -214,5 +227,53 @@ Public Class CmdSQLSrvText
 			mlngRecordsAffected = value
 		End Set
 	End Property
+
+	''' <summary>
+	''' The cache query returns Recordset.AllRecordset2JSon. Note that for SQL statements with updated data, using the cache query may have unpredictable results.
+	''' </summary>
+	''' <returns></returns>
+	Public Function CacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, Optional CacheTime As Integer = 60) As String
+		Dim strStepName As String = ""
+		Try
+			With ConnSQLSrv
+				If .PigKeyValueApp Is Nothing Then
+					strStepName = "InitPigKeyValue"
+					.InitPigKeyValue()
+					If .LastErr <> "" Then Throw New Exception(.LastErr)
+				End If
+				Dim strKeyName As String = Me.KeyName
+				strStepName = "GetPigKeyValue"
+				Dim oPigKeyValue As PigKeyValue = .PigKeyValueApp.GetPigKeyValue(strKeyName)
+				If .PigKeyValueApp.LastErr <> "" Then Throw New Exception(.PigKeyValueApp.LastErr)
+				Dim bolIsExec As Boolean = False
+				If oPigKeyValue Is Nothing Then
+					bolIsExec = True
+				ElseIf oPigKeyValue.IsExpired = True Then
+					bolIsExec = True
+				End If
+				If bolIsExec = True Then
+					Dim rsAny As Recordset
+					If Me.ActiveConnection Is Nothing Then
+						Me.ActiveConnection = ConnSQLSrv.Connection
+					End If
+					strStepName = "Execute"
+					rsAny = Me.Execute
+					If Me.LastErr <> "" Then Throw New Exception(.LastErr)
+					strStepName = "New PigKeyValue"
+					oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), rsAny.AllRecordset2JSon)
+					If oPigKeyValue.LastErr <> "" Then Throw New Exception(oPigKeyValue.LastErr)
+					strStepName = "PigKeyValueApp.SavePigKeyValue"
+					.PigKeyValueApp.SavePigKeyValue(oPigKeyValue)
+					If .PigKeyValueApp.LastErr <> "" Then Throw New Exception(.PigKeyValueApp.LastErr)
+				End If
+				CacheQuery = oPigKeyValue.StrValue
+				oPigKeyValue = Nothing
+			End With
+			Me.ClearErr()
+		Catch ex As Exception
+			Me.SetSubErrInf("CacheQuery", strStepName, ex)
+			Return ""
+		End Try
+	End Function
 
 End Class
