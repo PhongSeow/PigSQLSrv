@@ -17,11 +17,12 @@ Interface similar to ObjAdoDBLib.
 Friendly calling interface for Command of SQL Server StoredProcedure and SQL statement Text.
 Support automatic switch connection of mirror database for high availability.
 Support the transformation of query results into JSON.
+Support cache query.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.4.10</Version>
-    <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON mirror database</PackageTags>
-    <PackageReleaseNotes>Fix bugs of SQLSrvTools and Recordset.</PackageReleaseNotes>
+    <Version>1.5.5</Version>
+    <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON mirror database cache query</PackageTags>
+    <PackageReleaseNotes>Add cache query function.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,6 +34,10 @@ It can run on Windows platforms only.
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PigKeyCacheLib" Version="1.3.3" />
   </ItemGroup>
 
 </Project>
