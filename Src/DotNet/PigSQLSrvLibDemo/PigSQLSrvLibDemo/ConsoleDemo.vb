@@ -1,4 +1,15 @@
-﻿Imports System.Data
+﻿'**********************************
+'* Name: ConsoleDemo
+'* Author: Seow Phong
+'* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
+'* Describe: ConsoleDemo for PigSQLSrv
+'* Home Url: https://www.seowphong.com or https://en.seowphong.com
+'* Version: 1.2
+'* Create Time: 17/4/2021
+'* 1.2	23/9/2021	Add Test Cache Query
+'**********************************
+Imports System.Data
+
 #If NETFRAMEWORK Then
 Imports PigSQLSrvLib
 Imports System.Data.SqlClient
@@ -43,6 +54,7 @@ Public Class ConsoleDemo
             Console.WriteLine("Press K to Execute SQL Server SQL statement Text")
             Console.WriteLine("Press L to SQLSrvTools")
             Console.WriteLine("Press M to Test MultipleActiveResultSets")
+            Console.WriteLine("Press N to Test Cache Query")
             Console.WriteLine("*******************")
             Select Case Console.ReadKey().Key
                 Case ConsoleKey.Q
@@ -461,6 +473,8 @@ Public Class ConsoleDemo
                 Case ConsoleKey.M
                     If Me.ConnSQLSrv Is Nothing Then
                         Console.WriteLine("ConnSQLSrv Is Nothing")
+                    ElseIf Me.ConnSQLSrv.IsDBConnReady = False Then
+                        Console.WriteLine("ConnSQLSrv.IsDBConnReady=" & Me.ConnSQLSrv.IsDBConnReady)
                     Else
                         Dim oCmdSQLSrvText1 As New CmdSQLSrvText("select * from sysusers")
                         Dim oCmdSQLSrvText2 As New CmdSQLSrvText("select * from sysobjects")
@@ -505,6 +519,33 @@ Public Class ConsoleDemo
                                 End With
                             End If
                         End With
+                    End If
+                Case ConsoleKey.N
+                    Console.WriteLine("*******************")
+                    Console.WriteLine("Test Cache Query")
+                    Console.WriteLine("*******************")
+                    If Me.ConnSQLSrv Is Nothing Then
+                        Console.WriteLine("ConnSQLSrv Is Nothing")
+                    ElseIf Me.ConnSQLSrv.IsDBConnReady = False Then
+                        Console.WriteLine("ConnSQLSrv.IsDBConnReady=" & Me.ConnSQLSrv.IsDBConnReady)
+                    Else
+                        Dim oCmdSQLSrvText As New CmdSQLSrvText("select * from sysobjects where name=@name")
+                        oCmdSQLSrvText.ActiveConnection = Me.ConnSQLSrv.Connection
+                        oCmdSQLSrvText.AddPara("@name", SqlDbType.VarChar, 256)
+                        Console.WriteLine("Input db object name=sysobjects")
+                        Dim strName As String = Console.ReadLine()
+                        If strName = "" Then strName = "sysobjects"
+                        oCmdSQLSrvText.ParaValue("@name") = strName
+                        Dim strKeyName As String = oCmdSQLSrvText.KeyName
+                        Console.WriteLine("InitPigKeyValue=")
+                        Me.ConnSQLSrv.InitPigKeyValue()
+                        Console.WriteLine(Me.ConnSQLSrv.LastErr)
+                        Console.WriteLine("Before IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
+                        Console.WriteLine("CacheQuery=")
+                        Dim strJSon As String = oCmdSQLSrvText.CacheQuery(Me.ConnSQLSrv)
+                        Console.WriteLine(oCmdSQLSrvText.LastErr)
+                        Console.WriteLine("After IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
+                        Console.WriteLine("JSon=" & strJSon)
                     End If
             End Select
         Loop
