@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.2
+'* Version: 1.3
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -13,6 +13,7 @@
 '* 1.0.6	21/7/2021	Modify mSetConnSQLServer
 '* 1.1		29/8/2021   Add support for .net core
 '* 1.2		24/9/2021   Add PigKeyValueApp,InitPigKeyValue
+'* 1.3		5/10/2021   Modify InitPigKeyValue
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -24,7 +25,7 @@ Imports Microsoft.Data.SqlClient
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.2.2"
+	Private Const CLS_VERSION As String = "1.3.1"
 	Public Connection As SqlConnection
 	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
@@ -506,7 +507,7 @@ Public Class ConnSQLSrv
 
 	Public Sub InitPigKeyValue()
 		Try
-			Me.PigKeyValueApp = New PigKeyValueApp(Me.Connection.ConnectionString)
+			Me.PigKeyValueApp = New PigKeyValueApp(Me.Connection.ConnectionString, PigKeyValueApp.enmCacheLevel.ToShareMem)
 			If Me.PigKeyValueApp.LastErr <> "" Then Throw New Exception(Me.PigKeyValueApp.LastErr)
 			Me.ClearErr()
 		Catch ex As Exception
