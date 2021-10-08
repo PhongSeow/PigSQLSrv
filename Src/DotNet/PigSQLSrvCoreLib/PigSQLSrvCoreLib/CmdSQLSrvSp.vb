@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.3
+'* Version: 1.5
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -19,6 +19,8 @@
 '* 1.1		29/8/2021   Add support for .net core
 '* 1.2		4/9/2021	Add RecordsAffected,ExecuteNonQuery, Modify Execute
 '* 1.3		24/9/2021	Add KeyName,CacheQuery
+'* 1.4		6/10/2021	Modify CacheQuery
+'* 1.5		8/10/2021	Modify CacheQuery
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -29,7 +31,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class CmdSQLSrvSp
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.3.2"
+	Private Const CLS_VERSION As String = "1.5.1"
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
@@ -281,10 +283,14 @@ Public Class CmdSQLSrvSp
 					bolIsExec = True
 				End If
 				If bolIsExec = True Then
+					If Me.ActiveConnection Is Nothing Then
+						strStepName = "Set ActiveConnection"
+						Me.ActiveConnection = ConnSQLSrv.Connection
+					End If
 					Dim rsAny As Recordset
 					strStepName = "Execute"
 					rsAny = Me.Execute
-					If Me.LastErr <> "" Then Throw New Exception(.LastErr)
+					If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 					strStepName = "New PigKeyValue"
 					oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), rsAny.AllRecordset2JSon)
 					If oPigKeyValue.LastErr <> "" Then Throw New Exception(oPigKeyValue.LastErr)
