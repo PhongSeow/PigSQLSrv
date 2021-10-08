@@ -6,9 +6,9 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v3.1": {
-      "PigSQLSrvCoreLibDemo/1.5.2": {
+      "PigSQLSrvCoreLibDemo/1.5.3": {
         "dependencies": {
-          "PigSQLSrvCoreLib": "1.5.18"
+          "PigSQLSrvCoreLib": "1.5.28"
         },
         "runtime": {
           "PigSQLSrvCoreLibDemo.dll": {}
@@ -230,15 +230,15 @@
           }
         }
       },
-      "PigSQLSrvCoreLib/1.5.18": {
+      "PigSQLSrvCoreLib/1.5.28": {
         "dependencies": {
           "Microsoft.Data.SqlClient": "3.0.0",
           "PigKeyCacheLib": "1.3.3"
         },
         "runtime": {
           "lib/netcoreapp3.1/PigSQLSrvCoreLib.dll": {
-            "assemblyVersion": "1.5.18.0",
-            "fileVersion": "1.5.18.0"
+            "assemblyVersion": "1.5.28.0",
+            "fileVersion": "1.5.28.0"
           }
         }
       },
@@ -396,7 +396,7 @@
     }
   },
   "libraries": {
-    "PigSQLSrvCoreLibDemo/1.5.2": {
+    "PigSQLSrvCoreLibDemo/1.5.3": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -516,16 +516,16 @@
     "PigKeyCacheLib/1.3.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Ix9yZppeLBjoDz6CIOptfMCDlWAY70WQNseoZCuxz+HjTeZaT0Yg9CXaFTTQ13pjyv5ccZknu9ml0GyY9J57Uw==",
+      "sha512": "sha512-snENZAIfu5osTV/c/N43V4m4higTj48SCqbIoY9xUCCBtmxZjSok8lDSD8si09XZEybtWX+7pvyTN1WdeSzXFg==",
       "path": "pigkeycachelib/1.3.3",
       "hashPath": "pigkeycachelib.1.3.3.nupkg.sha512"
     },
-    "PigSQLSrvCoreLib/1.5.18": {
+    "PigSQLSrvCoreLib/1.5.28": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-41BJ9ttzTqY6hDYl/FaUjxuqT9sdcHJwlV5EE9Ic7k6Z6RoiDjK3ZJ0+7Eb+Tj7FODwStBINCwEm4znGjHlkGw==",
-      "path": "pigsqlsrvcorelib/1.5.18",
-      "hashPath": "pigsqlsrvcorelib.1.5.18.nupkg.sha512"
+      "sha512": "sha512-7uiHNgmZ5ZqTlFQAmbQ6olsUhdpl+lwaXDVN1ZeKbBZ6gGLRC8YO6S0Fd38hP9Qas4087ydzyD3+Ebq32SnLYA==",
+      "path": "pigsqlsrvcorelib/1.5.28",
+      "hashPath": "pigsqlsrvcorelib.1.5.28.nupkg.sha512"
     },
     "PigToolsLiteLib/1.2.1": {
       "type": "package",
