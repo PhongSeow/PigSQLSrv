@@ -4,10 +4,11 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.3
+'* Version: 1.4
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
+'* 1.4	8/10/2021	Add Test Cache Query -> CmdSQLSrvSp
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -528,25 +529,54 @@ Public Class ConsoleDemo
                     If Me.ConnSQLSrv Is Nothing Then
                         Console.WriteLine("ConnSQLSrv Is Nothing")
                     ElseIf Me.ConnSQLSrv.IsDBConnReady = False Then
-                        Console.WriteLine("ConnSQLSrv.IsDBConnReady=" & Me.ConnSQLSrv.IsDBConnReady)
+                        Console.WriteLine("IsDBConnReady = False")
                     Else
-                        Dim oCmdSQLSrvText As New CmdSQLSrvText("select * from sysobjects where name=@name")
-                        oCmdSQLSrvText.ActiveConnection = Me.ConnSQLSrv.Connection
-                        oCmdSQLSrvText.AddPara("@name", SqlDbType.VarChar, 256)
-                        Console.WriteLine("Input db object name=sysobjects")
-                        Dim strName As String = Console.ReadLine()
-                        If strName = "" Then strName = "sysobjects"
-                        oCmdSQLSrvText.ParaValue("@name") = strName
-                        Dim strKeyName As String = oCmdSQLSrvText.KeyName
-                        Console.WriteLine("InitPigKeyValue=")
-                        Me.ConnSQLSrv.InitPigKeyValue()
-                        Console.WriteLine(Me.ConnSQLSrv.LastErr)
-                        Console.WriteLine("Before IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
-                        Console.WriteLine("CacheQuery=")
-                        Dim strJSon As String = oCmdSQLSrvText.CacheQuery(Me.ConnSQLSrv)
-                        Console.WriteLine(oCmdSQLSrvText.LastErr)
-                        Console.WriteLine("After IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
-                        Console.WriteLine("JSon=" & strJSon)
+                        Console.WriteLine("ConnSQLSrv.IsDBConnReady=" & Me.ConnSQLSrv.IsDBConnReady)
+                        Console.WriteLine("Press Q to Up")
+                        Console.WriteLine("Press A to CmdSQLSrvText")
+                        Console.WriteLine("Press B to CmdSQLSrvSp")
+                        Do While True
+                            Me.CurrConsoleKey = Console.ReadKey().Key
+                            Select Case Me.CurrConsoleKey
+                                Case ConsoleKey.Q
+                                    Exit Do
+                                Case ConsoleKey.A
+                                    Dim oCmdSQLSrvText As New CmdSQLSrvText("select * from sysobjects where name=@name")
+                                    'oCmdSQLSrvText.ActiveConnection = Me.ConnSQLSrv.Connection
+                                    oCmdSQLSrvText.AddPara("@name", SqlDbType.VarChar, 256)
+                                    Console.WriteLine("Input db object name=sysobjects")
+                                    Dim strName As String = Console.ReadLine()
+                                    If strName = "" Then strName = "sysobjects"
+                                    oCmdSQLSrvText.ParaValue("@name") = strName
+                                    Dim strKeyName As String = oCmdSQLSrvText.KeyName
+                                    Console.WriteLine("InitPigKeyValue=")
+                                    Me.ConnSQLSrv.InitPigKeyValue()
+                                    Console.WriteLine(Me.ConnSQLSrv.LastErr)
+                                    Console.WriteLine("Before IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
+                                    Console.WriteLine("CacheQuery=")
+                                    Dim strJSon As String = oCmdSQLSrvText.CacheQuery(Me.ConnSQLSrv)
+                                    Console.WriteLine(oCmdSQLSrvText.LastErr)
+                                    Console.WriteLine("After IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
+                                    Console.WriteLine("JSon=" & strJSon)
+                                    Exit Do
+                                Case ConsoleKey.B
+                                    Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_helpdb")
+                                    'oCmdSQLSrvSp.ActiveConnection = Me.ConnSQLSrv.Connection
+                                    oCmdSQLSrvSp.AddPara("@dbname", SqlDbType.VarChar, 256)
+                                    oCmdSQLSrvSp.ParaValue("@dbname") = "master"
+                                    Dim strKeyName As String = oCmdSQLSrvSp.KeyName
+                                    Console.WriteLine("InitPigKeyValue=")
+                                    Me.ConnSQLSrv.InitPigKeyValue()
+                                    Console.WriteLine(Me.ConnSQLSrv.LastErr)
+                                    Console.WriteLine("Before IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
+                                    Console.WriteLine("CacheQuery=")
+                                    Dim strJSon As String = oCmdSQLSrvSp.CacheQuery(Me.ConnSQLSrv)
+                                    Console.WriteLine(oCmdSQLSrvSp.LastErr)
+                                    Console.WriteLine("After IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
+                                    Console.WriteLine("JSon=" & strJSon)
+                                    Exit Do
+                            End Select
+                        Loop
                     End If
             End Select
         Loop
