@@ -13,9 +13,9 @@
 	  <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
 	  <RepositoryType>GIT</RepositoryType>
 	  <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvLibDemo</RepositoryUrl>
-	  <Version>1.5.8</Version>
+	  <Version>1.6.1</Version>
 	  <PackageTags>PigSQLSrvLib SQLServer Windows Mirror automatic high availability JSON cache query</PackageTags>
-	  <PackageReleaseNotes>Optimization cache query function and reference the latest class library.</PackageReleaseNotes>
+	  <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigSQLSrvLib" Version="1.5.32" />
+    <PackageReference Include="PigSQLSrvLib" Version="1.6.3" />
   </ItemGroup>
 
 </Project>
