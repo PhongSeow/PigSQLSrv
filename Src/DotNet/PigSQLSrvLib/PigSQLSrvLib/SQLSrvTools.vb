@@ -4,11 +4,12 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.2
+'* Version: 1.3
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.2		20/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
+'* 1.3		5/12/2021   Add IsTabColExists
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -18,7 +19,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class SQLSrvTools
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.2.3"
+    Private Const CLS_VERSION As String = "1.3.3"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum enmDBObjType
@@ -182,6 +183,42 @@ Public Class SQLSrvTools
                 rsAny.Close()
                 rsAny = Nothing
             End With
+        Catch ex As Exception
+            Me.SetSubErrInf(SUB_NAME, strStepName, ex)
+            Return False
+        End Try
+    End Function
+
+    Public Function IsTabColExists(TableName As String, ColName As String) As Boolean
+        Const SUB_NAME As String = "IsTabColExists"
+        Dim strStepName As String = ""
+        Try
+            Dim strXType As String = ""
+            Dim strSQL As String = "SELECT TOP 1 1 FROM syscolumns c WITH(NOLOCK)  JOIN sysobjects o  WITH(NOLOCK) ON c.id=o.id AND o.xtype='U' WHERE o.name=@TableName AND c.name=@ColName"
+            strStepName = "New CmdSQLSrvText"
+            Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
+            With oCmdSQLSrvText
+                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .AddPara("@TableName", SqlDbType.VarChar, 512)
+                .AddPara("@ColName", SqlDbType.VarChar, 512)
+                .ParaValue("@TableName") = TableName
+                .ParaValue("@ColName") = ColName
+                strStepName = "Execute"
+                Dim rsAny = .Execute()
+                If .LastErr <> "" Then
+                    Me.PrintDebugLog(SUB_NAME, strStepName, .DebugStr)
+                    Throw New Exception(.LastErr)
+                End If
+                If rsAny.EOF = True Then
+                    IsTabColExists = False
+                Else
+                    IsTabColExists = True
+                End If
+                strStepName = "rsAny.Close"
+                rsAny.Close()
+                rsAny = Nothing
+            End With
+            oCmdSQLSrvText = Nothing
         Catch ex As Exception
             Me.SetSubErrInf(SUB_NAME, strStepName, ex)
             Return False
