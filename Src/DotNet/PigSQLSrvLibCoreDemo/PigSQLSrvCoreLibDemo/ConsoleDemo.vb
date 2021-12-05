@@ -10,6 +10,7 @@
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
 '* 1.4	8/10/2021	Add Test Cache Query -> CmdSQLSrvSp
 '* 1.5	9/10/2021	Add Test Cache Query -> Print 
+'* 1.6	5/12/2021	Add Test Cache Query -> Print 
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -37,6 +38,8 @@ Public Class ConsoleDemo
     Public CurrConsoleKey As ConsoleKey
     Public InpStr As String
     Public AccessFilePath As String
+    Public TableName As String
+    Public ColName As String
 
     Public Sub Main()
         Do While True
@@ -470,6 +473,12 @@ Public Class ConsoleDemo
                             Console.WriteLine(".IsDatabaseExists(" & strDBUser & ")=" & .IsDBUserExists(strDBUser))
                             If .LastErr <> "" Then Console.WriteLine(.LastErr)
                             Console.WriteLine(".IsLoginUserExists(sa)=" & .IsLoginUserExists("sa"))
+                            If .LastErr <> "" Then Console.WriteLine(.LastErr)
+                            Console.WriteLine("Input TableName=" & Me.TableName)
+                            Me.TableName = Console.ReadLine()
+                            Console.WriteLine("Input ColName=" & Me.ColName)
+                            Me.ColName = Console.ReadLine()
+                            Console.WriteLine(".IsTabColExists(" & Me.TableName & "，" & Me.ColName & ")=" & .IsTabColExists(Me.TableName, Me.ColName))
                             If .LastErr <> "" Then Console.WriteLine(.LastErr)
                         End With
                     End If
