@@ -19,7 +19,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class SQLSrvTools
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.3.2"
+    Private Const CLS_VERSION As String = "1.3.3"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum enmDBObjType
@@ -194,7 +194,7 @@ Public Class SQLSrvTools
         Dim strStepName As String = ""
         Try
             Dim strXType As String = ""
-            Dim strSQL As String = "SELECT TOP 1 1 FROM syscolumns c WITH(NOLOCK)  JOIN sysobjects o  WITH(NOLOCK) ON c.id=o.id AND o.xtype='U' WHERE c.name=@TableName AND c.name=@ColName"
+            Dim strSQL As String = "SELECT TOP 1 1 FROM syscolumns c WITH(NOLOCK)  JOIN sysobjects o  WITH(NOLOCK) ON c.id=o.id AND o.xtype='U' WHERE o.name=@TableName AND c.name=@ColName"
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
