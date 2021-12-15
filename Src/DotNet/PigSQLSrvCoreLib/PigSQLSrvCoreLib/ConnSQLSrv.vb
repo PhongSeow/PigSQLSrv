@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.5
+'* Version: 1.7
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -16,6 +16,7 @@
 '* 1.3		5/10/2021   Modify InitPigKeyValue
 '* 1.5		5/12/2021   Modify OpenOrKeepActive
 '* 1.6		6/12/2021   Add IsEncrypt,OpenOrKeepActive
+'* 1.7		15/12/2021	Rewrite the error handling code with LOG.
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -24,10 +25,11 @@ Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
 #End If
+Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.5.3"
+	Private Const CLS_VERSION As String = "1.7.16"
 	Public Connection As SqlConnection
 	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
@@ -300,18 +302,18 @@ Public Class ConnSQLSrv
 	''' Open or keep the database connection available
 	''' </summary>
 	Public Sub OpenOrKeepActive()
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("OpenOrKeepActive")
 		Try
 			Select Case Me.RunMode
 				Case RunModeEnum.StandAlone
 					If Me.Connection Is Nothing Then
-						strStepName = "New SqlConnection"
+						LOG.StepName = "New SqlConnection"
 						Me.Connection = New SqlConnection
 					End If
 					With Me.Connection
 						Select Case .State
 							Case ConnectionState.Closed
-								strStepName = "SetConnSQLServer"
+								LOG.StepName = "SetConnSQLServer"
 								If Me.IsTrustedConnection = True Then
 									Me.mSetConnSQLServer(Me.PrincipalSQLServer, Me.CurrDatabase)
 								Else
@@ -324,7 +326,7 @@ Public Class ConnSQLSrv
 								Else
 									.ConnectionString &= "Encrypt=False;"
 								End If
-								strStepName = "Open"
+								LOG.StepName = "Open"
 								Me.mConnOpen()
 								If Me.LastErr <> "" Then
 									Me.ConnStatus = ConnStatusEnum.Offline
@@ -365,10 +367,10 @@ Public Class ConnSQLSrv
 							End If
 							Me.Connection = Nothing
 						End If
-						strStepName = "New SqlConnection"
+						LOG.StepName = "New SqlConnection"
 						Me.Connection = New SqlConnection
 						With Me.Connection
-							strStepName = "SetConnSQLServer first time"
+							LOG.StepName = "SetConnSQLServer first time"
 							If Me.IsTrustedConnection = True Then
 								Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.CurrDatabase)
 							Else
@@ -376,7 +378,7 @@ Public Class ConnSQLSrv
 							End If
 							If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 							.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
-							strStepName = "Open first time"
+							LOG.StepName = "Open first time"
 							Me.mConnOpen()
 							If Me.LastErr = "" Then
 								If Me.mIsDBOnline = True Then
@@ -397,7 +399,7 @@ Public Class ConnSQLSrv
 								Me.mLastConnSQLServer = Me.MirrorSQLServer
 							End If
 							With Me.Connection
-								strStepName = "SetConnSQLServer second time"
+								LOG.StepName = "SetConnSQLServer second time"
 								If Me.IsTrustedConnection = True Then
 									Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.CurrDatabase)
 								Else
@@ -405,10 +407,10 @@ Public Class ConnSQLSrv
 								End If
 								If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 								.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
-								strStepName = "Open second time"
+								LOG.StepName = "Open second time"
 								Me.mConnOpen()
 								If Me.LastErr = "" Then
-									strStepName = "mIsDBOnline second time"
+									LOG.StepName = "mIsDBOnline second time"
 									If Me.mIsDBOnline = True Then
 										If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
 											Me.ConnStatus = ConnStatusEnum.PrincipalOnline
@@ -432,7 +434,7 @@ Public Class ConnSQLSrv
 			End Select
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("OpenOrKeepActive", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 			If Me.ConnStatus <> ConnStatusEnum.Offline Then Me.ConnStatus = ConnStatusEnum.Unknow
 		End Try
 	End Sub
@@ -488,24 +490,24 @@ Public Class ConnSQLSrv
 	End Sub
 
 	Private Function mIsDBOnline() As Boolean
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("mIsDBOnline")
 		Try
 			If Me.Connection Is Nothing Then Throw New Exception("No connection established")
 			If Me.Connection.State <> ConnectionState.Open Then Throw New Exception("The current connection status is " & Me.Connection.State.ToString)
 			If mcstChkDBStatus Is Nothing Then
-				strStepName = "New CmdSQLSrvText"
+				LOG.StepName = "New CmdSQLSrvText"
 				mcstChkDBStatus = New CmdSQLSrvText("SELECT Convert(varchar(50),DatabasePropertyEx(@DBName,'status')) DBStatus")
 				If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
-				strStepName = "AddPara(@DBName)"
+				LOG.StepName = "AddPara(@DBName)"
 				mcstChkDBStatus.AddPara("@DBName", SqlDbType.NVarChar, 512)
 				If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
-				strStepName = "Set ActiveConnection"
+				LOG.StepName = "Set ActiveConnection"
 				mcstChkDBStatus.ActiveConnection = Me.Connection
 				If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
 			End If
 			Dim rsAny As Recordset
 			mcstChkDBStatus.ParaValue("@DBName") = Me.CurrDatabase
-			strStepName = "Execute"
+			LOG.StepName = "Execute"
 			rsAny = mcstChkDBStatus.Execute
 			If mcstChkDBStatus.LastErr <> "" Then Throw New Exception(mcstChkDBStatus.LastErr)
 			Dim strDBStaus As String = UCase(rsAny.Fields.Item("DBStatus").StrValue)
@@ -517,7 +519,7 @@ Public Class ConnSQLSrv
 				Return False
 			End If
 		Catch ex As Exception
-			Me.SetSubErrInf("mIsDBOnline", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 			Return False
 		End Try
 	End Function

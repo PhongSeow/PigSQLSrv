@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.2
+'* Version: 1.3
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -14,6 +14,7 @@
 '* 1.0.7	29/7/2021	Add Recordset2JSon,Recordset2SimpleJSonArray,MaxToJSonRows,mRecordset2JSon,AllRecordset2JSon
 '* 1.1		29/8/2021   Add support for .net core
 '* 1.2		29/8/2021   Modify Close
+'* 1.3		15/12/2021	Rewrite the error handling code with LOG.
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -21,9 +22,10 @@ Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
 #End If
+Imports PigToolsLiteLib
 Public Class Recordset
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.2.2"
+	Private Const CLS_VERSION As String = "1.3.6"
 	Private moSqlDataReader As SqlDataReader
 
 	Public Sub New()
@@ -98,25 +100,25 @@ Public Class Recordset
 	End Sub
 
 	Public Sub MoveNext()
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("MoveNext")
 		Try
-			strStepName = "Read"
+			LOG.StepName = "Read"
 			If moSqlDataReader.Read() = True Then
 				For i = 0 To moSqlDataReader.FieldCount - 1
-					strStepName = "GetValue(" & i.ToString & ")"
+					LOG.StepName = "GetValue(" & i.ToString & ")"
 					Me.Fields.Item(i).Value = moSqlDataReader.GetValue(i)
 				Next
 				mbolEOF = False
 			Else
 				For i = 0 To moSqlDataReader.FieldCount - 1
-					strStepName = "GetValue(" & i.ToString & ")"
+					LOG.StepName = "GetValue(" & i.ToString & ")"
 					Me.Fields.Item(i).Value = Nothing
 				Next
 				mbolEOF = True
 			End If
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("MoveNext", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 			mbolEOF = True
 		End Try
 	End Sub
@@ -168,10 +170,10 @@ Public Class Recordset
 	End Function
 
 	Private Function mRecordset2JSon(Optional TopRows As Long = -1) As String
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("mRecordset2JSon")
 		Try
 			Dim intRowNo As Integer = 0
-			strStepName = "New PigJSon"
+			LOG.StepName = "New PigJSon"
 			Dim pjMain As New PigJSonLite
 			If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
 			pjMain.AddArrayEleBegin("ROW", True)
@@ -180,7 +182,7 @@ Public Class Recordset
 				If TopRows > 0 Then
 					If intRowNo >= TopRows Then Exit Do
 				End If
-				strStepName = "Row2JSon"
+				LOG.StepName = "Row2JSon"
 				Dim strRowJSon As String = Me.Row2JSon
 				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 				If intRowNo = 0 Then
@@ -189,7 +191,7 @@ Public Class Recordset
 					pjMain.AddArrayEleValue(strRowJSon)
 				End If
 				intRowNo += 1
-				strStepName = "MoveNext"
+				LOG.StepName = "MoveNext"
 				Me.MoveNext()
 				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 			Loop
@@ -200,7 +202,7 @@ Public Class Recordset
 			mRecordset2JSon = pjMain.MainJSonStr
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("mRecordset2JSon", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 			Return ""
 		End Try
 	End Function
@@ -209,15 +211,15 @@ Public Class Recordset
 	''' Convert recordset to simple JSON array, The returned result cannot be used as a standalone JSON.|当前结果集转换成简单的JSON数组，返回结果不能作为独立的 JSon 使用。
 	''' </summary>
 	Public Function Recordset2SimpleJSonArray() As String
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("Recordset2SimpleJSonArray")
 		Try
 			Dim intRowNo As Integer = 0
-			strStepName = "New PigJSonLite"
+			LOG.StepName = "New PigJSonLite"
 			Dim pjMain As New PigJSonLite
 			If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
 			Do While Not Me.EOF
 				If intRowNo >= Me.MaxToJSonRows Then Exit Do
-				strStepName = "Row2JSon"
+				LOG.StepName = "Row2JSon"
 				Dim strRowJSon As String = Me.Row2JSon
 				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 				If intRowNo = 0 Then
@@ -226,7 +228,7 @@ Public Class Recordset
 					pjMain.AddArrayEleValue(strRowJSon)
 				End If
 				intRowNo += 1
-				strStepName = "MoveNext"
+				LOG.StepName = "MoveNext"
 				Me.MoveNext()
 				If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 			Loop
@@ -244,30 +246,30 @@ Public Class Recordset
 	''' </summary>
 	''' <returns></returns>
 	Public Function AllRecordset2JSon() As String
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("AllRecordset2JSon")
 		Try
 			Dim intRSNo As Integer = 0
-			strStepName = "New PigJSonLite"
+			LOG.StepName = "New PigJSonLite"
 			Dim pjMain As New PigJSonLite
 			If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
 			pjMain.AddArrayEleBegin("RS", True)
 			Dim strRsJSon As String
-			strStepName = "Me.Recordset2JSon"
+			LOG.StepName = "Me.Recordset2JSon"
 			strRsJSon = Me.Recordset2JSon(Me.MaxToJSonRows)
 			If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 			pjMain.AddArrayEleValue(strRsJSon, True)
 			intRSNo = 1
-			strStepName = "Me.NextRecordset"
+			LOG.StepName = "Me.NextRecordset"
 			Dim rsParent As Recordset = Nothing
 			Dim rsSub As Recordset = Me.NextRecordset
 			Do While Not rsSub Is Nothing
-				strStepName = "rs.Recordset2JSon"
+				LOG.StepName = "rs.Recordset2JSon"
 				strRsJSon = rsSub.Recordset2JSon(Me.MaxToJSonRows)
 				If rsSub.LastErr <> "" Then Throw New Exception(rsSub.LastErr)
 				pjMain.AddArrayEleValue(strRsJSon)
 				intRSNo += 1
 				rsParent = rsSub
-				strStepName = "rs.NextRecordset"
+				LOG.StepName = "rs.NextRecordset"
 				rsSub = Nothing
 				rsSub = rsParent.NextRecordset
 				If rsParent.LastErr <> "" Then Exit Do
@@ -305,27 +307,27 @@ Public Class Recordset
 	End Sub
 
 	Private Sub mNew(SqlDataReader As SqlDataReader)
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("mNew")
 		Try
 			With Me
-				strStepName = "ExecuteReader"
+				LOG.StepName = "ExecuteReader"
 				moSqlDataReader = SqlDataReader
 				mlngRecordsAffected = moSqlDataReader.RecordsAffected
-				strStepName = "New Fields"
+				LOG.StepName = "New Fields"
 				.Fields = New Fields
 				For i = 0 To moSqlDataReader.FieldCount - 1
-					strStepName = "Fields.Add（" & i & ")"
+					LOG.StepName = "Fields.Add（" & i & ")"
 					.Fields.Add(moSqlDataReader.GetName(i), moSqlDataReader.GetDataTypeName(i), moSqlDataReader.GetFieldType(i).Name, i)
 					If .Fields.LastErr <> "" Then Throw New Exception(.Fields.LastErr)
 				Next
 				If moSqlDataReader.HasRows = True Then
-					strStepName = "MoveNext"
+					LOG.StepName = "MoveNext"
 					.MoveNext()
 					If .LastErr <> "" Then Throw New Exception(.LastErr)
 				End If
 			End With
 		Catch ex As Exception
-			Me.SetSubErrInf("mNew", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 		End Try
 	End Sub
 	Public Function NextRecordset() As Recordset
