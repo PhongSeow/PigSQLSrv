@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.3
+'* Version: 1.5
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -14,6 +14,8 @@
 '* 1.1		29/8/2021   Add support for .net core
 '* 1.2		24/9/2021   Add PigKeyValueApp,InitPigKeyValue
 '* 1.3		5/10/2021   Modify InitPigKeyValue
+'* 1.5		5/12/2021   Modify OpenOrKeepActive
+'* 1.6		6/12/2021   Add IsEncrypt,OpenOrKeepActive
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -25,7 +27,7 @@ Imports Microsoft.Data.SqlClient
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.3.1"
+	Private Const CLS_VERSION As String = "1.5.3"
 	Public Connection As SqlConnection
 	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
@@ -317,6 +319,11 @@ Public Class ConnSQLSrv
 								End If
 								If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 								.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
+								If Me.IsEncrypt = True Then
+									.ConnectionString &= "Encrypt=True;"
+								Else
+									.ConnectionString &= "Encrypt=False;"
+								End If
 								strStepName = "Open"
 								Me.mConnOpen()
 								If Me.LastErr <> "" Then
@@ -429,6 +436,16 @@ Public Class ConnSQLSrv
 			If Me.ConnStatus <> ConnStatusEnum.Offline Then Me.ConnStatus = ConnStatusEnum.Unknow
 		End Try
 	End Sub
+
+	Private mbolIsEncrypt As Boolean = False
+	Public Property IsEncrypt() As Boolean
+		Get
+			Return mbolIsEncrypt
+		End Get
+		Set(value As Boolean)
+			mbolIsEncrypt = value
+		End Set
+	End Property
 
 	Public ReadOnly Property IsDBConnReady() As Boolean
 		Get

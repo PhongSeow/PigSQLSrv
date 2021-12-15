@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.5
+'* Version: 1.6
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -21,6 +21,7 @@
 '* 1.3		24/9/2021	Add KeyName,CacheQuery
 '* 1.4		6/10/2021	Modify CacheQuery
 '* 1.5		8/10/2021	Modify CacheQuery
+'* 1.6		15/12/2021	Modify CacheQuery, and Rewrite the error handling code with LOG.
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -29,30 +30,32 @@ Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
 #End If
+Imports PigToolsLiteLib
+
 Public Class CmdSQLSrvSp
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.5.1"
+	Private Const CLS_VERSION As String = "1.6.8"
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
 		MyBase.New(CLS_VERSION)
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("New")
 		Try
 			mstrSpName = SpName
 			moSqlCommand = New SqlCommand
 			With moSqlCommand
 				.CommandType = CommandType.StoredProcedure
 				.CommandText = SpName
-				strStepName = "New SqlParameter(RETURN_VALUE)"
+				LOG.StepName = "New SqlParameter(RETURN_VALUE)"
 				Dim oSqlParameter As New SqlParameter("RETURN_VALUE", SqlDbType.Int)
 				oSqlParameter.Direction = ParameterDirection.ReturnValue
-				strStepName = "Add(RETURN_VALUE)"
+				LOG.StepName = "Add(RETURN_VALUE)"
 				.Parameters.Add(oSqlParameter)
 				oSqlParameter = Nothing
 			End With
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("New", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 		End Try
 	End Sub
 
@@ -81,17 +84,17 @@ Public Class CmdSQLSrvSp
 
 
 	Public Function Execute() As Recordset
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("Execute")
 		Try
-			strStepName = "ExecuteReader"
+			LOG.StepName = "ExecuteReader"
 			Dim oSqlDataReader As SqlDataReader = moSqlCommand.ExecuteReader()
-			strStepName = "New Recordset"
+			LOG.StepName = "New Recordset"
 			Execute = New Recordset(oSqlDataReader)
 			If Execute.LastErr <> "" Then Throw New Exception(Execute.LastErr)
 			Me.RecordsAffected = -1
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("Execute", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 			Me.RecordsAffected = -1
 			Return Nothing
 		End Try
@@ -139,26 +142,26 @@ Public Class CmdSQLSrvSp
 	End Property
 
 	Public Sub AddPara(ParaName As String, DataType As SqlDbType)
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("AddPara")
 		Try
 			If moSqlCommand.Parameters.IndexOf(ParaName) >= 0 Then Throw New Exception("ParaName already exists.")
-			strStepName = "Parameters.Add"
+			LOG.StepName = "Parameters.Add"
 			moSqlCommand.Parameters.Add(ParaName, DataType)
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("AddPara", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 		End Try
 	End Sub
 
 	Public Sub AddPara(ParaName As String, DataType As SqlDbType, Size As Long)
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("AddPara")
 		Try
 			If moSqlCommand.Parameters.IndexOf(ParaName) >= 0 Then Throw New Exception("ParaName already exists.")
-			strStepName = "Parameters.Add"
+			LOG.StepName = "Parameters.Add"
 			moSqlCommand.Parameters.Add(ParaName, DataType, Size)
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("AddPara", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 		End Try
 	End Sub
 
@@ -167,16 +170,16 @@ Public Class CmdSQLSrvSp
 	''' </summary>
 	Public ReadOnly Property DebugStr() As String
 		Get
-			Dim strStepName As String = ""
+			Dim LOG As New PigStepLog("DebugStr")
 			Try
-				strStepName = "SpName"
+				LOG.StepName = "SpName"
 				Dim strDebugStr As String = "EXEC " & Me.SpName & " "
 				Dim bolIsBegin As Boolean = False
 				If Not moSqlCommand.Parameters Is Nothing Then
 					For Each oSqlParameter As SqlParameter In moSqlCommand.Parameters
 						With oSqlParameter
 							If .Direction <> ParameterDirection.ReturnValue And Not .Value Is Nothing Then
-								strStepName = "Parameters(" & .ParameterName & ")"
+								LOG.StepName = "Parameters(" & .ParameterName & ")"
 								If bolIsBegin = True Then
 									strDebugStr &= " , "
 								Else
@@ -201,7 +204,7 @@ Public Class CmdSQLSrvSp
 				End If
 				Return strDebugStr
 			Catch ex As Exception
-				Me.SetSubErrInf("DebugStr", strStepName, ex)
+				Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 				Return ""
 			End Try
 		End Get
@@ -264,16 +267,16 @@ Public Class CmdSQLSrvSp
 	''' </summary>
 	''' <returns></returns>
 	Public Function CacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, Optional CacheTime As Integer = 60) As String
-		Dim strStepName As String = ""
+		Dim LOG As New PigStepLog("CacheQuery")
 		Try
 			With ConnSQLSrv
 				If .PigKeyValueApp Is Nothing Then
-					strStepName = "InitPigKeyValue"
+					LOG.StepName = "InitPigKeyValue"
 					.InitPigKeyValue()
 					If .LastErr <> "" Then Throw New Exception(.LastErr)
 				End If
 				Dim strKeyName As String = Me.KeyName
-				strStepName = "GetPigKeyValue"
+				LOG.StepName = "GetPigKeyValue"
 				Dim oPigKeyValue As PigKeyValue = .PigKeyValueApp.GetPigKeyValue(strKeyName)
 				If .PigKeyValueApp.LastErr <> "" Then Throw New Exception(.PigKeyValueApp.LastErr)
 				Dim bolIsExec As Boolean = False
@@ -284,17 +287,17 @@ Public Class CmdSQLSrvSp
 				End If
 				If bolIsExec = True Then
 					If Me.ActiveConnection Is Nothing Then
-						strStepName = "Set ActiveConnection"
+						LOG.StepName = "Set ActiveConnection"
 						Me.ActiveConnection = ConnSQLSrv.Connection
 					End If
 					Dim rsAny As Recordset
-					strStepName = "Execute"
+					LOG.StepName = "Execute"
 					rsAny = Me.Execute
 					If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
-					strStepName = "New PigKeyValue"
-					oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), rsAny.AllRecordset2JSon)
+					LOG.StepName = "New PigKeyValue"
+					oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), rsAny.AllRecordset2JSon, PigToolsLiteLib.PigText.enmTextType.UTF8, PigKeyValue.EnmSaveType.SaveSpace)
 					If oPigKeyValue.LastErr <> "" Then Throw New Exception(oPigKeyValue.LastErr)
-					strStepName = "PigKeyValueApp.SavePigKeyValue"
+					LOG.StepName = "PigKeyValueApp.SavePigKeyValue"
 					.PigKeyValueApp.SavePigKeyValue(oPigKeyValue)
 					If .PigKeyValueApp.LastErr <> "" Then Throw New Exception(.PigKeyValueApp.LastErr)
 				End If
@@ -303,7 +306,7 @@ Public Class CmdSQLSrvSp
 			End With
 			Me.ClearErr()
 		Catch ex As Exception
-			Me.SetSubErrInf("CacheQuery", strStepName, ex)
+			Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
 			Return ""
 		End Try
 	End Function
