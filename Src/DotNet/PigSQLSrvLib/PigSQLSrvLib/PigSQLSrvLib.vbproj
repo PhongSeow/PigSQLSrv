@@ -20,9 +20,9 @@ Support the transformation of query results into JSON.
 Support cache query.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.7.28</Version>
+    <Version>1.7.38</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON mirror database cache query</PackageTags>
-    <PackageReleaseNotes>Reference the latest PigCacheLib class library to optimize the CacheQuery.</PackageReleaseNotes>
+    <PackageReleaseNotes>Reference the latest PigCacheLib class library.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,7 +37,7 @@ It can run on Windows platforms only.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigKeyCacheLib" Version="3.0.168" />
+    <PackageReference Include="PigKeyCacheLib" Version="3.1.12" />
   </ItemGroup>
 
 </Project>

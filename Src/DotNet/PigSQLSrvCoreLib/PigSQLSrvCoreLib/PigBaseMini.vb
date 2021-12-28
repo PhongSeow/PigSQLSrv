@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Basic lightweight Edition
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.3.2
+'* Version: 1.5.1
 '* Create Time: 31/8/2019
 '*1.0.2  1/10/2019   Add mGetSubErrInf 
 '*1.0.3  4/11/2019   Add LastErr
@@ -35,6 +35,7 @@
 '*1.1.1 31/8/2021    Modify MyClassName
 '*1.2 7/12/2021      Add MyPID, modify mGetSubErrInf,MyClassName,mGetSubErrInf, remove mstrKeyInf
 '*1.3 8/12/2021      Add StruSubLog
+'*1.5 17/12/2021     Modify StruSubLog
 '************************************
 Imports System.Runtime.InteropServices
 Public Class PigBaseMini
@@ -45,7 +46,7 @@ Public Class PigBaseMini
     Private mbolIsHardDebug As Boolean
     Private mstrDebugFilePath As String
 
-    Public Structure StruSubLog
+    Friend Structure StruSubLog
         Dim SubName As String
         Dim StepName As String
         Dim Ret As String

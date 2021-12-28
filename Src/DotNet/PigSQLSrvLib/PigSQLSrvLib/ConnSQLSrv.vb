@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.7
+'* Version: 1.8
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -17,6 +17,7 @@
 '* 1.5		5/12/2021   Modify OpenOrKeepActive
 '* 1.6		6/12/2021   Add IsEncrypt,OpenOrKeepActive
 '* 1.7		15/12/2021	Rewrite the error handling code with LOG.
+'* 1.8		28/12/2021	Increase initial value of internal variable
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -29,7 +30,7 @@ Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.7.16"
+	Private Const CLS_VERSION As String = "1.8.16"
 	Public Connection As SqlConnection
 	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
@@ -91,7 +92,7 @@ Public Class ConnSQLSrv
 	''' <summary>
 	''' If Mirror SQL server is not specified, it will run in stand-alone mode.
 	''' </summary>
-	Private mstrPrincipalSQLServer As String
+	Private mstrPrincipalSQLServer As String = ""
 	Public Property PrincipalSQLServer() As String
 		Get
 			Return mstrPrincipalSQLServer
@@ -104,7 +105,7 @@ Public Class ConnSQLSrv
 	''' <summary>
 	''' If Mirror SQL server is specified, it will run in mirror mode and can automatic failover.
 	''' </summary>
-	Private mstrMirrorSQLServer As String
+	Private mstrMirrorSQLServer As String = ""
 	Public Property MirrorSQLServer() As String
 		Get
 			Return mstrMirrorSQLServer
@@ -117,7 +118,7 @@ Public Class ConnSQLSrv
 	''' <summary>
 	''' If running in mirror mode, the current database of the principal server and the mirror server must be the same.
 	''' </summary>
-	Private mstrCurrDatabase As String
+	Private mstrCurrDatabase As String = ""
 	Public Property CurrDatabase() As String
 		Get
 			Return mstrCurrDatabase
@@ -130,7 +131,7 @@ Public Class ConnSQLSrv
 	''' <summary>
 	''' If running in mirror mode, the uid of the principal server and the mirror server must be the same.
 	''' </summary>
-	Private mstrDBUser As String
+	Private mstrDBUser As String = ""
 	Public Property DBUser() As String
 		Get
 			Return mstrDBUser
@@ -143,7 +144,7 @@ Public Class ConnSQLSrv
 	''' <summary>
 	''' If running in mirror mode, the password of the principal server and the mirror server must be the same.
 	''' </summary>
-	Private mstrDBUserPwd As String
+	Private mstrDBUserPwd As String = ""
 	Public Property DBUserPwd() As String
 		Get
 			Return mstrDBUserPwd
