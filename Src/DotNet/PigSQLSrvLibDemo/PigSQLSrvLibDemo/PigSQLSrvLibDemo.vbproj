@@ -13,9 +13,9 @@
 	  <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
 	  <RepositoryType>GIT</RepositoryType>
 	  <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvLibDemo</RepositoryUrl>
-	  <Version>1.8.2</Version>
+	  <Version>1.8.18</Version>
 	  <PackageTags>PigSQLSrvLib SQLServer Windows Mirror automatic high availability JSON cache query</PackageTags>
-	  <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
+	  <PackageReleaseNotes>Refer to PigConsole.Getpwdstr of PigCmdLib  is used to hide the entered password.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="PigCmdLib" Version="1.1.20" />
     <PackageReference Include="PigSQLSrvLib" Version="1.8.16" />
   </ItemGroup>
 

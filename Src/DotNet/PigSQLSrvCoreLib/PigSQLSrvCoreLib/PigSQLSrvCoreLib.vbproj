@@ -27,7 +27,7 @@ It can run on Windows and Linux platforms.
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.1" />
     <PackageReference Include="PigKeyCacheLib" Version="3.2.30" />
   </ItemGroup>
 

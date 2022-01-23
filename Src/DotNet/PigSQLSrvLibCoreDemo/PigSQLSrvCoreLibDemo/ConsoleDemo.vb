@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.7
+'* Version: 1.8
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -12,9 +12,11 @@
 '* 1.5	9/10/2021	Add Test Cache Query -> Print 
 '* 1.6	5/12/2021	Add Test Cache Query -> Print 
 '* 1.7	15/12/2021	Test the new class library
+'* 1.8	23/1/2022	Refer to PigConsole.Getpwdstr of PigCmdLib  is used to hide the entered password.
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
+Imports PigCmdLib
 #If NETFRAMEWORK Then
 Imports PigSQLSrvLib
 Imports System.Data.SqlClient
@@ -62,6 +64,7 @@ Public Class ConsoleDemo
             Console.WriteLine("Press L to SQLSrvTools")
             Console.WriteLine("Press M to Test MultipleActiveResultSets")
             Console.WriteLine("Press N to Test Cache Query")
+            Console.CursorVisible = False
             Console.WriteLine("*******************")
             Select Case Console.ReadKey().Key
                 Case ConsoleKey.Q
@@ -79,6 +82,7 @@ Public Class ConsoleDemo
                             Case ConsoleKey.Q
                                 Exit Do
                             Case ConsoleKey.A
+                                Console.CursorVisible = True
                                 Console.WriteLine("Input SQL Server:" & Me.DBSrv)
                                 Me.DBSrv = Console.ReadLine()
                                 If Me.DBSrv = "" Then Me.DBSrv = "localhost"
