@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.8
+'* Version: 1.8.10
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -43,6 +43,7 @@ Public Class ConsoleDemo
     Public AccessFilePath As String
     Public TableName As String
     Public ColName As String
+    Public PigConsole As New PigConsole
 
     Public Sub Main()
         Do While True
@@ -66,7 +67,7 @@ Public Class ConsoleDemo
             Console.WriteLine("Press N to Test Cache Query")
             Console.CursorVisible = False
             Console.WriteLine("*******************")
-            Select Case Console.ReadKey().Key
+            Select Case Console.ReadKey(True).Key
                 Case ConsoleKey.Q
                     Exit Do
                 Case ConsoleKey.A
@@ -77,7 +78,7 @@ Public Class ConsoleDemo
                     Console.WriteLine("Press A to SQL Server(StandAlone mode)")
                     Console.WriteLine("Press B to SQL Server(Mirror mode)")
                     Do While True
-                        Me.CurrConsoleKey = Console.ReadKey().Key
+                        Me.CurrConsoleKey = Console.ReadKey(True).Key
                         Select Case Me.CurrConsoleKey
                             Case ConsoleKey.Q
                                 Exit Do
@@ -102,8 +103,8 @@ Public Class ConsoleDemo
                                         If Me.DBUser = "" Then Me.DBUser = "sa"
                                         Console.WriteLine("DB User=" & Me.DBUser)
                                         Console.WriteLine("Input DB Password:")
-                                        Me.DBPwd = Console.ReadLine()
-                                        Console.WriteLine("DB Password=" & Me.DBPwd)
+                                        Me.DBPwd = Me.PigConsole.GetPwdStr
+                                        'Console.WriteLine("DB Password=" & Me.DBPwd)
                                         Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
                                 End Select
                                 Me.ConnSQLSrv.ConnectionTimeout = 5
@@ -132,8 +133,8 @@ Public Class ConsoleDemo
                                         If Me.DBUser = "" Then Me.DBUser = "sa"
                                         Console.WriteLine("DB User=" & Me.DBUser)
                                         Console.WriteLine("Input DB Password:")
-                                        Me.DBPwd = Console.ReadLine()
-                                        Console.WriteLine("DB Password=" & Me.DBPwd)
+                                        Me.DBPwd = Me.PigConsole.GetPwdStr
+                                        'Console.WriteLine("DB Password=" & Me.DBPwd)
                                         Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.MirrDBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
                                 End Select
                                 Exit Do
@@ -164,6 +165,7 @@ Public Class ConsoleDemo
                     Console.WriteLine("#################")
                     Console.WriteLine("Create Recordset with Execute")
                     Console.WriteLine("#################")
+                    Console.CursorVisible = True
                     Console.WriteLine("Input SQL:")
                     Me.SQL = Console.ReadLine()
                     If Not Me.RS Is Nothing Then
@@ -257,6 +259,7 @@ Public Class ConsoleDemo
                     Console.WriteLine("#################")
                     Console.WriteLine("Test ExecuteNonQuery")
                     Console.WriteLine("#################")
+                    Console.CursorVisible = True
                     Console.WriteLine("Input SQL:")
                     Me.SQL = Console.ReadLine()
                     Dim oCmdSQLSrvText As New CmdSQLSrvText(Me.SQL)
@@ -296,7 +299,7 @@ Public Class ConsoleDemo
                         Console.WriteLine("Press C to Convert all recordset to JSON")
                         Console.WriteLine("Press D to Convert current recordset to Simple JSON Array")
                         Do While True
-                            Me.CurrConsoleKey = Console.ReadKey().Key
+                            Me.CurrConsoleKey = Console.ReadKey(True).Key
                             Select Case Me.CurrConsoleKey
                                 Case ConsoleKey.Q
                                     Exit Do
@@ -551,11 +554,12 @@ Public Class ConsoleDemo
                         Console.WriteLine("Press A to CmdSQLSrvText")
                         Console.WriteLine("Press B to CmdSQLSrvSp")
                         Do While True
-                            Me.CurrConsoleKey = Console.ReadKey().Key
+                            Me.CurrConsoleKey = Console.ReadKey(True).Key
                             Select Case Me.CurrConsoleKey
                                 Case ConsoleKey.Q
                                     Exit Do
                                 Case ConsoleKey.A
+                                    Console.CursorVisible = True
                                     Dim oCmdSQLSrvText As New CmdSQLSrvText("select * from sysobjects where name=@name")
                                     'oCmdSQLSrvText.ActiveConnection = Me.ConnSQLSrv.Connection
                                     oCmdSQLSrvText.AddPara("@name", SqlDbType.VarChar, 256)
@@ -575,6 +579,7 @@ Public Class ConsoleDemo
                                     Console.WriteLine("JSon=" & strJSon)
                                     Exit Do
                                 Case ConsoleKey.B
+                                    Console.CursorVisible = True
                                     Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_helpdb")
                                     'oCmdSQLSrvSp.ActiveConnection = Me.ConnSQLSrv.Connection
                                     oCmdSQLSrvSp.AddPara("@dbname", SqlDbType.VarChar, 256)
