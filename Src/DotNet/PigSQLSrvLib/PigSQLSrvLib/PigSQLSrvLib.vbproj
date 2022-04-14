@@ -6,7 +6,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
-    <Copyright>Copyright (c) 2021 Seow Phong</Copyright>
+    <Copyright>Copyright (c) 2021-2022 Seow Phong</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
     <PackageIcon>SeowPhongLogo.png</PackageIcon>
@@ -18,11 +18,12 @@ Friendly calling interface for Command of SQL Server StoredProcedure and SQL sta
 Support automatic switch connection of mirror database for high availability.
 Support the transformation of query results into JSON.
 Support cache query.
+Database connection management.
 It can run on Windows platforms only.
 </Description>
-    <Version>1.8.16</Version>
+    <Version>2.1.5</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON mirror database cache query</PackageTags>
-    <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
+    <PackageReleaseNotes>Add Database connection management.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,7 +38,7 @@ It can run on Windows platforms only.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigKeyCacheLib" Version="3.2.30" />
+    <PackageReference Include="PigKeyCacheLib" Version="3.2.68" />
   </ItemGroup>
 
 </Project>
