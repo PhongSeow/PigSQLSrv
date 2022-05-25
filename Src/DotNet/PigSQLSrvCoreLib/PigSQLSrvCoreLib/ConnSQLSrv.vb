@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.9
+'* Version: 1.10
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -19,6 +19,7 @@
 '* 1.7		15/12/2021	Rewrite the error handling code with LOG.
 '* 1.8		28/12/2021	Increase initial value of internal variable
 '* 1.9		5/1/2022	Modify InitPigKeyValue
+'* 1.10		20/5/2022	Modify OpenOrKeepActive
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -31,8 +32,8 @@ Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.9.2"
-	Public Connection As SqlConnection
+    Private Const CLS_VERSION As String = "1.10.3"
+    Public Connection As SqlConnection
 	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
 
@@ -380,8 +381,13 @@ Public Class ConnSQLSrv
 							End If
 							If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 							.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
-							LOG.StepName = "Open first time"
-							Me.mConnOpen()
+                            If Me.IsEncrypt = True Then
+                                .ConnectionString &= "Encrypt=True;"
+                            Else
+                                .ConnectionString &= "Encrypt=False;"
+                            End If
+                            LOG.StepName = "Open first time"
+                            Me.mConnOpen()
 							If Me.LastErr = "" Then
 								If Me.mIsDBOnline = True Then
 									If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
