@@ -4,85 +4,82 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Database connection definition
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.3
+'* Version: 1.5
 '* Create Time: 17/10/2021
 '* 1.1	1/2/2022	Modify New, add Properties
 '* 1.2	1/2/2022	Add IsTrustedConnection, mNew
 '* 1.3	10/4/2022	Add New, modify RunMode
+'* 1.4	20/5/2022	Add DBConnDesc
+'* 1.5	22/5/2022	Modify New, add fPigConfigSession
 '**********************************
 Imports PigToolsLiteLib
 
-Public Class DBConnDef
+Friend Class DBConnDef
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.3.2"
-    Private mintRunMode As ConnSQLSrv.RunModeEnum
-    Public Property RunMode As ConnSQLSrv.RunModeEnum
+    Private Const CLS_VERSION As String = "1.5.5"
+
+    Friend fPigConfigSession As PigConfigSession
+
+    Public ReadOnly Property RunMode As ConnSQLSrv.RunModeEnum
         Get
-            Return mintRunMode
+            Try
+                If Me.fPigConfigSession.PigConfigs.Item("MirrorSQLServer").ConfValue = "" Then
+                    Return ConnSQLSrv.RunModeEnum.StandAlone
+                Else
+                    Return ConnSQLSrv.RunModeEnum.Mirror
+                End If
+            Catch ex As Exception
+                Me.SetSubErrInf("RunMode.Get", ex)
+                Return ConnSQLSrv.RunModeEnum.StandAlone
+            End Try
         End Get
-        Friend Set(value As ConnSQLSrv.RunModeEnum)
-            mintRunMode = value
-        End Set
     End Property
 
     Public ReadOnly Property DBConnName As String
+        Get
+            Try
+                Return Me.fPigConfigSession.SessionName
+            Catch ex As Exception
+                Me.SetSubErrInf("DBConnName.Get", ex)
+                Return ""
+            End Try
+        End Get
+    End Property
 
-    Public Sub New(DBConnName As String, SQLServer As String, CurrDatabase As String)
+    Public ReadOnly Property DBConnDesc As String
+        Get
+            Try
+                Return Me.fPigConfigSession.SessionDesc
+            Catch ex As Exception
+                Me.SetSubErrInf("DBConnDesc.Get", ex)
+                Return ""
+            End Try
+        End Get
+    End Property
+
+    Public Sub New()
         MyBase.New(CLS_VERSION)
-        Me.DBConnName = DBConnName
-        Me.mNew(ConnSQLSrv.RunModeEnum.StandAlone, SQLServer, CurrDatabase)
     End Sub
 
-    Public Sub New(DBConnName As String, SQLServer As String, CurrDatabase As String, DBUser As String, DBUserPwd As String)
-        MyBase.New(CLS_VERSION)
-        Me.DBConnName = DBConnName
-        Me.mNew(ConnSQLSrv.RunModeEnum.StandAlone, SQLServer, CurrDatabase, DBUser, DBUserPwd)
-    End Sub
-
-    Public Sub New(DBConnName As String, PrincipalSQLServer As String, MirrorSQLServer As String, CurrDatabase As String)
-        MyBase.New(CLS_VERSION)
-        Me.DBConnName = DBConnName
-        Me.mNew(ConnSQLSrv.RunModeEnum.Mirror, PrincipalSQLServer, CurrDatabase,,, MirrorSQLServer)
-    End Sub
-
-    Public Sub New(DBConnName As String, PrincipalSQLServer As String, MirrorSQLServer As String, CurrDatabase As String, DBUser As String, DBUserPwd As String)
-        MyBase.New(CLS_VERSION)
-        Me.DBConnName = DBConnName
-        Me.mNew(ConnSQLSrv.RunModeEnum.Mirror, PrincipalSQLServer, CurrDatabase, DBUser, DBUserPwd, MirrorSQLServer)
-    End Sub
-
-    Private Sub mNew(RunMode As ConnSQLSrv.RunModeEnum, PrincipalSQLServer As String, CurrDatabase As String, Optional DBUser As String = "", Optional DBUserPwd As String = "", Optional MirrorSQLServer As String = "")
-        Try
-            With Me
-                .RunMode = RunMode
-                .PrincipalSQLServer = PrincipalSQLServer
-                Select Case .RunMode
-                    Case ConnSQLSrv.RunModeEnum.Mirror
-                        .MirrorSQLServer = MirrorSQLServer
-                    Case ConnSQLSrv.RunModeEnum.StandAlone
-                    Case Else
-                        Throw New Exception("Invalid ModeEnum")
-                End Select
-                .DBUser = DBUser
-                .DBUserPwd = DBUserPwd
-                .CurrDatabase = CurrDatabase
-            End With
-            Me.ClearErr()
-        Catch ex As Exception
-            Me.SetSubErrInf("mNew", ex)
-        End Try
-    End Sub
-
-
-    Private mstrCurrDatabase As String
     Public Property CurrDatabase As String
         Get
-            Return mstrCurrDatabase
+            Try
+                Return Me.fPigConfigSession.PigConfigs.Item("CurrDatabase").ConfValue
+            Catch ex As Exception
+                Me.SetSubErrInf("CurrDatabase.Get", ex)
+                Return ""
+            End Try
         End Get
-        Friend Set(value As String)
-            mstrCurrDatabase = value
+        Set(value As String)
+            Try
+                Me.fPigConfigSession.PigConfigs.Item("CurrDatabase").ConfValue = value
+            Catch ex As Exception
+                Me.SetSubErrInf("CurrDatabase.Set", ex)
+            End Try
         End Set
     End Property
+
+
 
     Public ReadOnly Property IsTrustedConnection As Boolean
         Get

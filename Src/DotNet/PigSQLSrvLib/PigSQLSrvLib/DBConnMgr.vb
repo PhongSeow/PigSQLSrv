@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Database connection management
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.6
+'* Version: 1.8
 '* Create Time: 17/10/2021
 '* 1.1	1/2/2022	Modify New
 '* 1.2	23/3/2022	Modify New, add MkEncKey,LoadDBConnDefs
@@ -12,11 +12,13 @@
 '* 1.4	11/4/2022	Modify New
 '* 1.5	12/4/2022	Modify New
 '* 1.6	1/5/2022	Add IsConfigChange, modify New,fPigConfigApp
+'* 1.7	20/5/2022	Modify SaveDBConnDefs,LoadDBConnDefs
+'* 1.8	22/5/2022	Modify SaveDBConnDefs,LoadDBConnDefs
 '**********************************
 Imports PigToolsLiteLib
-Public Class DBConnMgr
+Friend Class DBConnMgr
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.6.2"
+    Private Const CLS_VERSION As String = "1.8.3"
     Friend Property fPigConfigApp As PigConfigApp
     Private Property mConfFilePath As String
     Public ReadOnly Property DBConnDefs As DBConnDefs
@@ -25,14 +27,14 @@ Public Class DBConnMgr
         MyBase.New(CLS_VERSION)
         Me.mConfFilePath = ConfFilePath
         Me.fPigConfigApp = New PigConfigApp(PigText.enmTextType.UTF8)
-        Me.DBConnDefs = New DBConnDefs(Me)
+        'Me.DBConnDefs = New DBConnDefs(Me)
     End Sub
 
     Public Sub New(EncKey As String, ConfFilePath As String)
         MyBase.New(CLS_VERSION)
         Me.mConfFilePath = ConfFilePath
         Me.fPigConfigApp = New PigConfigApp(EncKey, PigText.enmTextType.UTF8)
-        Me.DBConnDefs = New DBConnDefs(Me)
+        'Me.DBConnDefs = New DBConnDefs(Me)
     End Sub
 
     Public Function MkEncKey(ByRef Base64EncKey As String) As String
@@ -61,12 +63,61 @@ Public Class DBConnMgr
                 LOG.AddStepNameInf(Me.mConfFilePath)
                 Throw New Exception(LOG.Ret)
             End If
+            LoadDBConnDefs = ""
             For Each oPigConfigSession As PigConfigSession In Me.fPigConfigApp.PigConfigSessions
                 With oPigConfigSession
-                    If .SessionName = "Main" Then
-
-                    Else
-
+                    If .SessionName <> "Main" Then
+                        Dim strPrincipalSQLServer As String = ""
+                        If .PigConfigs.IsItemExists("PrincipalSQLServer") = True Then
+                            strPrincipalSQLServer = .PigConfigs.Item("PrincipalSQLServer").ConfValue
+                        ElseIf .PigConfigs.IsItemExists("PrincipalSQLServer") = True Then
+                            strPrincipalSQLServer = .PigConfigs.Item("SQLServer").ConfValue
+                        End If
+                        If strPrincipalSQLServer = "" Then
+                            LoadDBConnDefs &= .SessionName & ".PrincipalSQLServer Undefined;"
+                        Else
+                            Dim strCurrDatabase As String = ""
+                            If .PigConfigs.IsItemExists("CurrDatabase") = True Then strCurrDatabase = .PigConfigs.Item("CurrDatabase").ConfValue
+                            If strCurrDatabase = "" Then strCurrDatabase = "master"
+                            Dim intRunMode As ConnSQLSrv.RunModeEnum
+                            If .PigConfigs.IsItemExists("MirrorSQLServer") = False Then
+                                intRunMode = ConnSQLSrv.RunModeEnum.StandAlone
+                            ElseIf .PigConfigs.Item("MirrorSQLServer").ConfValue = "" Then
+                                intRunMode = ConnSQLSrv.RunModeEnum.StandAlone
+                            Else
+                                intRunMode = ConnSQLSrv.RunModeEnum.Mirror
+                            End If
+                            Dim bolIsTrustedConnection As Boolean
+                            If .PigConfigs.IsItemExists("DBUser") = False Then
+                                bolIsTrustedConnection = True
+                            ElseIf .PigConfigs.Item("DBUser").ConfValue = "" Then
+                                bolIsTrustedConnection = True
+                            Else
+                                bolIsTrustedConnection = False
+                            End If
+                            If Me.DBConnDefs.IsItemExists(.SessionName) = True Then
+                                LOG.StepName = "DBConnDefs.Remove"
+                                LOG.Ret = Me.DBConnDefs.Remove(.SessionName)
+                                If LOG.Ret <> "OK" Then
+                                    LOG.AddStepNameInf(.SessionName)
+                                    LoadDBConnDefs &= LOG.StepName & .SessionName & LOG.Ret & ";"
+                                End If
+                            End If
+                            Select Case intRunMode
+                                Case ConnSQLSrv.RunModeEnum.StandAlone
+                                    If bolIsTrustedConnection = True Then
+                                        Me.DBConnDefs.Add(.SessionName, strPrincipalSQLServer, strCurrDatabase, .SessionDesc)
+                                    Else
+                                        Me.DBConnDefs.Add(.SessionName, strPrincipalSQLServer, strCurrDatabase, .PigConfigs.Item("DBUser").ConfValue, .PigConfigs.Item("DBUserPwd").ConfValue, .SessionDesc)
+                                    End If
+                                Case ConnSQLSrv.RunModeEnum.Mirror
+                                    If bolIsTrustedConnection = True Then
+                                        Me.DBConnDefs.Add(.SessionName, strPrincipalSQLServer, .PigConfigs.Item("MirrorSQLServer").ConfValue, strCurrDatabase, .SessionDesc)
+                                    Else
+                                        Me.DBConnDefs.Add(.SessionName, strPrincipalSQLServer, .PigConfigs.Item("MirrorSQLServer").ConfValue, strCurrDatabase, .PigConfigs.Item("DBUser").ConfValue, .PigConfigs.Item("DBUserPwd").ConfValue, .SessionDesc)
+                                    End If
+                            End Select
+                        End If
                     End If
                 End With
             Next
@@ -79,6 +130,7 @@ Public Class DBConnMgr
     Public Function SaveDBConnDefs() As String
         Dim LOG As New PigStepLog("SaveDBConnDefs")
         Try
+
             LOG.StepName = "LoadConfigFile"
             LOG.Ret = Me.fPigConfigApp.LoadConfigFile(Me.mConfFilePath, PigConfigApp.EnmSaveType.Xml)
             If LOG.Ret <> "OK" Then
