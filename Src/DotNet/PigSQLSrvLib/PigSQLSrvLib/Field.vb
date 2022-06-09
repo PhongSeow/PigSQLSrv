@@ -4,12 +4,13 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.1
+'* Version: 1.2
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
 '* 1.0.4	28/7/2021	Modify New,DataCategory, add FieldTypeName
 '* 1.1		29/8/2021   Add support for .net core
+'* 1.2		9/6/2022   Modify DataCategoryEnum,ValueForJSon
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -19,20 +20,21 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
 	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.1.2"
+    Private Const CLS_VERSION As String = "1.2.2"
 
 
-	Public Enum DataCategoryEnum
+    Public Enum DataCategoryEnum
 		OtherValue = 0
 		StrValue = 10
 		IntValue = 20
 		DecValue = 30
 		BooleanValue = 40
 		DateValue = 50
-	End Enum
+        LongValue = 60
+    End Enum
 
 
-	Public Sub New(Name As String, TypeName As String, FieldTypeName As String, Index As Long)
+    Public Sub New(Name As String, TypeName As String, FieldTypeName As String, Index As Long)
 		MyBase.New(CLS_VERSION)
 		Me.Name = Name
 		Me.Index = Index
@@ -51,12 +53,16 @@ Public Class Field
 				Select Case Me.FieldTypeName
 					Case "String", "Guid"
 						DataCategory = DataCategoryEnum.StrValue
-					Case "Int64", "Boolean", "Int32", "Int16"
-						DataCategory = DataCategoryEnum.IntValue
-					Case "Decimal", "Double", "Single"
-						DataCategory = DataCategoryEnum.DecValue
-					Case "DateTime", ""
-						DataCategory = DataCategoryEnum.DateValue
+                    Case "Int32", "Int16"
+                        DataCategory = DataCategoryEnum.IntValue
+                    Case "Int64"
+                        DataCategory = DataCategoryEnum.LongValue
+                    Case "Boolean"
+                        DataCategory = DataCategoryEnum.BooleanValue
+                    Case "Decimal", "Double", "Single"
+                        DataCategory = DataCategoryEnum.DecValue
+                    Case "DateTime"
+                        DataCategory = DataCategoryEnum.DateValue
 					Case Else
 						DataCategory = DataCategoryEnum.OtherValue
 				End Select
@@ -153,8 +159,10 @@ Public Class Field
 						ValueForJSon = Me.DecValue
 					Case DataCategoryEnum.IntValue
 						ValueForJSon = Me.IntValue
-					Case DataCategoryEnum.OtherValue
-						ValueForJSon = Me.StrValue
+                    Case DataCategoryEnum.LongValue
+                        ValueForJSon = Me.LngValue
+                    Case DataCategoryEnum.OtherValue
+                        ValueForJSon = Me.StrValue
 					Case DataCategoryEnum.StrValue
 						ValueForJSon = Me.StrValue
 					Case Else

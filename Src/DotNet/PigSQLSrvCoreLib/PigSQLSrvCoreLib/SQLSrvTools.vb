@@ -18,12 +18,12 @@ Imports System.Data
 Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
+#End If
 Imports PigToolsLiteLib
 
-#End If
 Public Class SQLSrvTools
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.5.30"
+    Private Const CLS_VERSION As String = "1.5.31"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum enmDBObjType
