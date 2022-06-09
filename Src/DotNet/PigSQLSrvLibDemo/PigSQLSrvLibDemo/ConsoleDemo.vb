@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.8.10
+'* Version: 1.16.1
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -13,6 +13,13 @@
 '* 1.6	5/12/2021	Add Test Cache Query -> Print 
 '* 1.7	15/12/2021	Test the new class library
 '* 1.8	23/1/2022	Refer to PigConsole.Getpwdstr of PigCmdLib  is used to hide the entered password.
+'* 1.9	2/2/2022	Add Database connection management
+'* 1.10	19/3/2022	Use PigCmdLib.GetLine
+'* 1.11	23/3/2022	Modify MainSet
+'* 1.13	29/4/2022	Modify MainSet,Main
+'* 1.14	30/4/2022	Modify MainSet
+'* 1.15	1/5/2022	Modify MainSet
+'* 1.16	9/6/2022	Add SQLSrvToolsDemo
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -24,6 +31,8 @@ Imports System.Data.SqlClient
 Imports PigSQLSrvCoreLib
 Imports Microsoft.Data.SqlClient
 #End If
+Imports PigToolsLiteLib
+
 
 Public Class ConsoleDemo
     Public ConnSQLSrv As ConnSQLSrv
@@ -44,13 +53,28 @@ Public Class ConsoleDemo
     Public TableName As String
     Public ColName As String
     Public PigConsole As New PigConsole
+    'Public DBConnMgr As DBConnMgr
+    Public EncKey As String
+    Public ConfFilePath As String
+    Public Ret As String
+    Public PigFunc As New PigFunc
+    'Public DBConnDef As DBConnDef
+    Public DBConnName As String
+    Public MenuKey As String
+    Public MenuDefinition As String
+    Public SQLSrvTools As SQLSrvTools
+    Public VBCode As String
+    Public NotMathFillByRsList As String
+    Public NotMathMD5List As String
+    Public FilePath As String
 
-    Public Sub Main()
+    Public Sub MainFunc()
         Do While True
+            Console.Clear()
             Console.WriteLine("*******************")
-            Console.WriteLine("Main menu")
+            Console.WriteLine("Main Function menu")
             Console.WriteLine("*******************")
-            Console.WriteLine("Press Q to Exit")
+            Console.WriteLine("Press Q to Up")
             Console.WriteLine("Press A to Set SQL Server Connection String")
             Console.WriteLine("Press B to OpenOrKeepActive Connection")
             Console.WriteLine("Press C to Show Connection Information")
@@ -84,9 +108,7 @@ Public Class ConsoleDemo
                                 Exit Do
                             Case ConsoleKey.A
                                 Console.CursorVisible = True
-                                Console.WriteLine("Input SQL Server:" & Me.DBSrv)
-                                Me.DBSrv = Console.ReadLine()
-                                If Me.DBSrv = "" Then Me.DBSrv = "localhost"
+                                Me.PigConsole.GetLine("Input SQL Server", Me.DBSrv)
                                 Console.WriteLine("SQL Server=" & Me.DBSrv)
                                 Console.WriteLine("Input Default DB:" & Me.CurrDB)
                                 Me.CurrDB = Console.ReadLine()
@@ -599,6 +621,152 @@ Public Class ConsoleDemo
                         Loop
                     End If
             End Select
+            Me.PigConsole.DisplayPause()
+        Loop
+    End Sub
+
+
+    'Public Sub ShowDBConnDef(ByRef oDBConnDef As DBConnDef)
+    '    With oDBConnDef
+    '        Console.WriteLine("DBConnName=" & .DBConnName)
+    '        Console.WriteLine("CurrDatabase=" & .CurrDatabase)
+    '        Console.WriteLine("DBUser=" & .DBUser)
+    '        Console.WriteLine("DBUserPwd=" & .DBUserPwd)
+    '    End With
+    'End Sub
+
+    Public Sub MainSet()
+        Do While True
+            Console.Clear()
+            Me.MenuDefinition = "GenerateEncKey#Generate EncKey|"
+            Me.MenuDefinition &= "NewDBConnMgr#New DBConnMgr|"
+            Me.MenuDefinition &= "ShowDBConnDefs#Show DBConnDefs|"
+            Me.MenuDefinition &= "LoadDBConnDefs#LoadDBConnDefs|"
+            Me.MenuDefinition &= "AddOrGetDBConnDef#AddOrGet DBConnDef|"
+            Me.MenuDefinition &= "SaveDBConnDefs#SaveDBConnDefs|"
+            Me.MenuDefinition &= "EditDBConnDef#Edit DBConnDef|"
+            Me.MenuDefinition &= "RemoveDBConnDef#Remove DBConnDef|"
+            Me.PigConsole.SimpleMenu("Database connection management", Me.MenuDefinition, Me.MenuKey, PigConsole.EnmSimpleMenuExitType.QtoUp)
+            Select Case Me.MenuKey
+                Case ""
+                    Exit Do
+                Case "ShowDBConnDefs"
+                    'If Me.DBConnMgr Is Nothing Then
+                    '    Console.WriteLine("Me.DBConnMgr Is Nothing")
+                    'Else
+                    '    Console.WriteLine("DBConnDefs.Count=" & Me.DBConnMgr.DBConnDefs.Count)
+                    '    For Each oDBConnDef As DBConnDef In Me.DBConnMgr.DBConnDefs
+                    '        Me.ShowDBConnDef(oDBConnDef)
+                    '    Next
+                    'End If
+                Case "GenerateEncKey"
+                    'Me.DBConnMgr = New DBConnMgr("")
+                    'Me.Ret = Me.DBConnMgr.MkEncKey(Me.EncKey)
+                    'If Me.Ret <> "OK" Then
+                    '    Console.WriteLine("MkEncKey=" & Me.Ret)
+                    'Else
+                    '    Console.WriteLine("EncKey=")
+                    '    Console.WriteLine(Me.EncKey)
+                    'End If
+                Case "NewDBConnMgr"
+                    'Me.PigConsole.GetLine("Input ConfFilePath", Me.ConfFilePath)
+                    'Me.PigConsole.GetLine("Input MkEncKey", Me.EncKey)
+                    'Me.DBConnMgr = New DBConnMgr(Me.EncKey, Me.ConfFilePath)
+                    'Console.WriteLine("New DBConnMgr...")
+                    'If Me.DBConnMgr.LastErr <> "" Then
+                    '    Console.WriteLine(Me.DBConnMgr.LastErr)
+                    'Else
+                    '    Console.WriteLine("OK")
+                    'End If
+                Case "LoadDBConnDefs"
+                    'If Me.DBConnMgr Is Nothing Then
+                    '    Console.WriteLine("Me.DBConnMgr Is Nothing")
+                    'Else
+                    '    Console.WriteLine("LoadDBConnDefs...")
+                    '    Me.Ret = Me.DBConnMgr.LoadDBConnDefs()
+                    '    Console.WriteLine(Me.Ret)
+                    'End If
+                Case "AddOrGetDBConnDef"
+                    'Me.PigConsole.GetLine("Input DBConnName", Me.DBConnName)
+                    'Me.PigConsole.GetLine("Input SQLServer", Me.DBSrv)
+                    'Me.PigConsole.GetLine("Input CurrDatabase", Me.CurrDB)
+                    'Me.PigConsole.GetLine("Input DBUser", Me.DBUser)
+                    'Me.DBPwd = Me.PigConsole.GetPwdStr("Input DBPwd")
+                    'If Me.DBUser = "" Then
+                    '    Me.DBConnMgr.DBConnDefs.Add(Me.DBConnName, Me.DBSrv, Me.CurrDB)
+                    'Else
+                    '    Me.DBConnMgr.DBConnDefs.Add(Me.DBConnName, Me.DBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
+                    'End If
+                    'If Me.DBConnMgr.LastErr <> "" Then
+                    '    Console.WriteLine("New DBConnMgr" & Me.DBConnMgr.LastErr)
+                    'End If
+                Case "SaveDBConnDefs"
+                    'If Me.DBConnMgr Is Nothing Then
+                    '    Console.WriteLine("Me.DBConnMgr Is Nothing")
+                    'Else
+                    '    Me.Ret = Me.DBConnMgr.SaveDBConnDefs()
+                    '    Console.WriteLine("SaveDBConnDefs=" & Me.Ret)
+                    'End If
+            End Select
+            Me.PigConsole.DisplayPause()
+        Loop
+    End Sub
+
+    Public Sub Main()
+        Do While True
+            Console.Clear()
+            Me.MenuDefinition = ""
+            'Me.MenuDefinition &= "MainSet#Database connection management|"
+            Me.MenuDefinition &= "MainFunc#Main Function Demo|"
+            Me.MenuDefinition &= "SQLSrvTools#SQLSrvTools Demo|"
+            Me.PigConsole.SimpleMenu("Main Menu", Me.MenuDefinition, Me.MenuKey, PigConsole.EnmSimpleMenuExitType.QtoExit)
+            Select Case Me.MenuKey
+                Case ""
+                    Exit Do
+                Case "SQLSrvTools"
+                    Me.SQLSrvToolsDemo()
+                Case "MainSet"
+                    Me.MainSet()
+                Case "MainFunc"
+                    Me.MainFunc()
+            End Select
+        Loop
+    End Sub
+
+    Public Sub SQLSrvToolsDemo()
+        Do While True
+            Console.Clear()
+            MenuDefinition = ""
+            Me.MenuDefinition &= "GetTableOrView2VBCode#Generate VB class code corresponding to table or view.|"
+            Me.PigConsole.SimpleMenu("SQLSrvToolsDemo", Me.MenuDefinition, Me.MenuKey, PigConsole.EnmSimpleMenuExitType.QtoUp)
+            Select Case Me.MenuKey
+                Case ""
+                    Exit Do
+                Case "GetTableOrView2VBCode"
+                    If Me.SQLSrvTools Is Nothing Then
+                        If Me.ConnSQLSrv Is Nothing Then
+                            Console.WriteLine("ConnSQLSrv Is Nothing")
+                        ElseIf Me.ConnSQLSrv.IsDBConnReady = False Then
+                            Console.WriteLine("ConnSQLSrv.IsDBConnReady = False")
+                        Else
+                            Me.SQLSrvTools = New SQLSrvTools(Me.ConnSQLSrv)
+                        End If
+                    End If
+                    If Me.SQLSrvTools IsNot Nothing Then
+                        Me.PigConsole.GetLine("Input table or view name", Me.TableName)
+                        Me.PigConsole.GetLine("Input NotMathFillByRsList ,separated by ','", Me.NotMathFillByRsList)
+                        'Me.PigConsole.GetLine("Input NotMathMD5List ,separated by ','", Me.NotMathMD5List)
+                        Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
+                        Me.Ret = Me.SQLSrvTools.GetTableOrView2VBCode(Me.TableName, Me.VBCode, Me.NotMathFillByRsList, Me.NotMathMD5List)
+                        If Me.Ret <> "OK" Then
+                            Console.WriteLine(Me.Ret)
+                        Else
+                            Console.WriteLine("Save to " & Me.FilePath)
+                            Me.PigFunc.SaveTextToFile(Me.FilePath, Me.VBCode)
+                        End If
+                    End If
+            End Select
+            Me.PigConsole.DisplayPause()
         Loop
     End Sub
 
