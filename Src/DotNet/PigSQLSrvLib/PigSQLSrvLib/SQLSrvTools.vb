@@ -4,14 +4,15 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.5
+'* Version: 1.6
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.2		20/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.3		5/12/2021   Add IsTabColExists
 '* 1.4		6/6/2021    Imports PigToolsLiteLib
-'* 1.5		9/6/2021   Add GetTableOrView2VBCode,DataCategory2VBDataType,SQLSrvTypeDataCategory
+'* 1.5		9/6/2021    Add GetTableOrView2VBCode,DataCategory2VBDataType,SQLSrvTypeDataCategory
+'* 1.6		13/6/2021   Modif GetTableOrView2VBCode
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -23,7 +24,7 @@ Imports PigToolsLiteLib
 
 Public Class SQLSrvTools
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.5.31"
+    Private Const CLS_VERSION As String = "1.6.3"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum enmDBObjType
@@ -294,20 +295,21 @@ Public Class SQLSrvTools
                         strPublic &= vbTab & "Public ReadOnly Property " & strColumn_name & " As " & strVBDataType & vbCrLf
                         strFillByRs &= vbTab & "Friend Function fFillByRs(ByRef InRs As Recordset) As String" & vbCrLf
                         strFillByRs &= vbTab & vbTab & "Try" & vbCrLf
-                        strFillByRs &= vbTab & vbTab & vbTab & "If InRs.EOF = True Then Throw New Exception(""No data"")" & vbCrLf
-                        strFillByRs &= vbTab & vbTab & vbTab & "With InRs.Fields" & vbCrLf
+                        strFillByRs &= vbTab & vbTab & vbTab & "If InRs.EOF = False Then" & vbCrLf
+                        strFillByRs &= vbTab & vbTab & vbTab & vbTab & "With InRs.Fields" & vbCrLf
                         bolIsFrist = False
                     Else
                         strPublic &= vbTab & "Public Property " & strColumn_name & " As " & strVBDataType & vbCrLf
                         If InStr(NotMathFillByRsList, "," & strColumn_name & ",") = 0 Then
-                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & "If .IsItemExists(""" & strColumn_name & """) = True Then Me." & strColumn_name & " = .Item(""" & strColumn_name & """)." & strValueType & vbCrLf
+                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "If .IsItemExists(""" & strColumn_name & """) = True Then Me." & strColumn_name & " = .Item(""" & strColumn_name & """)." & strValueType & vbCrLf
                         End If
                     End If
                     LOG.StepName = "MoveNext"
                     rs.MoveNext()
                     If rs.LastErr <> "" Then Throw New Exception(rs.LastErr)
                 Loop
-                strFillByRs &= vbTab & vbTab & vbTab & "End With" & vbCrLf
+                strFillByRs &= vbTab & vbTab & vbTab & vbTab & "End With" & vbCrLf
+                strFillByRs &= vbTab & vbTab & vbTab & "End If" & vbCrLf
                 strFillByRs &= vbTab & vbTab & vbTab & "Return ""OK""" & vbCrLf
                 strFillByRs &= vbTab & vbTab & "Catch ex As Exception" & vbCrLf
                 strFillByRs &= vbTab & vbTab & vbTab & "Return Me.GetSubErrInf(""fFillByRs"", ex)" & vbCrLf
