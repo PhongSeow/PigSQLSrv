@@ -12,7 +12,7 @@
 '* 1.3		5/12/2021   Add IsTabColExists
 '* 1.4		6/6/2021    Imports PigToolsLiteLib
 '* 1.5		9/6/2021    Add GetTableOrView2VBCode,DataCategory2VBDataType,SQLSrvTypeDataCategory
-'* 1.6		13/6/2021   Modif GetTableOrView2VBCode
+'* 1.6		13/6/2021   Modif GetTableOrView2VBCode, add DataCategory2StrValue
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -257,9 +257,9 @@ Public Class SQLSrvTools
                 If Left(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList = "," & NotMathFillByRsList
                 If Right(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList &= ","
             End If
-            If NotMathFillByRsList <> "" Then
-                If Left(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList = "," & NotMathFillByRsList
-                If Right(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList &= ","
+            If NotMathMD5List <> "" Then
+                If Left(NotMathMD5List, 1) <> "," Then NotMathMD5List = "," & NotMathMD5List
+                If Right(NotMathMD5List, 1) <> "," Then NotMathMD5List &= ","
             End If
             LOG.StepName = "New CmdSQLSrvSp"
             Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_help")
@@ -297,11 +297,20 @@ Public Class SQLSrvTools
                         strFillByRs &= vbTab & vbTab & "Try" & vbCrLf
                         strFillByRs &= vbTab & vbTab & vbTab & "If InRs.EOF = False Then" & vbCrLf
                         strFillByRs &= vbTab & vbTab & vbTab & vbTab & "With InRs.Fields" & vbCrLf
+                        '-------
+                        strValueMD5 &= vbTab & "Friend ReadOnly Property ValueMD5(Optional TextType As PigMD5.enmTextType = PigMD5.enmTextType.UTF8) As String" & vbCrLf
+                        strValueMD5 &= vbTab & vbTab & "Get" & vbCrLf
+                        strValueMD5 &= vbTab & vbTab & vbTab & "Try" & vbCrLf
+                        strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Dim strText As String = """"" & vbCrLf
+                        strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "With Me" & vbCrLf
                         bolIsFrist = False
                     Else
                         strPublic &= vbTab & "Public Property " & strColumn_name & " As " & strVBDataType & vbCrLf
                         If InStr(NotMathFillByRsList, "," & strColumn_name & ",") = 0 Then
                             strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "If .IsItemExists(""" & strColumn_name & """) = True Then Me." & strColumn_name & " = .Item(""" & strColumn_name & """)." & strValueType & vbCrLf
+                        End If
+                        If InStr(NotMathMD5List, "," & strColumn_name & ",") = 0 Then
+                            strValueMD5 &= vbTab & vbTab & vbTab & vbTab & vbTab & Me.GetValueMD5Row(strColumn_name, intDataCategory) & vbCrLf
                         End If
                     End If
                     LOG.StepName = "MoveNext"
@@ -315,9 +324,21 @@ Public Class SQLSrvTools
                 strFillByRs &= vbTab & vbTab & vbTab & "Return Me.GetSubErrInf(""fFillByRs"", ex)" & vbCrLf
                 strFillByRs &= vbTab & vbTab & "End Try" & vbCrLf
                 strFillByRs &= vbTab & "End Function" & vbCrLf
+                '-------
+                strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "End With" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Dim oPigMD5 As New PigMD5(strText, TextType)" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "ValueMD5 = oPigMD5.MD5" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "oPigMD5 = Nothing" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & vbTab & "Catch ex As Exception" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Me.SetSubErrInf(""ValueMD5"", ex)" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Return """"" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & vbTab & "End Try" & vbCrLf
+                strValueMD5 &= vbTab & vbTab & "End Get" & vbCrLf
+                strValueMD5 &= vbTab & "End Property" & vbCrLf
             End With
             OutVBCode &= vbCrLf & strPublic & vbCrLf
             OutVBCode &= vbCrLf & strFillByRs & vbCrLf
+            OutVBCode &= vbCrLf & strValueMD5 & vbCrLf
             OutVBCode &= "End Class" & vbCrLf
             Return "OK"
         Catch ex As Exception
@@ -373,6 +394,31 @@ Public Class SQLSrvTools
             End Select
         Catch ex As Exception
             Me.SetSubErrInf("DataCategory2VBDataType", ex)
+            Return ""
+        End Try
+    End Function
+
+    Public Function GetValueMD5Row(ColName As String, DataCategory As Field.DataCategoryEnum) As String
+        Try
+            GetValueMD5Row = "strText &= ""<"" & "
+            Select Case DataCategory
+                Case Field.DataCategoryEnum.BooleanValue
+                    GetValueMD5Row &= "Math.Abs(CInt(." & ColName & "))"
+                Case Field.DataCategoryEnum.DateValue
+                    GetValueMD5Row &= "Format(." & ColName & ", ""yyyy-MM-dd HH:mm:ss.fff"")"
+                Case Field.DataCategoryEnum.DecValue
+                    GetValueMD5Row &= "Math.Round(." & ColName & ",6).ToString"
+                Case Field.DataCategoryEnum.OtherValue
+                    GetValueMD5Row &= "." & ColName
+                Case Field.DataCategoryEnum.StrValue
+                    GetValueMD5Row &= "." & ColName
+                Case Field.DataCategoryEnum.LongValue, Field.DataCategoryEnum.IntValue
+                    GetValueMD5Row &= "CStr(." & ColName & ")"
+                Case Else
+            End Select
+            GetValueMD5Row &= " & "">"""
+        Catch ex As Exception
+            Me.SetSubErrInf("GetValueMD5Row", ex)
             Return ""
         End Try
     End Function
