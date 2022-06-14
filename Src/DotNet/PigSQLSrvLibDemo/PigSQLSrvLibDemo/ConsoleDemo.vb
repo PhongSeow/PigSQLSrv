@@ -755,7 +755,7 @@ Public Class ConsoleDemo
                     If Me.SQLSrvTools IsNot Nothing Then
                         Me.PigConsole.GetLine("Input table or view name", Me.TableName)
                         Me.PigConsole.GetLine("Input NotMathFillByRsList ,separated by ','", Me.NotMathFillByRsList)
-                        'Me.PigConsole.GetLine("Input NotMathMD5List ,separated by ','", Me.NotMathMD5List)
+                        Me.PigConsole.GetLine("Input NotMathMD5List ,separated by ','", Me.NotMathMD5List)
                         Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
                         Me.Ret = Me.SQLSrvTools.GetTableOrView2VBCode(Me.TableName, Me.VBCode, Me.NotMathFillByRsList, Me.NotMathMD5List)
                         If Me.Ret <> "OK" Then
