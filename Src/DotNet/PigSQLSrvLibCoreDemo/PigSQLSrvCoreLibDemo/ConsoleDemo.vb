@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.16.1
+'* Version: 1.17.2
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -20,6 +20,7 @@
 '* 1.14	30/4/2022	Modify MainSet
 '* 1.15	1/5/2022	Modify MainSet
 '* 1.16	9/6/2022	Add SQLSrvToolsDemo
+'* 1.17	23/6/2022	Modify SQLSrvToolsDemo
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -757,7 +758,12 @@ Public Class ConsoleDemo
                         Me.PigConsole.GetLine("Input NotMathFillByRsList ,separated by ','", Me.NotMathFillByRsList)
                         Me.PigConsole.GetLine("Input NotMathMD5List ,separated by ','", Me.NotMathMD5List)
                         Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
-                        Me.Ret = Me.SQLSrvTools.GetTableOrView2VBCode(Me.TableName, Me.VBCode, Me.NotMathFillByRsList, Me.NotMathMD5List)
+                        Dim bolIsSimpleProperty As Boolean = Me.PigConsole.IsYesOrNo("Is Simple Property")
+                        Dim bolIsSetUpdateTime As Boolean
+                        If bolIsSimpleProperty = False Then
+                            bolIsSetUpdateTime = Me.PigConsole.IsYesOrNo("Is Set UpdateTime")
+                        End If
+                        Me.Ret = Me.SQLSrvTools.GetTableOrView2VBCode(Me.TableName, Me.VBCode, Me.NotMathFillByRsList, Me.NotMathMD5List, bolIsSimpleProperty, bolIsSetUpdateTime)
                         If Me.Ret <> "OK" Then
                             Console.WriteLine(Me.Ret)
                         Else
