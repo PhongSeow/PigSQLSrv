@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.6
+'* Version: 1.8
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -13,6 +13,8 @@
 '* 1.4		6/6/2021    Imports PigToolsLiteLib
 '* 1.5		9/6/2021    Add GetTableOrView2VBCode,DataCategory2VBDataType,SQLSrvTypeDataCategory
 '* 1.6		13/6/2021   Modif GetTableOrView2VBCode, add DataCategory2StrValue
+'* 1.7		17/6/2021   Add GetTableOrView2SQLFragment
+'* 1.8		23/6/2021   Modify GetTableOrView2VBCode
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -24,7 +26,7 @@ Imports PigToolsLiteLib
 
 Public Class SQLSrvTools
     Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.6.3"
+    Private Const CLS_VERSION As String = "1.8.6"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum enmDBObjType
@@ -236,8 +238,10 @@ Public Class SQLSrvTools
     ''' <param name="TableOrViewName">表或视图名|Table or view name</param>
     ''' <param name="OutVBCode">输出的VB代码|Exported VB code</param>
     ''' <param name="NotMathMD5List">不匹配MD5的列名列表，以,分隔|List of column names that do not match MD5, separated by ","</param>
+    ''' <param name="IsSimpleProperty">是否使用简单属性代码|Whether to use simple attribute code</param>
+    ''' <param name="IsSetUpdateTime">是否设置更新时间|Is set update time</param>
     ''' <returns></returns>
-    Public Function GetTableOrView2VBCode(TableOrViewName As String, ByRef OutVBCode As String, Optional NotMathFillByRsList As String = "", Optional NotMathMD5List As String = "") As String
+    Public Function GetTableOrView2VBCode(TableOrViewName As String, ByRef OutVBCode As String, Optional NotMathFillByRsList As String = "", Optional NotMathMD5List As String = "", Optional IsSimpleProperty As Boolean = True, Optional IsSetUpdateTime As Boolean = False) As String
         Dim LOG As New PigStepLog("GetTableOrView2VBCode")
         Try
             OutVBCode = "Imports PigToolsLiteLib" & vbCrLf
@@ -251,6 +255,7 @@ Public Class SQLSrvTools
             OutVBCode &= vbTab & "Private Const CLS_VERSION As String = ""1.0.0""" & vbCrLf
 
             Dim strPublic As String = ""
+            Dim strProperty As String = ""
             Dim strValueMD5 As String = ""
             Dim strFillByRs As String = ""
             If NotMathFillByRsList <> "" Then
@@ -293,6 +298,38 @@ Public Class SQLSrvTools
                         OutVBCode &= vbTab & vbTab & "Me." & strColumn_name & " = " & strColumn_name & vbCrLf
                         OutVBCode &= vbTab & "End Sub" & vbCrLf
                         strPublic &= vbTab & "Public ReadOnly Property " & strColumn_name & " As " & strVBDataType & vbCrLf
+                        strProperty &= vbTab & "Public ReadOnly Property " & strColumn_name & " As " & strVBDataType & vbCrLf
+                        If IsSimpleProperty = False And IsSetUpdateTime = True Then
+                            strProperty &= vbTab & "Private mUpdateTime As DateTime = #1/1/1900#" & vbCrLf
+                            strProperty &= vbTab & "Public Property UpdateTime() As DateTime" & vbCrLf
+                            strProperty &= vbTab & vbTab & "Get" & vbCrLf
+                            strProperty &= vbTab & vbTab & vbTab & "Return mUpdateTime" & vbCrLf
+                            strProperty &= vbTab & vbTab & "End Get" & vbCrLf
+                            strProperty &= vbTab & vbTab & "Friend Set(ByVal value As DateTime)" & vbCrLf
+                            strProperty &= vbTab & vbTab & vbTab & "mUpdateTime = value" & vbCrLf
+                            strProperty &= vbTab & vbTab & "End Set" & vbCrLf
+                            strProperty &= vbTab & "End Property" & vbCrLf
+                        End If
+                        'If IsSimpleProperty = True Then
+                        '    strPublic &= vbTab & "Public ReadOnly Property " & strColumn_name & " As " & strVBDataType & vbCrLf
+                        'Else
+                        '    strProperty &= vbTab & "Private m" & strColumn_name & " As " & strVBDataType & vbCrLf
+                        '    strProperty &= vbTab & "Public Property " & strColumn_name & "() As " & strVBDataType & vbCrLf
+                        '    strProperty &= vbTab & vbTab & "Get" & vbCrLf
+                        '    strProperty &= vbTab & vbTab & vbTab & "Return m" & strColumn_name & vbCrLf
+                        '    strProperty &= vbTab & vbTab & "End Get" & vbCrLf
+                        '    strProperty &= vbTab & vbTab & "Friend Set(ByVal value As " & strVBDataType & ")" & vbCrLf
+                        '    If IsSetUpdateTime = True Then
+                        '        strProperty &= vbTab & vbTab & vbTab & "If value <> m" & strColumn_name & " Then" & vbCrLf
+                        '        strProperty &= vbTab & vbTab & vbTab & vbTab & "Me.UpdateTime = Now" & vbCrLf
+                        '        strProperty &= vbTab & vbTab & vbTab & vbTab & "m" & strColumn_name & " = value" & vbCrLf
+                        '        strProperty &= vbTab & vbTab & vbTab & "End If" & vbCrLf
+                        '    Else
+                        '        strProperty &= vbTab & vbTab & vbTab & vbTab & "m" & strColumn_name & " = value" & vbCrLf
+                        '    End If
+                        '    strProperty &= vbTab & vbTab & "End Set" & vbCrLf
+                        '    strProperty &= vbTab & "End Property" & vbCrLf
+                        'End If
                         strFillByRs &= vbTab & "Friend Function fFillByRs(ByRef InRs As Recordset) As String" & vbCrLf
                         strFillByRs &= vbTab & vbTab & "Try" & vbCrLf
                         strFillByRs &= vbTab & vbTab & vbTab & "If InRs.EOF = False Then" & vbCrLf
@@ -305,7 +342,28 @@ Public Class SQLSrvTools
                         strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "With Me" & vbCrLf
                         bolIsFrist = False
                     Else
-                        strPublic &= vbTab & "Public Property " & strColumn_name & " As " & strVBDataType & vbCrLf
+                        If IsSimpleProperty = True Then
+                            strPublic &= vbTab & "Public Property " & strColumn_name & " As " & strVBDataType & vbCrLf
+                        Else
+                            If strColumn_name <> "UpdateTime" Then
+                                strProperty &= vbTab & "Private m" & strColumn_name & " As " & strVBDataType & vbCrLf
+                                strProperty &= vbTab & "Public Property " & strColumn_name & "() As " & strVBDataType & vbCrLf
+                                strProperty &= vbTab & vbTab & "Get" & vbCrLf
+                                strProperty &= vbTab & vbTab & vbTab & "Return m" & strColumn_name & vbCrLf
+                                strProperty &= vbTab & vbTab & "End Get" & vbCrLf
+                                strProperty &= vbTab & vbTab & "Friend Set(ByVal value As " & strVBDataType & ")" & vbCrLf
+                                If IsSetUpdateTime = True Then
+                                    strProperty &= vbTab & vbTab & vbTab & "If value <> m" & strColumn_name & " Then" & vbCrLf
+                                    strProperty &= vbTab & vbTab & vbTab & vbTab & "Me.UpdateTime = Now" & vbCrLf
+                                    strProperty &= vbTab & vbTab & vbTab & vbTab & "m" & strColumn_name & " = value" & vbCrLf
+                                    strProperty &= vbTab & vbTab & vbTab & "End If" & vbCrLf
+                                Else
+                                    strProperty &= vbTab & vbTab & vbTab & vbTab & "m" & strColumn_name & " = value" & vbCrLf
+                                End If
+                                strProperty &= vbTab & vbTab & "End Set" & vbCrLf
+                                strProperty &= vbTab & "End Property" & vbCrLf
+                            End If
+                        End If
                         If InStr(NotMathFillByRsList, "," & strColumn_name & ",") = 0 Then
                             strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "If .IsItemExists(""" & strColumn_name & """) = True Then Me." & strColumn_name & " = .Item(""" & strColumn_name & """)." & strValueType & vbCrLf
                         End If
@@ -336,7 +394,11 @@ Public Class SQLSrvTools
                 strValueMD5 &= vbTab & vbTab & "End Get" & vbCrLf
                 strValueMD5 &= vbTab & "End Property" & vbCrLf
             End With
-            OutVBCode &= vbCrLf & strPublic & vbCrLf
+            If IsSimpleProperty = True Then
+                OutVBCode &= vbCrLf & strPublic & vbCrLf
+            Else
+                OutVBCode &= vbCrLf & strProperty & vbCrLf
+            End If
             OutVBCode &= vbCrLf & strFillByRs & vbCrLf
             OutVBCode &= vbCrLf & strValueMD5 & vbCrLf
             OutVBCode &= "End Class" & vbCrLf
@@ -449,5 +511,109 @@ Public Class SQLSrvTools
         End Try
     End Function
 
+    Public Enum EnmWhatFragment
+        Unknow = 0
+        SpInParas = 10
+    End Enum
+
+
+    '''' <summary>
+    '''' 生成表或视图对应的SQL语句片段
+    '''' </summary>
+    '''' <param name="TableOrViewName">表或视图名|Table or view name</param>
+    '''' <param name="EnmWhatFragment">什么片段</param>
+    '''' <param name="NotMathColList">不需要的列名列表，以,分隔</param>
+    '''' <returns></returns>
+    'Public Function GetTableOrView2SQLFragment(TableOrViewName As String, EnmWhatFragment As EnmWhatFragment, ByRef OutSQLFragment As String, Optional NotMathColList As String = "") As String
+    '    Dim LOG As New PigStepLog("GetTableOrView2SQLFragment")
+    '    Try
+    '        If NotMathFillByRsList <> "" Then
+    '            If Left(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList = "," & NotMathFillByRsList
+    '            If Right(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList &= ","
+    '        End If
+    '        LOG.StepName = "New CmdSQLSrvSp"
+    '        Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_help")
+    '        With oCmdSQLSrvSp
+    '            LOG.StepName = "Set ActiveConnection"
+    '            .ActiveConnection = Me.moConnSQLSrv.Connection
+    '            If .LastErr <> "" Then
+    '                LOG.AddStepNameInf("sp_help")
+    '                Throw New Exception(.LastErr)
+    '            End If
+    '            .AddPara("@objname", SqlDbType.NVarChar)
+    '            .ParaValue("@objname") = TableOrViewName
+    '            LOG.StepName = "New CmdSQLSrvSp"
+    '            Dim rs As Recordset = .Execute()
+    '            If .LastErr <> "" Then
+    '                LOG.AddStepNameInf(.DebugStr)
+    '                Throw New Exception(.LastErr)
+    '            End If
+    '            LOG.StepName = "NextRecordset"
+    '            rs = rs.NextRecordset
+    '            Dim bolIsFrist As Boolean = True
+    '            Do While Not rs.EOF
+    '                Dim strColumn_name As String = rs.Fields.Item("Column_name").StrValue
+    '                Dim strType As String = rs.Fields.Item("Type").StrValue
+    '                Dim intDataCategory As Field.DataCategoryEnum = Me.SQLSrvTypeDataCategory(strType)
+    '                Dim strVBDataType As String = Me.DataCategory2VBDataType(intDataCategory)
+    '                Dim strValueType As String = Me.DataCategory2ValueType(intDataCategory)
+    '                If bolIsFrist = True Then
+    '                    OutVBCode &= vbTab & "Public Sub New(" & strColumn_name & " As " & strVBDataType & ")" & vbCrLf
+    '                    OutVBCode &= vbTab & vbTab & "MyBase.New(CLS_VERSION)" & vbCrLf
+    '                    OutVBCode &= vbTab & vbTab & "Me." & strColumn_name & " = " & strColumn_name & vbCrLf
+    '                    OutVBCode &= vbTab & "End Sub" & vbCrLf
+    '                    strPublic &= vbTab & "Public ReadOnly Property " & strColumn_name & " As " & strVBDataType & vbCrLf
+    '                    strFillByRs &= vbTab & "Friend Function fFillByRs(ByRef InRs As Recordset) As String" & vbCrLf
+    '                    strFillByRs &= vbTab & vbTab & "Try" & vbCrLf
+    '                    strFillByRs &= vbTab & vbTab & vbTab & "If InRs.EOF = False Then" & vbCrLf
+    '                    strFillByRs &= vbTab & vbTab & vbTab & vbTab & "With InRs.Fields" & vbCrLf
+    '                    '-------
+    '                    strValueMD5 &= vbTab & "Friend ReadOnly Property ValueMD5(Optional TextType As PigMD5.enmTextType = PigMD5.enmTextType.UTF8) As String" & vbCrLf
+    '                    strValueMD5 &= vbTab & vbTab & "Get" & vbCrLf
+    '                    strValueMD5 &= vbTab & vbTab & vbTab & "Try" & vbCrLf
+    '                    strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Dim strText As String = """"" & vbCrLf
+    '                    strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "With Me" & vbCrLf
+    '                    bolIsFrist = False
+    '                Else
+    '                    strPublic &= vbTab & "Public Property " & strColumn_name & " As " & strVBDataType & vbCrLf
+    '                    If InStr(NotMathFillByRsList, "," & strColumn_name & ",") = 0 Then
+    '                        strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "If .IsItemExists(""" & strColumn_name & """) = True Then Me." & strColumn_name & " = .Item(""" & strColumn_name & """)." & strValueType & vbCrLf
+    '                    End If
+    '                    If InStr(NotMathMD5List, "," & strColumn_name & ",") = 0 Then
+    '                        strValueMD5 &= vbTab & vbTab & vbTab & vbTab & vbTab & Me.GetValueMD5Row(strColumn_name, intDataCategory) & vbCrLf
+    '                    End If
+    '                End If
+    '                LOG.StepName = "MoveNext"
+    '                rs.MoveNext()
+    '                If rs.LastErr <> "" Then Throw New Exception(rs.LastErr)
+    '            Loop
+    '            strFillByRs &= vbTab & vbTab & vbTab & vbTab & "End With" & vbCrLf
+    '            strFillByRs &= vbTab & vbTab & vbTab & "End If" & vbCrLf
+    '            strFillByRs &= vbTab & vbTab & vbTab & "Return ""OK""" & vbCrLf
+    '            strFillByRs &= vbTab & vbTab & "Catch ex As Exception" & vbCrLf
+    '            strFillByRs &= vbTab & vbTab & vbTab & "Return Me.GetSubErrInf(""fFillByRs"", ex)" & vbCrLf
+    '            strFillByRs &= vbTab & vbTab & "End Try" & vbCrLf
+    '            strFillByRs &= vbTab & "End Function" & vbCrLf
+    '            '-------
+    '            strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "End With" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Dim oPigMD5 As New PigMD5(strText, TextType)" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "ValueMD5 = oPigMD5.MD5" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "oPigMD5 = Nothing" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & vbTab & "Catch ex As Exception" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Me.SetSubErrInf(""ValueMD5"", ex)" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Return """"" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & vbTab & "End Try" & vbCrLf
+    '            strValueMD5 &= vbTab & vbTab & "End Get" & vbCrLf
+    '            strValueMD5 &= vbTab & "End Property" & vbCrLf
+    '        End With
+    '        OutVBCode &= vbCrLf & strPublic & vbCrLf
+    '        OutVBCode &= vbCrLf & strFillByRs & vbCrLf
+    '        OutVBCode &= vbCrLf & strValueMD5 & vbCrLf
+    '        OutVBCode &= "End Class" & vbCrLf
+    '        Return "OK"
+    '    Catch ex As Exception
+    '        Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+    '    End Try
+    'End Function
 
 End Class
