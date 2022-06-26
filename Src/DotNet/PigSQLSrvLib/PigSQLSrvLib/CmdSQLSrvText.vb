@@ -186,16 +186,16 @@ Public Class CmdSQLSrvText
 								End If
 								strDebugStr &= .ParameterName & "="
 								Select Case GetDataCategoryBySqlDbType(.SqlDbType)
-									Case Field.DataCategoryEnum.BooleanValue
-										strDebugStr &= CStr(.Value)
-									Case Field.DataCategoryEnum.DateValue
-										strDebugStr &= mSQLStr(.Value.ToString)
-									Case Field.DataCategoryEnum.IntValue, Field.DataCategoryEnum.DecValue
-										strDebugStr &= CStr(.Value)
-									Case Field.DataCategoryEnum.StrValue
-										strDebugStr &= mSQLStr(.Value.ToString)
-									Case Field.DataCategoryEnum.OtherValue
-										strDebugStr &= mSQLStr(.Value.ToString)
+                                    Case Field.EnumDataCategory.BooleanValue
+                                        strDebugStr &= CStr(.Value)
+                                    Case Field.EnumDataCategory.DateValue
+                                        strDebugStr &= mSQLStr(.Value.ToString)
+                                    Case Field.EnumDataCategory.IntValue, Field.EnumDataCategory.DecValue
+                                        strDebugStr &= CStr(.Value)
+                                    Case Field.EnumDataCategory.StrValue
+                                        strDebugStr &= mSQLStr(.Value.ToString)
+                                    Case Field.EnumDataCategory.OtherValue
+                                        strDebugStr &= mSQLStr(.Value.ToString)
 								End Select
 							End If
 						End With

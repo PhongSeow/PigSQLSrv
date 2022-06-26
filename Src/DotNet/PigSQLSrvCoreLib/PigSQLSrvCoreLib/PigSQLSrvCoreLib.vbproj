@@ -4,7 +4,7 @@
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.1.68</Version>
+    <Version>2.2.32</Version>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
     <Description>An interface class library specially designed for MS-SQL server.
@@ -14,6 +14,7 @@ Support automatic switch connection of mirror database for high availability.
 Support the transformation of query results into JSON.
 Support cache query.
 Database connection management.
+Generate SQL statements or VB code for tables or views.
 It can run on Windows and Linux platforms.
 </Description>
     <Copyright>Copyright (c) 2021-2022 Seow Phong</Copyright>
@@ -23,14 +24,13 @@ It can run on Windows and Linux platforms.
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLib</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability JSON cache query</PackageTags>
-    <PackageReleaseNotes>Optimization generate VB class code corresponding to table or view.</PackageReleaseNotes>
+    <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability JSON cache query vbcode generate</PackageTags>
+    <PackageReleaseNotes>Add Generate SQL statement fragments corresponding to tables or views.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="4.1.0" />
-    <PackageReference Include="PigCmdLib" Version="1.9.50" />
-    <PackageReference Include="PigKeyCacheLib" Version="3.2.98" />
+    <PackageReference Include="PigKeyCacheLib" Version="3.2.110" />
   </ItemGroup>
 
   <ItemGroup>

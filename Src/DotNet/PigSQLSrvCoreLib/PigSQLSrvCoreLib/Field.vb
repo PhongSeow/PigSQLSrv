@@ -4,13 +4,14 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.2
+'* Version: 1.3
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
 '* 1.0.4	28/7/2021	Modify New,DataCategory, add FieldTypeName
 '* 1.1		29/8/2021   Add support for .net core
-'* 1.2		9/6/2022   Modify DataCategoryEnum,ValueForJSon
+'* 1.2		9/6/2022    Modify EnumDataCategory,ValueForJSon
+'* 1.3		24/6/2022   Rename DataCategoryEnum to EnumDataCategory
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -19,152 +20,152 @@ Imports System.Data.SqlClient
 Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
-	Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.2.2"
+    Inherits PigBaseMini
+    Private Const CLS_VERSION As String = "1.3.2"
 
 
-    Public Enum DataCategoryEnum
-		OtherValue = 0
-		StrValue = 10
-		IntValue = 20
-		DecValue = 30
-		BooleanValue = 40
-		DateValue = 50
+    Public Enum EnumDataCategory
+        OtherValue = 0
+        StrValue = 10
+        IntValue = 20
+        DecValue = 30
+        BooleanValue = 40
+        DateValue = 50
         LongValue = 60
     End Enum
 
 
     Public Sub New(Name As String, TypeName As String, FieldTypeName As String, Index As Long)
-		MyBase.New(CLS_VERSION)
-		Me.Name = Name
-		Me.Index = Index
-		Me.TypeName = TypeName
-		Me.FieldTypeName = FieldTypeName
-	End Sub
+        MyBase.New(CLS_VERSION)
+        Me.Name = Name
+        Me.Index = Index
+        Me.TypeName = TypeName
+        Me.FieldTypeName = FieldTypeName
+    End Sub
 
-	Public ReadOnly Property Name As String
-	Public ReadOnly Property Index As Long
-	Public ReadOnly Property TypeName As String
-	Public ReadOnly Property FieldTypeName As String
+    Public ReadOnly Property Name As String
+    Public ReadOnly Property Index As Long
+    Public ReadOnly Property TypeName As String
+    Public ReadOnly Property FieldTypeName As String
 
-	Public ReadOnly Property DataCategory() As DataCategoryEnum
-		Get
-			Try
-				Select Case Me.FieldTypeName
-					Case "String", "Guid"
-						DataCategory = DataCategoryEnum.StrValue
+    Public ReadOnly Property DataCategory() As EnumDataCategory
+        Get
+            Try
+                Select Case Me.FieldTypeName
+                    Case "String", "Guid"
+                        DataCategory = EnumDataCategory.StrValue
                     Case "Int32", "Int16"
-                        DataCategory = DataCategoryEnum.IntValue
+                        DataCategory = EnumDataCategory.IntValue
                     Case "Int64"
-                        DataCategory = DataCategoryEnum.LongValue
+                        DataCategory = EnumDataCategory.LongValue
                     Case "Boolean"
-                        DataCategory = DataCategoryEnum.BooleanValue
+                        DataCategory = EnumDataCategory.BooleanValue
                     Case "Decimal", "Double", "Single"
-                        DataCategory = DataCategoryEnum.DecValue
+                        DataCategory = EnumDataCategory.DecValue
                     Case "DateTime"
-                        DataCategory = DataCategoryEnum.DateValue
-					Case Else
-						DataCategory = DataCategoryEnum.OtherValue
-				End Select
-			Catch ex As Exception
-				Me.SetSubErrInf("DataCategory.Get", ex)
-				Return DataCategoryEnum.OtherValue
-			End Try
-		End Get
-	End Property
+                        DataCategory = EnumDataCategory.DateValue
+                    Case Else
+                        DataCategory = EnumDataCategory.OtherValue
+                End Select
+            Catch ex As Exception
+                Me.SetSubErrInf("DataCategory.Get", ex)
+                Return EnumDataCategory.OtherValue
+            End Try
+        End Get
+    End Property
 
-	Private mintSqlDbType As SqlDbType
-	Public ReadOnly Property Type() As SqlDbType
-		Get
-			Return mintSqlDbType
-		End Get
-	End Property
+    Private mintSqlDbType As SqlDbType
+    Public ReadOnly Property Type() As SqlDbType
+        Get
+            Return mintSqlDbType
+        End Get
+    End Property
 
 
-	Public ReadOnly Property DecValue() As Decimal
-		Get
-			Try
-				Return CDec(moValue)
-			Catch ex As Exception
-				Me.SetSubErrInf("DecValue.Get", ex)
-				Return Nothing
-			End Try
-		End Get
-	End Property
+    Public ReadOnly Property DecValue() As Decimal
+        Get
+            Try
+                Return CDec(moValue)
+            Catch ex As Exception
+                Me.SetSubErrInf("DecValue.Get", ex)
+                Return Nothing
+            End Try
+        End Get
+    End Property
 
-	Public ReadOnly Property DateValue() As DateTime
-		Get
-			Try
-				Return CDate(moValue)
-			Catch ex As Exception
-				Me.SetSubErrInf("DateValue.Get", ex)
-				Return DateTime.MinValue
-			End Try
-		End Get
-	End Property
+    Public ReadOnly Property DateValue() As DateTime
+        Get
+            Try
+                Return CDate(moValue)
+            Catch ex As Exception
+                Me.SetSubErrInf("DateValue.Get", ex)
+                Return DateTime.MinValue
+            End Try
+        End Get
+    End Property
 
-	Public ReadOnly Property StrValue() As String
-		Get
-			Try
-				Return CStr(moValue)
-			Catch ex As Exception
-				Me.SetSubErrInf("StrValue.Get", ex)
-				Return ""
-			End Try
-		End Get
-	End Property
+    Public ReadOnly Property StrValue() As String
+        Get
+            Try
+                Return CStr(moValue)
+            Catch ex As Exception
+                Me.SetSubErrInf("StrValue.Get", ex)
+                Return ""
+            End Try
+        End Get
+    End Property
 
-	Public ReadOnly Property LngValue() As Long
-		Get
-			Try
-				Return CLng(moValue)
-			Catch ex As Exception
-				Me.SetSubErrInf("LngValue.Get", ex)
-				Return 0
-			End Try
-		End Get
-	End Property
+    Public ReadOnly Property LngValue() As Long
+        Get
+            Try
+                Return CLng(moValue)
+            Catch ex As Exception
+                Me.SetSubErrInf("LngValue.Get", ex)
+                Return 0
+            End Try
+        End Get
+    End Property
 
-	Public ReadOnly Property IntValue() As Integer
-		Get
-			Try
-				Return CInt(moValue)
-			Catch ex As Exception
-				Me.SetSubErrInf("IntValue.Get", ex)
-				Return 0
-			End Try
-		End Get
-	End Property
+    Public ReadOnly Property IntValue() As Integer
+        Get
+            Try
+                Return CInt(moValue)
+            Catch ex As Exception
+                Me.SetSubErrInf("IntValue.Get", ex)
+                Return 0
+            End Try
+        End Get
+    End Property
 
-	Public ReadOnly Property BooleanValue() As Boolean
-		Get
-			Try
-				Return CBool(moValue)
-			Catch ex As Exception
-				Me.SetSubErrInf("BooleanValue.Get", ex)
-				Return False
-			End Try
-		End Get
-	End Property
+    Public ReadOnly Property BooleanValue() As Boolean
+        Get
+            Try
+                Return CBool(moValue)
+            Catch ex As Exception
+                Me.SetSubErrInf("BooleanValue.Get", ex)
+                Return False
+            End Try
+        End Get
+    End Property
 
-	Friend ReadOnly Property ValueForJSon() As Object
-		Get
-			Try
-				Select Case Me.DataCategory
-					Case DataCategoryEnum.BooleanValue
-						ValueForJSon = Me.BooleanValue
-					Case DataCategoryEnum.DateValue
-						ValueForJSon = Me.DateValue
-					Case DataCategoryEnum.DecValue
-						ValueForJSon = Me.DecValue
-					Case DataCategoryEnum.IntValue
-						ValueForJSon = Me.IntValue
-                    Case DataCategoryEnum.LongValue
+    Friend ReadOnly Property ValueForJSon() As Object
+        Get
+            Try
+                Select Case Me.DataCategory
+                    Case EnumDataCategory.BooleanValue
+                        ValueForJSon = Me.BooleanValue
+                    Case EnumDataCategory.DateValue
+                        ValueForJSon = Me.DateValue
+                    Case EnumDataCategory.DecValue
+                        ValueForJSon = Me.DecValue
+                    Case EnumDataCategory.IntValue
+                        ValueForJSon = Me.IntValue
+                    Case EnumDataCategory.LongValue
                         ValueForJSon = Me.LngValue
-                    Case DataCategoryEnum.OtherValue
+                    Case EnumDataCategory.OtherValue
                         ValueForJSon = Me.StrValue
-					Case DataCategoryEnum.StrValue
-						ValueForJSon = Me.StrValue
+                    Case EnumDataCategory.StrValue
+                        ValueForJSon = Me.StrValue
 					Case Else
 						ValueForJSon = Me.StrValue
 				End Select
