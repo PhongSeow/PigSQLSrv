@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.17.2
+'* Version: 1.18.3
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -21,6 +21,7 @@
 '* 1.15	1/5/2022	Modify MainSet
 '* 1.16	9/6/2022	Add SQLSrvToolsDemo
 '* 1.17	23/6/2022	Modify SQLSrvToolsDemo
+'* 1.18	24/6/2022	Modify SQLSrvToolsDemo
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -62,12 +63,16 @@ Public Class ConsoleDemo
     'Public DBConnDef As DBConnDef
     Public DBConnName As String
     Public MenuKey As String
+    Public MenuKey2 As String
     Public MenuDefinition As String
+    Public MenuDefinition2 As String
     Public SQLSrvTools As SQLSrvTools
-    Public VBCode As String
+    Public VBCodeOrSQLFragment As String
     Public NotMathFillByRsList As String
     Public NotMathMD5List As String
+    Public NotMathColList As String
     Public FilePath As String
+    Public WhatFragment As SQLSrvTools.EnmWhatFragment
 
     Public Sub MainFunc()
         Do While True
@@ -737,13 +742,14 @@ Public Class ConsoleDemo
     Public Sub SQLSrvToolsDemo()
         Do While True
             Console.Clear()
-            MenuDefinition = ""
-            Me.MenuDefinition &= "GetTableOrView2VBCode#Generate VB class code corresponding to table or view.|"
+            Me.MenuDefinition = ""
+            Me.MenuDefinition &= "GetTableOrView2VBCode#Generate VB class code corresponding to table or view|"
+            Me.MenuDefinition &= "GetTableOrView2SQLOrVBFragment#Generate SQL statement or VB code fragments corresponding to tables or views|"
             Me.PigConsole.SimpleMenu("SQLSrvToolsDemo", Me.MenuDefinition, Me.MenuKey, PigConsole.EnmSimpleMenuExitType.QtoUp)
             Select Case Me.MenuKey
                 Case ""
                     Exit Do
-                Case "GetTableOrView2VBCode"
+                Case "GetTableOrView2VBCode", "GetTableOrView2SQLOrVBFragment"
                     If Me.SQLSrvTools Is Nothing Then
                         If Me.ConnSQLSrv Is Nothing Then
                             Console.WriteLine("ConnSQLSrv Is Nothing")
@@ -754,22 +760,44 @@ Public Class ConsoleDemo
                         End If
                     End If
                     If Me.SQLSrvTools IsNot Nothing Then
-                        Me.PigConsole.GetLine("Input table or view name", Me.TableName)
-                        Me.PigConsole.GetLine("Input NotMathFillByRsList ,separated by ','", Me.NotMathFillByRsList)
-                        Me.PigConsole.GetLine("Input NotMathMD5List ,separated by ','", Me.NotMathMD5List)
-                        Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
-                        Dim bolIsSimpleProperty As Boolean = Me.PigConsole.IsYesOrNo("Is Simple Property")
-                        Dim bolIsSetUpdateTime As Boolean
-                        If bolIsSimpleProperty = False Then
-                            bolIsSetUpdateTime = Me.PigConsole.IsYesOrNo("Is Set UpdateTime")
-                        End If
-                        Me.Ret = Me.SQLSrvTools.GetTableOrView2VBCode(Me.TableName, Me.VBCode, Me.NotMathFillByRsList, Me.NotMathMD5List, bolIsSimpleProperty, bolIsSetUpdateTime)
-                        If Me.Ret <> "OK" Then
-                            Console.WriteLine(Me.Ret)
-                        Else
-                            Console.WriteLine("Save to " & Me.FilePath)
-                            Me.PigFunc.SaveTextToFile(Me.FilePath, Me.VBCode)
-                        End If
+                        Select Case Me.MenuKey
+                            Case "GetTableOrView2VBCode"
+                                Me.PigConsole.GetLine("Input table or view name", Me.TableName)
+                                Me.PigConsole.GetLine("Input NotMathFillByRsList ,separated by ','", Me.NotMathFillByRsList)
+                                Me.PigConsole.GetLine("Input NotMathMD5List ,separated by ','", Me.NotMathMD5List)
+                                Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
+                                Dim bolIsSimpleProperty As Boolean = Me.PigConsole.IsYesOrNo("Is Simple Property")
+                                Dim bolIsSetUpdateTime As Boolean
+                                If bolIsSimpleProperty = False Then
+                                    bolIsSetUpdateTime = Me.PigConsole.IsYesOrNo("Is Set UpdateTime")
+                                End If
+                                Me.Ret = Me.SQLSrvTools.GetTableOrView2VBCode(Me.TableName, Me.VBCodeOrSQLFragment, Me.NotMathFillByRsList, Me.NotMathMD5List, bolIsSimpleProperty, bolIsSetUpdateTime)
+                                If Me.Ret <> "OK" Then
+                                    Console.WriteLine(Me.Ret)
+                                Else
+                                    Console.WriteLine("Save to " & Me.FilePath)
+                                    Me.PigFunc.SaveTextToFile(Me.FilePath, Me.VBCodeOrSQLFragment)
+                                End If
+                            Case "GetTableOrView2SQLOrVBFragment"
+                                Me.PigConsole.GetLine("Input table or view name", Me.TableName)
+                                Me.PigConsole.GetLine("List of unwanted column names, separated by ','", Me.NotMathColList)
+                                Me.MenuDefinition2 = ""
+                                Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.SpInParas) & "#" & SQLSrvTools.EnmWhatFragment.SpInParas.ToString & "|"
+                                Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.SpInParasSetNull) & "#" & SQLSrvTools.EnmWhatFragment.SpInParasSetNull.ToString & "|"
+                                Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara.ToString & "|"
+                                Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_ParaValue) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_ParaValue.ToString & "|"
+                                Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue.ToString & "|"
+                                Me.PigConsole.SimpleMenu("Select WhatFragment", Me.MenuDefinition2, Me.MenuKey2, PigConsole.EnmSimpleMenuExitType.Null)
+                                Me.WhatFragment = CInt(Me.MenuKey2)
+                                Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
+                                Me.Ret = Me.SQLSrvTools.GetTableOrView2SQLOrVBFragment(Me.TableName, Me.WhatFragment, Me.VBCodeOrSQLFragment, Me.NotMathColList)
+                                If Me.Ret <> "OK" Then
+                                    Console.WriteLine(Me.Ret)
+                                Else
+                                    Console.WriteLine("Save to " & Me.FilePath)
+                                    Me.PigFunc.SaveTextToFile(Me.FilePath, Me.VBCodeOrSQLFragment)
+                                End If
+                        End Select
                     End If
             End Select
             Me.PigConsole.DisplayPause()
