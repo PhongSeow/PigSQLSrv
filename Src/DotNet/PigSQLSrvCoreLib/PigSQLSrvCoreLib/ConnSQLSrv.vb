@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.10
+'* Version: 1.12
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -20,6 +20,8 @@
 '* 1.8		28/12/2021	Increase initial value of internal variable
 '* 1.9		5/1/2022	Modify InitPigKeyValue
 '* 1.10		20/5/2022	Modify OpenOrKeepActive
+'* 1.11		2/7/2022	Use PigBaseLocal
+'* 1.12		2/7/2022	Use PigBaseLocal, modify IsDBConnReady
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -31,8 +33,8 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
-	Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.10.3"
+    Inherits PigBaseLocal
+    Private Const CLS_VERSION As String = "1.12.2"
     Public Connection As SqlConnection
 	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
@@ -459,15 +461,20 @@ Public Class ConnSQLSrv
 
 	Public ReadOnly Property IsDBConnReady() As Boolean
 		Get
-			Try
-				Select Case Me.ConnStatus
-					Case ConnStatusEnum.PrincipalOnline, ConnStatusEnum.MirrorOnline
-						Return True
-					Case Else
-						Return False
-				End Select
+            Try
+                IsDBConnReady = False
+				If Me.Connection IsNot Nothing Then
+					If Me.Connection.State = ConnectionState.Open Then
+                        Select Case Me.ConnStatus
+                            Case ConnStatusEnum.PrincipalOnline, ConnStatusEnum.MirrorOnline
+                                Return True
+                            Case Else
+                                Return False
+                        End Select
+                    End If
+                End If
 			Catch ex As Exception
-				Me.SetSubErrInf("IsDBConnReady", ex)
+                Me.SetSubErrInf("IsDBConnReady", ex)
 				Return False
 			End Try
 		End Get

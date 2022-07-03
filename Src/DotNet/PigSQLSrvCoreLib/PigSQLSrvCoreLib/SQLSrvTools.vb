@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.10
+'* Version: 1.12
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -17,6 +17,8 @@
 '* 1.8		23/6/2021   Modify GetTableOrView2VBCode, add DataTypeStr,SpHelpFields2SQLSrvTypeStr
 '* 1.9		25/6/2021   Modify GetTableOrView2VBCode
 '* 1.10		26/6/2021   Modify GetTableOrView2VBCode
+'* 1.11		1/7/2021   Modify GetTableOrView2SQLOrVBFragment
+'* 1.12		2/7/2022	Use PigBaseLocal
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -27,8 +29,8 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 
 Public Class SQLSrvTools
-    Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.10.3"
+    Inherits PigBaseLocal
+    Private Const CLS_VERSION As String = "1.12.1"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum EnmDBObjType
@@ -253,7 +255,7 @@ Public Class SQLSrvTools
             OutVBCode &= "Imports PigSQLSrvCoreLib" & Me.OsCrLf
 #End If
             OutVBCode &= "Public Class " & TableOrViewName & Me.OsCrLf
-            OutVBCode &= vbTab & "Inherits PigBaseMini" & Me.OsCrLf
+            OutVBCode &= vbTab & "Inherits PigBaseLocal" & Me.OsCrLf
             OutVBCode &= vbTab & "Private Const CLS_VERSION As String = ""1.0.0""" & Me.OsCrLf
 
             Dim strPublic As String = ""
@@ -600,15 +602,24 @@ Public Class SQLSrvTools
     Public Enum EnmWhatFragment
         Unknow = 0
         ''' <summary>
-        ''' 存储过程的输入参数|
+        ''' 存储过程的输入参数|Input parameters of stored procedure
         ''' </summary>
         SpInParas = 1
         ''' <summary>
-        ''' 存储过程的输入参数预设空值|
+        ''' 存储过程的输入参数预设空值|Preset null value for input parameter of stored procedure
         ''' </summary>
         SpInParasSetNull = 2
+        ''' <summary>
+        ''' 调用 CmdSQLSrvSp 或 CmdSQLSrvText 的 AddPara 方法的VB代码|VB code calling AddPara of CmdSQLSrvSp or CmdSQLSrvText
+        ''' </summary>
         CmdSQLSrvSpOrCmdSQLSrvText_AddPara = 3
+        ''' <summary>
+        ''' 调用 CmdSQLSrvSp 或 CmdSQLSrvText 的 ParaValue 方法的VB代码|VB code calling ParaValue of CmdSQLSrvSp or CmdSQLSrvText
+        ''' </summary>
         CmdSQLSrvSpOrCmdSQLSrvText_ParaValue = 4
+        ''' <summary>
+        ''' 调用 CmdSQLSrvSp 或 CmdSQLSrvText 的 AddPara 和 ParaValue 方法的VB代码|VB code calling AddPara and ParaValue of CmdSQLSrvSp or CmdSQLSrvText
+        ''' </summary>
         CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue = 5
     End Enum
 
@@ -670,7 +681,7 @@ Public Class SQLSrvTools
                             OutFragment &= vbTab & vbTab & ".ParaValue(""@" & strColName & """) = InObj." & strColName & Me.OsCrLf
                             OutFragment &= vbTab & "End If" & Me.OsCrLf
                         Case EnmWhatFragment.SpInParas, EnmWhatFragment.SpInParasSetNull
-                            OutFragment &= vbTab & "," & strColName & " " & strSQLSrvTypeStr
+                            OutFragment &= vbTab & ",@" & strColName & " " & strSQLSrvTypeStr
                             Select Case WhatFragment
                                 Case EnmWhatFragment.SpInParasSetNull
                                     OutFragment &= " = NULL"

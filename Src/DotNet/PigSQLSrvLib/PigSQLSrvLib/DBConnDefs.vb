@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2022 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: DBConnDef 的集合类|Collection class of DBConnDef
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.8
+'* Version: 1.9
 '* Create Time: 1/2/2022
 '* 1.1	16/3/2022	Modify Add,AddOrGet
 '* 1.2	16/3/2022	Modify Add,AddOrGet
@@ -14,13 +14,14 @@
 '* 1.6	20/5/2022	Modify Add,AddOrGet
 '* 1.7	22/5/2022	Remove AddOrGet, Add Add
 '* 1.8	8/6/2022	Modify IsItemExists
+'* 1.9	2/7/2022	Use PigBaseLocal
 '************************************
 Imports PigToolsLiteLib
 
 Friend Class DBConnDefs
-    Inherits PigBaseMini
+    Inherits PigBaseLocal
     Implements IEnumerable(Of DBConnDef)
-    Private Const CLS_VERSION As String = "1.8.2"
+    Private Const CLS_VERSION As String = "1.9.2"
     Private ReadOnly moList As New List(Of DBConnDef)
 
     Friend fPigConfigApp As PigConfigApp

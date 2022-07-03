@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.7
+'* Version: 1.8
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -21,6 +21,7 @@
 '* 1.5		24/9/2021	Add KeyName,CacheQuery
 '* 1.6		8/10/2021	Modify CacheQuery
 '* 1.7		15/12/2021	Modify CacheQuery, and Rewrite the error handling code with LOG.
+'* 1.8		2/7/2022	Use PigBaseLocal
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -31,9 +32,9 @@ Imports Microsoft.Data.SqlClient
 #End If
 Imports PigToolsLiteLib
 Public Class CmdSQLSrvText
-	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.7.8"
-	Public Property SQLText As String
+	Inherits PigBaseLocal
+    Private Const CLS_VERSION As String = "1.8.1"
+    Public Property SQLText As String
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SQLText As String)

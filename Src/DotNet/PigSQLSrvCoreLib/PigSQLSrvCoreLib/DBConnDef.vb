@@ -4,19 +4,20 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Database connection definition
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.5
+'* Version: 1.6
 '* Create Time: 17/10/2021
 '* 1.1	1/2/2022	Modify New, add Properties
 '* 1.2	1/2/2022	Add IsTrustedConnection, mNew
 '* 1.3	10/4/2022	Add New, modify RunMode
 '* 1.4	20/5/2022	Add DBConnDesc
 '* 1.5	22/5/2022	Modify New, add fPigConfigSession
+'* 1.6	2/7/2022	Use PigBaseLocal
 '**********************************
 Imports PigToolsLiteLib
 
 Friend Class DBConnDef
-    Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.5.5"
+    Inherits PigBaseLocal
+    Private Const CLS_VERSION As String = "1.6.1"
 
     Friend fPigConfigSession As PigConfigSession
 

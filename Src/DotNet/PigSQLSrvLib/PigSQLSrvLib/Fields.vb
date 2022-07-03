@@ -4,17 +4,18 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Field 的集合类|Collection class of field
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.1
+'* Version: 1.2
 '* Create Time: 6/6/2021
 '* 1.0.2	21/7/2021	Modify Add
 '* 1.0.3	28/7/2021	Modify Add
 '* 1.1	8/6/2022	Add IsItemExists
+'* 1.2	2/7/2022	Use PigBaseLocal
 '************************************
 
 Public Class Fields
-    Inherits PigBaseMini
+    Inherits PigBaseLocal
     Implements IEnumerable(Of Field)
-    Private Const CLS_VERSION As String = "1.1.8"
+    Private Const CLS_VERSION As String = "1.2.1"
 
     Private moList As New List(Of Field)
 

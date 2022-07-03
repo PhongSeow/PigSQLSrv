@@ -33,8 +33,8 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 
 Public Class CmdSQLSrvSp
-	Inherits PigBaseMini
-	Private Const CLS_VERSION As String = "1.6.8"
+    Inherits PigBaseLocal
+    Private Const CLS_VERSION As String = "1.6.8"
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)

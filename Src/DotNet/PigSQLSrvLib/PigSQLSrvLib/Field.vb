@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.3
+'* Version: 1.5
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
@@ -12,6 +12,8 @@
 '* 1.1		29/8/2021   Add support for .net core
 '* 1.2		9/6/2022    Modify EnumDataCategory,ValueForJSon
 '* 1.3		24/6/2022   Rename DataCategoryEnum to EnumDataCategory
+'* 1.4		2/7/2022	Use PigBaseLocal
+'* 1.5		3/7/2022	Modify IntValue,LngValue,DecValue,DateValue,StrValue
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -20,8 +22,8 @@ Imports System.Data.SqlClient
 Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
-    Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.3.2"
+    Inherits PigBaseLocal
+    Private Const CLS_VERSION As String = "1.5.6"
 
 
     Public Enum EnumDataCategory
@@ -74,21 +76,27 @@ Public Class Field
         End Get
     End Property
 
-    Private mintSqlDbType As SqlDbType
-    Public ReadOnly Property Type() As SqlDbType
-        Get
-            Return mintSqlDbType
-        End Get
-    End Property
+    'Private mintSqlDbType As SqlDbType
+    'Public ReadOnly Property Type() As SqlDbType
+    '    Get
+    '        Return mintSqlDbType
+    '    End Get
+    'End Property
 
 
     Public ReadOnly Property DecValue() As Decimal
         Get
             Try
-                Return CDec(moValue)
+                If IsDBNull(moValue) = True Then
+                    Return 0
+                ElseIf IsNumeric(moValue) = True Then
+                    Return CDec(moValue)
+                Else
+                    Return 0
+                End If
             Catch ex As Exception
                 Me.SetSubErrInf("DecValue.Get", ex)
-                Return Nothing
+                Return 0
             End Try
         End Get
     End Property
@@ -96,10 +104,16 @@ Public Class Field
     Public ReadOnly Property DateValue() As DateTime
         Get
             Try
-                Return CDate(moValue)
+                If IsDBNull(moValue) = True Then
+                    Return #1/1/1900#
+                ElseIf IsDate(moValue) = True Then
+                    Return CDate(moValue)
+                Else
+                    Return #1/1/1900#
+                End If
             Catch ex As Exception
                 Me.SetSubErrInf("DateValue.Get", ex)
-                Return DateTime.MinValue
+                Return #1/1/1900#
             End Try
         End Get
     End Property
@@ -107,7 +121,11 @@ Public Class Field
     Public ReadOnly Property StrValue() As String
         Get
             Try
-                Return CStr(moValue)
+                If IsDBNull(moValue) = True Then
+                    Return ""
+                Else
+                    Return CStr(moValue)
+                End If
             Catch ex As Exception
                 Me.SetSubErrInf("StrValue.Get", ex)
                 Return ""
@@ -118,7 +136,13 @@ Public Class Field
     Public ReadOnly Property LngValue() As Long
         Get
             Try
-                Return CLng(moValue)
+                If IsDBNull(moValue) = True Then
+                    Return 0
+                ElseIf IsNumeric(moValue) = True Then
+                    Return CLng(moValue)
+                Else
+                    Return 0
+                End If
             Catch ex As Exception
                 Me.SetSubErrInf("LngValue.Get", ex)
                 Return 0
@@ -129,7 +153,13 @@ Public Class Field
     Public ReadOnly Property IntValue() As Integer
         Get
             Try
-                Return CInt(moValue)
+                If IsDBNull(moValue) = True Then
+                    Return 0
+                ElseIf IsNumeric(moValue) = True Then
+                    Return CInt(moValue)
+                Else
+                    Return 0
+                End If
             Catch ex As Exception
                 Me.SetSubErrInf("IntValue.Get", ex)
                 Return 0
@@ -140,7 +170,18 @@ Public Class Field
     Public ReadOnly Property BooleanValue() As Boolean
         Get
             Try
-                Return CBool(moValue)
+                If IsNumeric(moValue) = False Then
+                    Select Case UCase(moValue)
+                        Case "TRUE", "FALSE"
+                            Return CBool(moValue)
+                        Case Else
+                            Return False
+                    End Select
+                ElseIf IsDBNull(moValue) = True Then
+                    Return False
+                Else
+                    Return CBool(moValue)
+                End If
             Catch ex As Exception
                 Me.SetSubErrInf("BooleanValue.Get", ex)
                 Return False

@@ -3,7 +3,7 @@
 '* Author: Seow Phong
 '* Describe: Simple JSON class.
 '* Home Url: http://www.seowphong.com
-'* Version: 1.1
+'* Version: 1.2
 '* Create Time: 8/8/2019
 '* 1.0.2    10/8/2020   Code changed from VB6 to VB.NET
 '* 1.0.3    12/8/2020   Some Function debugging 
@@ -19,11 +19,12 @@
 '* 1.0.13   6/7/2021   Modify mLng2Date,AddEle,mDate2Lng
 '* 1.0.14   27/8/2021   Modify mLng2Date for NETCOREAPP3_1_OR_GREATER
 '* 1.1      14/9/2021  Modify xpJSonEleType,mAddJSonStr, and add AddOneObjectEle
+'* 1.2		2/7/2022	Use PigBaseLocal
 '*******************************************************
 Imports System.Text
 Public Class PigJSonLite
-    Inherits PigBaseMini
-    Private Const CLS_VERSION As String = "1.1.6"
+    Inherits PigBaseLocal
+    Private Const CLS_VERSION As String = "1.2.1"
 
     ''' <summary>The type of the JSON element</summary>
     Public Enum xpJSonEleType
