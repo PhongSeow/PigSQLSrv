@@ -621,6 +621,10 @@ Public Class SQLSrvTools
         ''' 调用 CmdSQLSrvSp 或 CmdSQLSrvText 的 AddPara 和 ParaValue 方法的VB代码|VB code calling AddPara and ParaValue of CmdSQLSrvSp or CmdSQLSrvText
         ''' </summary>
         CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue = 5
+        ''' <summary>
+        ''' 每列判断并更新|The columns of each data table are judged and updated
+        ''' </summary>
+        UpdatePerCol = 6
     End Enum
 
 
@@ -645,6 +649,8 @@ Public Class SQLSrvTools
                     OutFragment &= "Dim oCmdSQLSrvSp As New CmdSQLSrvSp(""SpName"")" & Me.OsCrLf
                     OutFragment &= "Dim oCmdSQLSrvText As New CmdSQLSrvText(""TextName"")" & Me.OsCrLf
                     OutFragment &= "With oCmdSQLSrvSpOrCmdSQLSrvText" & Me.OsCrLf
+                Case EnmWhatFragment.UpdatePerCol
+                    OutFragment &= "SET @Rows=0" & Me.OsCrLf
             End Select
             LOG.StepName = "New CmdSQLSrvSp"
             Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_help")
@@ -687,6 +693,12 @@ Public Class SQLSrvTools
                                     OutFragment &= " = NULL"
                             End Select
                             OutFragment &= Me.OsCrLf
+                        Case EnmWhatFragment.UpdatePerCol
+                            OutFragment &= "IF @" & strColName & " IS NOT NULL" & Me.OsCrLf
+                            OutFragment &= "BEGIN" & Me.OsCrLf
+                            OutFragment &= vbTab & "UPDATE TableName SET " & strColName & "=@" & strColName & " WHERE KeyID=@KeyID" & Me.OsCrLf
+                            OutFragment &= vbTab & "SET @Rows=@Rows+@@ROWCOUNT" & Me.OsCrLf
+                            OutFragment &= "END" & Me.OsCrLf
                     End Select
                     LOG.StepName = "MoveNext"
                     rs.MoveNext()
