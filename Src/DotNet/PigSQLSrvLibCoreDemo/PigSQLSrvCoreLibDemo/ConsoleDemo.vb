@@ -258,14 +258,14 @@ Public Class ConsoleDemo
                     Console.WriteLine("#################")
                     Console.WriteLine("Recordset.NextRecordset")
                     Console.WriteLine("#################")
-                    Me.RS2 = Me.RS.NextRecordset
+                    Me.RS = Me.RS.NextRecordset
                     If Me.RS.LastErr <> "" Then
                         Console.WriteLine("Error:" & Me.RS.LastErr)
-                    ElseIf Me.RS2 Is Nothing Then
+                    ElseIf Me.rs Is Nothing Then
                         Console.WriteLine("NextRecordset is nothing")
                     Else
                         Console.WriteLine("OK")
-                        Me.RS = Me.RS2
+                        'Me.RS = Me.RS2
                         With Me.RS
                             If .LastErr <> "" Then
                                 Console.WriteLine("Error:" & .LastErr)
@@ -502,7 +502,7 @@ Public Class ConsoleDemo
                             If .LastErr <> "" Then Console.WriteLine(.LastErr)
                             Console.WriteLine("Input TabName")
                             Dim strTabName As String = Console.ReadLine
-                            Console.WriteLine(".IsDatabaseExists(" & strTabName & ")=" & .IsDBObjExists(SQLSrvTools.enmDBObjType.UserTable, strTabName))
+                            Console.WriteLine(".IsDatabaseExists(" & strTabName & ")=" & .IsDBObjExists(SQLSrvTools.EnmDBObjType.UserTable, strTabName))
                             If .LastErr <> "" Then Console.WriteLine(.LastErr)
                             Console.WriteLine("Input DBUser")
                             Dim strDBUser As String = Console.ReadLine
@@ -787,6 +787,7 @@ Public Class ConsoleDemo
                                 Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara.ToString & "|"
                                 Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_ParaValue) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_ParaValue.ToString & "|"
                                 Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue.ToString & "|"
+                                Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.UpdatePerCol) & "#" & SQLSrvTools.EnmWhatFragment.UpdatePerCol.ToString & "|"
                                 Me.PigConsole.SimpleMenu("Select WhatFragment", Me.MenuDefinition2, Me.MenuKey2, PigConsole.EnmSimpleMenuExitType.Null)
                                 Me.WhatFragment = CInt(Me.MenuKey2)
                                 Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
