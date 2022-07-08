@@ -19,6 +19,7 @@
 '* 1.10		26/6/2021   Modify GetTableOrView2VBCode
 '* 1.11		1/7/2021   Modify GetTableOrView2SQLOrVBFragment
 '* 1.12		2/7/2022	Use PigBaseLocal
+'* 1.16		4/7/2022	Modify GetTableOrView2VBCode
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -320,6 +321,9 @@ Public Class SQLSrvTools
                             strProperty &= vbTab & vbTab & vbTab & "Return mUpdateCheck.HasUpdated" & Me.OsCrLf
                             strProperty &= vbTab & vbTab & "End Get" & Me.OsCrLf
                             strProperty &= vbTab & "End Property" & Me.OsCrLf
+                            strProperty &= vbTab & "Public Sub UpdateCheckClear()" & Me.OsCrLf
+                            strProperty &= vbTab & vbTab & "mUpdateCheck.Clear()" & Me.OsCrLf
+                            strProperty &= vbTab & "End Sub" & Me.OsCrLf
                         End If
                         strFillByRs &= vbTab & "Friend Function fFillByRs(ByRef InRs As Recordset) As String" & Me.OsCrLf
                         strFillByRs &= vbTab & vbTab & "Try" & Me.OsCrLf
@@ -625,6 +629,10 @@ Public Class SQLSrvTools
         ''' 每列判断并更新|The columns of each data table are judged and updated
         ''' </summary>
         UpdatePerCol = 6
+        ''' <summary>
+        ''' 调用存储过程的参数列表|Parameter list of calling stored procedure
+        ''' </summary>
+        ExecSpParas = 7
     End Enum
 
 
@@ -651,6 +659,8 @@ Public Class SQLSrvTools
                     OutFragment &= "With oCmdSQLSrvSpOrCmdSQLSrvText" & Me.OsCrLf
                 Case EnmWhatFragment.UpdatePerCol
                     OutFragment &= "SET @Rows=0" & Me.OsCrLf
+                Case EnmWhatFragment.ExecSpParas
+                    OutFragment &= "EXEC SpName "
             End Select
             LOG.StepName = "New CmdSQLSrvSp"
             Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_help")
@@ -699,6 +709,8 @@ Public Class SQLSrvTools
                             OutFragment &= vbTab & "UPDATE TableName SET " & strColName & "=@" & strColName & " WHERE KeyID=@KeyID" & Me.OsCrLf
                             OutFragment &= vbTab & "SET @Rows=@Rows+@@ROWCOUNT" & Me.OsCrLf
                             OutFragment &= "END" & Me.OsCrLf
+                        Case EnmWhatFragment.ExecSpParas
+                            OutFragment &= "@" & strColName & " = @" & strColName & ","
                     End Select
                     LOG.StepName = "MoveNext"
                     rs.MoveNext()
