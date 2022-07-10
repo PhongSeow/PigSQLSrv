@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.12
+'* Version: 1.13
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -22,6 +22,7 @@
 '* 1.10		20/5/2022	Modify OpenOrKeepActive
 '* 1.11		2/7/2022	Use PigBaseLocal
 '* 1.12		2/7/2022	Use PigBaseLocal, modify IsDBConnReady
+'* 1.13		9/7/2022	Add CacheQueryResTypeEnum
 '**********************************
 Imports System.Data
 Imports PigKeyCacheLib
@@ -34,12 +35,18 @@ Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.12.2"
+    Private Const CLS_VERSION As String = "1.13.1"
     Public Connection As SqlConnection
 	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
 
-	Public Enum ConnStatusEnum
+    Friend Enum CacheQueryResTypeEnum
+        XmlOutStr = 1
+        XmlOutRS = 2
+        JSon = 3
+    End Enum
+
+    Public Enum ConnStatusEnum
 		Unknow = 0
 		PrincipalOnline = 10
 		MirrorOnline = 20

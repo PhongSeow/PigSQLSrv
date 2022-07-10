@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.5
+'* Version: 1.6
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -17,6 +17,7 @@
 '* 1.3		15/12/2021	Rewrite the error handling code with LOG.
 '* 1.4		2/7/2022	Use PigBaseLocal
 '* 1.5		3/7/2022	Modify NextRecordset
+'* 1.6		9/7/2022	Add mRecordset2Xml,Recordset2Xml,AllRecordset2Xml
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -27,12 +28,19 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.5.6"
+    Private Const CLS_VERSION As String = "1.6.12"
     Private moSqlDataReader As SqlDataReader
+
 
     Public Sub New()
         MyBase.New(CLS_VERSION)
     End Sub
+
+    ''' <summary>
+    ''' 是否对字符串值去除前后空格|Whether to remove the space before and after the string value
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property IsStrValueTrim As Boolean = True
 
     Public Sub New(SqlDataReader As SqlDataReader)
         MyBase.New(CLS_VERSION)
@@ -135,10 +143,10 @@ Public Class Recordset
                 If Me.EOF = False Then
                     For i = 0 To Me.Fields.Count - 1
                         Dim oField As Field = Me.Fields.Item(i)
+                        oField.IsStrValueTrim = Me.IsStrValueTrim
                         Dim strName As String = oField.Name
                         Dim strValue As String = oField.ValueForJSon
                         If strName = "" Then strName = "Col" & (i + 1).ToString
-                        If Me.IsTrimJSonValue = True Then strValue = Trim(strValue)
                         If i = 0 Then
                             .AddEle(strName, strValue, True)
                         Else
@@ -171,6 +179,102 @@ Public Class Recordset
         Return Me.mRecordset2JSon(TopRows)
     End Function
 
+    ''' <summary>
+    ''' 获取当前结果集的列信息|Get the column information of the current result set
+    ''' </summary>
+    ''' <param name="OutXml">输出的XML片段|Output XML fragment</param>
+    ''' <returns></returns>
+    Private Function mGetRSColInfXml(ByRef OutXml) As String
+        Dim LOG As New PigStepLog("mGetRSColInfXml")
+        Try
+            LOG.StepName = "New PigXml"
+            Dim oPigXml As New PigXml(False)
+            If oPigXml.LastErr <> "" Then Throw New Exception(oPigXml.LastErr)
+            oPigXml.AddEleLeftSign("ColInf", True)
+            oPigXml.AddEleLeftAttribute("TotalCols", Me.Fields.Count.ToString)
+            oPigXml.AddEleLeftSignEnd()
+            For i = 0 To Me.Fields.Count - 1
+                Dim strCol As String = "Col" & i.ToString
+                LOG.StepName = "Add " & i.ToString
+                oPigXml.AddEleLeftSign(strCol, True)
+                With Me.Fields.Item(i)
+                    .IsStrValueTrim = Me.IsStrValueTrim
+                    oPigXml.AddEleLeftAttribute("TypeName", .TypeName)
+                    oPigXml.AddEleLeftAttribute("DataCategory", .DataCategory.ToString)
+                    oPigXml.AddEleLeftSignEnd()
+                    Dim strName As String = .Name
+                    If strName = "" Then strName = "Col" & i.ToString
+                    oPigXml.AddEleValue(strName)
+                End With
+                oPigXml.AddEleRightSign(strCol)
+                If oPigXml.LastErr <> "" Then Throw New Exception(oPigXml.LastErr)
+            Next
+            oPigXml.AddEleRightSign("ColInf")
+            OutXml = oPigXml.MainXmlStr
+            oPigXml = Nothing
+            Return "OK"
+        Catch ex As Exception
+            OutXml = ""
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
+    Public Function Recordset2Xml(ByRef OutXml As String, TopRows As Long) As String
+        Return Me.mRecordset2Xml(OutXml, TopRows)
+    End Function
+
+    Public Function Recordset2Xml(ByRef OutXml As String) As String
+        Return Me.mRecordset2Xml(OutXml)
+    End Function
+
+    Private Function mRecordset2Xml(ByRef OutXml As String, Optional TopRows As Long = -1, Optional RSNo As Integer = 0) As String
+        Dim LOG As New PigStepLog("mRecordset2Xml")
+        Try
+            Dim intRowNo As Integer = 1
+            LOG.StepName = "New PigXml"
+            Dim oPigXml As New PigXml(False)
+            If oPigXml.LastErr <> "" Then Throw New Exception(oPigXml.LastErr)
+            Do While Not Me.EOF
+                If intRowNo >= Me.MaxTopJSonOrXmlRows Then Exit Do
+                If TopRows > 0 Then
+                    If intRowNo >= TopRows Then Exit Do
+                End If
+                Dim strRow As String = "Row" & intRowNo.ToString
+                oPigXml.AddEleLeftSign(strRow)
+                For i = 0 To Me.Fields.Count - 1
+                    oPigXml.AddEle("Col" & i.ToString, Me.Fields.Item(i).ValueForJSon)
+                Next
+                intRowNo += 1
+                LOG.StepName = "MoveNext"
+                Me.MoveNext()
+                oPigXml.AddEleRightSign(strRow)
+                If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+            Loop
+            Dim strValue As String = oPigXml.MainXmlStr
+            Dim strRS As String = "RS"
+            If RSNo > 0 Then strRS &= RSNo.ToString
+            oPigXml.Clear()
+            oPigXml.AddEleLeftSign(strRS, True)
+            oPigXml.AddEleLeftAttribute("TotalRows", intRowNo)
+            oPigXml.AddEleLeftAttribute("IsEOF", Me.EOF)
+            oPigXml.AddEleLeftSignEnd()
+            Dim strColInfXml As String = ""
+            LOG.StepName = "mGetRSColInfXml"
+            LOG.Ret = Me.mGetRSColInfXml(strColInfXml)
+            If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+            oPigXml.AddEleValue(strColInfXml)
+            oPigXml.AddEleLeftSign("Rows")
+            oPigXml.AddEleValue(strValue)
+            oPigXml.AddEleRightSign("Rows")
+            oPigXml.AddEleRightSign(strRS)
+            OutXml = oPigXml.MainXmlStr
+            oPigXml = Nothing
+            Return "OK"
+        Catch ex As Exception
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
     Private Function mRecordset2JSon(Optional TopRows As Long = -1) As String
         Dim LOG As New PigStepLog("mRecordset2JSon")
         Try
@@ -180,7 +284,7 @@ Public Class Recordset
             If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
             pjMain.AddArrayEleBegin("ROW", True)
             Do While Not Me.EOF
-                If intRowNo >= Me.MaxToJSonRows Then Exit Do
+                If intRowNo >= Me.MaxTopJSonOrXmlRows Then Exit Do
                 If TopRows > 0 Then
                     If intRowNo >= TopRows Then Exit Do
                 End If
@@ -220,7 +324,7 @@ Public Class Recordset
             Dim pjMain As New PigJSonLite
             If pjMain.LastErr <> "" Then Throw New Exception(pjMain.LastErr)
             Do While Not Me.EOF
-                If intRowNo >= Me.MaxToJSonRows Then Exit Do
+                If intRowNo >= Me.MaxTopJSonOrXmlRows Then Exit Do
                 LOG.StepName = "Row2JSon"
                 Dim strRowJSon As String = Me.Row2JSon
                 If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
@@ -243,6 +347,66 @@ Public Class Recordset
         End Try
     End Function
 
+
+    Public Function AllRecordset2Xml(ByRef OutStr As String) As String
+        Dim LOG As New PigStepLog("AllRecordset2Xml")
+        Try
+            Dim oPigXml As New PigXml(False)
+            With oPigXml
+                .AddEleLeftSign("XmlRS")
+                Dim strXmlRS As String = "", intRSNo As Integer = 1
+                LOG.StepName = "mRecordset2Xml"
+                LOG.Ret = Me.mRecordset2Xml(strXmlRS, Me.MaxTopJSonOrXmlRows, intRSNo)
+                If LOG.Ret <> "OK" Then
+                    LOG.AddStepNameInf(intRSNo.ToString)
+                    Throw New Exception(LOG.Ret)
+                End If
+                .AddEleValue(strXmlRS)
+                Dim rsParent As Recordset = Nothing
+                Dim rsSub As Recordset = Me.NextRecordset
+                Do While rsSub IsNot Nothing
+                    intRSNo += 1
+                    LOG.StepName = "mRecordset2Xml"
+                    LOG.Ret = rsSub.mRecordset2Xml(strXmlRS, Me.MaxTopJSonOrXmlRows, intRSNo)
+                    If LOG.Ret <> "OK" Then
+                        LOG.AddStepNameInf(intRSNo.ToString)
+                        Throw New Exception(LOG.Ret)
+                    End If
+                    .AddEleValue(strXmlRS)
+                    rsParent = rsSub
+                    LOG.StepName = "rs.NextRecordset"
+                    rsSub = Nothing
+                    rsSub = rsParent.NextRecordset
+                    If rsParent.LastErr <> "" Then Exit Do
+                Loop
+                .AddEle("TotalRS", intRSNo.ToString)
+                .AddEleRightSign("XmlRS")
+                OutStr = .MainXmlStr
+            End With
+            oPigXml = Nothing
+            Return "OK"
+        Catch ex As Exception
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
+    Public Function AllRecordset2Xml(ByRef OutRS As XmlRS) As String
+        Dim LOG As New PigStepLog("AllRecordset2Xml")
+        Try
+            Dim strXml As String = ""
+            LOG.StepName = "AllRecordset2Xml(OutStr)"
+            LOG.Ret = Me.AllRecordset2Xml(strXml)
+            If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+            LOG.StepName = "New XmlRS"
+            OutRS = New XmlRS(strXml)
+            If OutRS.LastErr <> "" Then Throw New Exception(OutRS.LastErr)
+            Return "OK"
+        Catch ex As Exception
+            OutRS = Nothing
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
     ''' <summary>
     ''' Convert all recordset to JSON|所有结果集转换成JSON
     ''' </summary>
@@ -257,7 +421,7 @@ Public Class Recordset
             pjMain.AddArrayEleBegin("RS", True)
             Dim strRsJSon As String
             LOG.StepName = "Me.Recordset2JSon"
-            strRsJSon = Me.Recordset2JSon(Me.MaxToJSonRows)
+            strRsJSon = Me.Recordset2JSon(Me.MaxTopJSonOrXmlRows)
             If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
             pjMain.AddArrayEleValue(strRsJSon, True)
             intRSNo = 1
@@ -266,7 +430,7 @@ Public Class Recordset
             Dim rsSub As Recordset = Me.NextRecordset
             Do While Not rsSub Is Nothing
                 LOG.StepName = "rs.Recordset2JSon"
-                strRsJSon = rsSub.Recordset2JSon(Me.MaxToJSonRows)
+                strRsJSon = rsSub.Recordset2JSon(Me.MaxTopJSonOrXmlRows)
                 If rsSub.LastErr <> "" Then Throw New Exception(rsSub.LastErr)
                 pjMain.AddArrayEleValue(strRsJSon)
                 intRSNo += 1
@@ -291,13 +455,12 @@ Public Class Recordset
     ''' <summary>
     ''' Whether to remove the space before and after the value is converted to JSON
     ''' </summary>
-    Private mbolIsTrimJSonValue As Boolean = True
     Public Property IsTrimJSonValue() As Boolean
         Get
-            Return mbolIsTrimJSonValue
+            Return Me.IsStrValueTrim
         End Get
         Set(ByVal value As Boolean)
-            mbolIsTrimJSonValue = value
+            Me.IsStrValueTrim = value
         End Set
     End Property
 
@@ -370,17 +533,21 @@ Public Class Recordset
 		End Get
 	End Property
 
-	''' <summary>
-	''' The maximum number of rows to convert the Recordset to JSON
-	''' </summary>
-	Private mlngMaxToJSonRows As Long = 1024
-	Public Property MaxToJSonRows() As Long
-		Get
-			Return mlngMaxToJSonRows
-		End Get
-		Set(ByVal value As Long)
-			mlngMaxToJSonRows = value
-		End Set
-	End Property
+    ''' <summary>
+    ''' The maximum number of rows to convert the Recordset to JSON or XML
+    ''' </summary>
+    Public Property MaxTopJSonOrXmlRows As Long = 1024
+
+    ''' <summary>
+    ''' The maximum number of rows to convert the Recordset to JSON
+    ''' </summary>
+    Public Property MaxToJSonRows() As Long
+        Get
+            Return Me.MaxTopJSonOrXmlRows
+        End Get
+        Set(ByVal value As Long)
+            Me.MaxTopJSonOrXmlRows = value
+        End Set
+    End Property
 
 End Class

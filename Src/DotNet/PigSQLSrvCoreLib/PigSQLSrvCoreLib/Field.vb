@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.5
+'* Version: 1.6
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
@@ -14,6 +14,7 @@
 '* 1.3		24/6/2022   Rename DataCategoryEnum to EnumDataCategory
 '* 1.4		2/7/2022	Use PigBaseLocal
 '* 1.5		3/7/2022	Modify IntValue,LngValue,DecValue,DateValue,StrValue
+'* 1.6		10/7/2022	Modify ValueForJSon, add DateFormat, add IsStrValueTrim
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -23,7 +24,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.5.6"
+    Private Const CLS_VERSION As String = "1.6.10"
 
 
     Public Enum EnumDataCategory
@@ -45,10 +46,18 @@ Public Class Field
         Me.FieldTypeName = FieldTypeName
     End Sub
 
+    ''' <summary>
+    ''' 是否对字符串值去除前后空格|Whether to remove the space before and after the string value
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property IsStrValueTrim As Boolean = True
+
     Public ReadOnly Property Name As String
     Public ReadOnly Property Index As Long
     Public ReadOnly Property TypeName As String
     Public ReadOnly Property FieldTypeName As String
+
+    Public Property DateFormat As String = "yyyy-MM-dd HH:mm:ss.fff"
 
     Public ReadOnly Property DataCategory() As EnumDataCategory
         Get
@@ -123,6 +132,8 @@ Public Class Field
             Try
                 If IsDBNull(moValue) = True Then
                     Return ""
+                ElseIf Me.IsStrValueTrim = True Then
+                    Return Trim(CStr(moValue))
                 Else
                     Return CStr(moValue)
                 End If
@@ -194,15 +205,15 @@ Public Class Field
             Try
                 Select Case Me.DataCategory
                     Case EnumDataCategory.BooleanValue
-                        ValueForJSon = Me.BooleanValue
+                        ValueForJSon = Me.BooleanValue.ToString
                     Case EnumDataCategory.DateValue
-                        ValueForJSon = Me.DateValue
+                        ValueForJSon = Format(Me.DateValue, Me.DateFormat)
                     Case EnumDataCategory.DecValue
-                        ValueForJSon = Me.DecValue
+                        ValueForJSon = Me.DecValue.ToString
                     Case EnumDataCategory.IntValue
-                        ValueForJSon = Me.IntValue
+                        ValueForJSon = Me.IntValue.ToString
                     Case EnumDataCategory.LongValue
-                        ValueForJSon = Me.LngValue
+                        ValueForJSon = Me.LngValue.ToString
                     Case EnumDataCategory.OtherValue
                         ValueForJSon = Me.StrValue
                     Case EnumDataCategory.StrValue

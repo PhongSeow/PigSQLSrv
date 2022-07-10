@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "PigSQLSrvCoreLib/2.3.32": {
+      "PigSQLSrvCoreLib/2.5.18": {
         "dependencies": {
           "Microsoft.Data.SqlClient": "4.1.0",
           "PigKeyCacheLib": "3.3.8"
@@ -448,7 +448,7 @@
     }
   },
   "libraries": {
-    "PigSQLSrvCoreLib/2.3.32": {
+    "PigSQLSrvCoreLib/2.5.18": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -582,7 +582,7 @@
     "PigToolsLiteLib/2.9.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-twsGWLRT1PmLPx9y9JIW6mbkYSiw0Z1IVUFZfHgL63eJ/DevdIimRYYPrX5zvjiAZrp/Vls2RRzuHmfd/sbAGQ==",
+      "sha512": "sha512-P7LIBKMb6SBtRwDPDoP6qN1tibWred5bmJLErmqj2nyhE84vnISkVhG8FR8x1ntzVsYVrEopRyrRNiacNiap2Q==",
       "path": "pigtoolslitelib/2.9.2",
       "hashPath": "pigtoolslitelib.2.9.2.nupkg.sha512"
     },
