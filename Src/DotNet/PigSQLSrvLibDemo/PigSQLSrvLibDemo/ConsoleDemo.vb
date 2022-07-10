@@ -42,6 +42,7 @@ Public Class ConsoleDemo
     Public CmdSQLSrvText As CmdSQLSrvText
     Public ConnStr As String
     Public SQL As String
+    Public SpName As String
     Public RS As Recordset
     Public RS2 As Recordset
     Public DBSrv As String = "localhost"
@@ -725,10 +726,13 @@ Public Class ConsoleDemo
             'Me.MenuDefinition &= "MainSet#Database connection management|"
             Me.MenuDefinition &= "MainFunc#Main Function Demo|"
             Me.MenuDefinition &= "SQLSrvTools#SQLSrvTools Demo|"
+            Me.MenuDefinition &= "XmlDemo#Xml Demo|"
             Me.PigConsole.SimpleMenu("Main Menu", Me.MenuDefinition, Me.MenuKey, PigConsole.EnmSimpleMenuExitType.QtoExit)
             Select Case Me.MenuKey
                 Case ""
                     Exit Do
+                Case "XmlDemo"
+                    Me.XmlDemo()
                 Case "SQLSrvTools"
                     Me.SQLSrvToolsDemo()
                 Case "MainSet"
@@ -788,6 +792,7 @@ Public Class ConsoleDemo
                                 Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_ParaValue) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_ParaValue.ToString & "|"
                                 Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue) & "#" & SQLSrvTools.EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue.ToString & "|"
                                 Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.UpdatePerCol) & "#" & SQLSrvTools.EnmWhatFragment.UpdatePerCol.ToString & "|"
+                                Me.MenuDefinition2 &= CStr(SQLSrvTools.EnmWhatFragment.ExecSpParas) & "#" & SQLSrvTools.EnmWhatFragment.ExecSpParas.ToString & "|"
                                 Me.PigConsole.SimpleMenu("Select WhatFragment", Me.MenuDefinition2, Me.MenuKey2, PigConsole.EnmSimpleMenuExitType.Null)
                                 Me.WhatFragment = CInt(Me.MenuKey2)
                                 Me.PigConsole.GetLine("Input save filepath", Me.FilePath)
@@ -799,6 +804,69 @@ Public Class ConsoleDemo
                                     Me.PigFunc.SaveTextToFile(Me.FilePath, Me.VBCodeOrSQLFragment)
                                 End If
                         End Select
+                    End If
+            End Select
+            Me.PigConsole.DisplayPause()
+        Loop
+    End Sub
+
+    Public Sub XmlDemo()
+        Do While True
+            Console.Clear()
+            Me.MenuDefinition = ""
+            Me.MenuDefinition &= "TestCmdSQLSrvText#Test CmdSQLSrvText|"
+            Me.MenuDefinition &= "TestCmdSQLSrvSp#Test CmdSQLSrvSp|"
+            Me.PigConsole.SimpleMenu("SQLSrvToolsDemo", Me.MenuDefinition, Me.MenuKey, PigConsole.EnmSimpleMenuExitType.QtoUp)
+            Select Case Me.MenuKey
+                Case ""
+                    Exit Do
+                Case "TestCmdSQLSrvText"
+                    If Me.ConnSQLSrv Is Nothing Then
+                        Console.WriteLine("Me.ConnSQLSrv Is Nothing")
+                    Else
+                        Me.PigConsole.GetLine("Input SQL", Me.SQL)
+                        Dim oCmdSQLSrvText As New CmdSQLSrvText(Me.SQL)
+                        Console.WriteLine("CacheQuery")
+                        Dim strXml As String = ""
+                        Me.Ret = oCmdSQLSrvText.XmlCacheQuery(Me.ConnSQLSrv, strXml)
+                        If Me.Ret <> "OK" Then
+                            Console.WriteLine(Me.Ret)
+                        Else
+                            Console.WriteLine(strXml)
+                        End If
+                    End If
+                Case "TestCmdSQLSrvSp"
+                    If Me.ConnSQLSrv Is Nothing Then
+                        Console.WriteLine("Me.ConnSQLSrv Is Nothing")
+                    Else
+                        Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_helpdb")
+                        oCmdSQLSrvSp.AddPara("@dbname", SqlDbType.NVarChar)
+                        oCmdSQLSrvSp.ParaValue("@dbname") = "master"
+                        Dim strXml As String = ""
+                        Dim oXmlRS As XmlRS = Nothing
+                        Me.Ret = oCmdSQLSrvSp.XmlCacheQuery(Me.ConnSQLSrv, oXmlRS)
+                        If Me.Ret <> "OK" Then
+                            Console.WriteLine(Me.Ret)
+                        Else
+                            Console.WriteLine("TotalRS=" & oXmlRS.TotalRS)
+                            For i = 1 To oXmlRS.TotalRS
+                                Console.WriteLine("RS" & i)
+                                Console.WriteLine("ColInf")
+                                For j = 0 To oXmlRS.TotalCols(i) - 1
+                                    Console.WriteLine(j)
+                                    Console.WriteLine("ColName=" & oXmlRS.ColName(i, j))
+                                    Console.WriteLine("TypeName=" & oXmlRS.TypeName(i, j))
+                                    Console.WriteLine("DataCategory=" & oXmlRS.DataCategory(i, j))
+                                Next
+                                Console.WriteLine("TotalRows=" & oXmlRS.TotalRows(i))
+                                For k = 1 To oXmlRS.TotalRows(i)
+                                    Console.WriteLine("Row(" & k & ")")
+                                    For j = 0 To oXmlRS.TotalCols(i) - 1
+                                        Console.WriteLine(oXmlRS.ColName(i, j) & "=" & oXmlRS.StrValue(i, k, j))
+                                    Next
+                                Next
+                            Next
+                        End If
                     End If
             End Select
             Me.PigConsole.DisplayPause()
