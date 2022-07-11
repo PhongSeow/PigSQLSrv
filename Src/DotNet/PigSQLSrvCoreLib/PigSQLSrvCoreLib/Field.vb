@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.6
+'* Version: 1.7
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
@@ -15,6 +15,7 @@
 '* 1.4		2/7/2022	Use PigBaseLocal
 '* 1.5		3/7/2022	Modify IntValue,LngValue,DecValue,DateValue,StrValue
 '* 1.6		10/7/2022	Modify ValueForJSon, add DateFormat, add IsStrValueTrim
+'* 1.7		11/7/2022	Modify DataCategory
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -24,7 +25,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.6.10"
+    Private Const CLS_VERSION As String = "1.7.3"
 
 
     Public Enum EnumDataCategory
@@ -35,6 +36,7 @@ Public Class Field
         BooleanValue = 40
         DateValue = 50
         LongValue = 60
+        BinaryValue = 70
     End Enum
 
 
@@ -65,7 +67,7 @@ Public Class Field
                 Select Case Me.FieldTypeName
                     Case "String", "Guid"
                         DataCategory = EnumDataCategory.StrValue
-                    Case "Int32", "Int16"
+                    Case "Int32", "Int16", "Byte"
                         DataCategory = EnumDataCategory.IntValue
                     Case "Int64"
                         DataCategory = EnumDataCategory.LongValue
@@ -73,8 +75,10 @@ Public Class Field
                         DataCategory = EnumDataCategory.BooleanValue
                     Case "Decimal", "Double", "Single"
                         DataCategory = EnumDataCategory.DecValue
-                    Case "DateTime"
+                    Case "DateTime", "DateTimeOffset"
                         DataCategory = EnumDataCategory.DateValue
+                    Case "Byte[]"
+                        DataCategory = EnumDataCategory.BinaryValue
                     Case Else
                         DataCategory = EnumDataCategory.OtherValue
                 End Select

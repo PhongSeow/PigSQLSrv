@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.6
+'* Version: 1.7
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -18,6 +18,7 @@
 '* 1.4		2/7/2022	Use PigBaseLocal
 '* 1.5		3/7/2022	Modify NextRecordset
 '* 1.6		9/7/2022	Add mRecordset2Xml,Recordset2Xml,AllRecordset2Xml
+'* 1.7		11/7/2022	Modify mRecordset2Xml,AllRecordset2Xml,mGetRSColInfXml
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -28,7 +29,7 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.6.12"
+    Private Const CLS_VERSION As String = "1.7.3"
     Private moSqlDataReader As SqlDataReader
 
 
@@ -204,7 +205,7 @@ Public Class Recordset
                     oPigXml.AddEleLeftSignEnd()
                     Dim strName As String = .Name
                     If strName = "" Then strName = "Col" & i.ToString
-                    oPigXml.AddEleValue(strName)
+                    oPigXml.AddXmlFragment(strName)
                 End With
                 oPigXml.AddEleRightSign(strCol)
                 If oPigXml.LastErr <> "" Then Throw New Exception(oPigXml.LastErr)
@@ -230,11 +231,12 @@ Public Class Recordset
     Private Function mRecordset2Xml(ByRef OutXml As String, Optional TopRows As Long = -1, Optional RSNo As Integer = 0) As String
         Dim LOG As New PigStepLog("mRecordset2Xml")
         Try
-            Dim intRowNo As Integer = 1
+            Dim intRowNo As Integer = 0
             LOG.StepName = "New PigXml"
             Dim oPigXml As New PigXml(False)
             If oPigXml.LastErr <> "" Then Throw New Exception(oPigXml.LastErr)
             Do While Not Me.EOF
+                intRowNo += 1
                 If intRowNo >= Me.MaxTopJSonOrXmlRows Then Exit Do
                 If TopRows > 0 Then
                     If intRowNo >= TopRows Then Exit Do
@@ -244,7 +246,6 @@ Public Class Recordset
                 For i = 0 To Me.Fields.Count - 1
                     oPigXml.AddEle("Col" & i.ToString, Me.Fields.Item(i).ValueForJSon)
                 Next
-                intRowNo += 1
                 LOG.StepName = "MoveNext"
                 Me.MoveNext()
                 oPigXml.AddEleRightSign(strRow)
@@ -262,9 +263,9 @@ Public Class Recordset
             LOG.StepName = "mGetRSColInfXml"
             LOG.Ret = Me.mGetRSColInfXml(strColInfXml)
             If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
-            oPigXml.AddEleValue(strColInfXml)
+            oPigXml.AddXmlFragment(strColInfXml)
             oPigXml.AddEleLeftSign("Rows")
-            oPigXml.AddEleValue(strValue)
+            oPigXml.AddXmlFragment(strValue)
             oPigXml.AddEleRightSign("Rows")
             oPigXml.AddEleRightSign(strRS)
             OutXml = oPigXml.MainXmlStr
@@ -361,7 +362,7 @@ Public Class Recordset
                     LOG.AddStepNameInf(intRSNo.ToString)
                     Throw New Exception(LOG.Ret)
                 End If
-                .AddEleValue(strXmlRS)
+                .AddXmlFragment(strXmlRS)
                 Dim rsParent As Recordset = Nothing
                 Dim rsSub As Recordset = Me.NextRecordset
                 Do While rsSub IsNot Nothing
@@ -372,7 +373,7 @@ Public Class Recordset
                         LOG.AddStepNameInf(intRSNo.ToString)
                         Throw New Exception(LOG.Ret)
                     End If
-                    .AddEleValue(strXmlRS)
+                    .AddXmlFragment(strXmlRS)
                     rsParent = rsSub
                     LOG.StepName = "rs.NextRecordset"
                     rsSub = Nothing
@@ -482,7 +483,12 @@ Public Class Recordset
                 .Fields = New Fields
                 For i = 0 To moSqlDataReader.FieldCount - 1
                     LOG.StepName = "Fields.Add（" & i & ")"
-                    .Fields.Add(moSqlDataReader.GetName(i), moSqlDataReader.GetDataTypeName(i), moSqlDataReader.GetFieldType(i).Name, i)
+                    Dim strName As String = moSqlDataReader.GetName(i)
+                    Dim strTypeName As String = moSqlDataReader.GetDataTypeName(i)
+                    Dim oType As Type = moSqlDataReader.GetFieldType(i)
+                    Dim strFieldTypeName As String = ""
+                    If oType IsNot Nothing Then strFieldTypeName = oType.Name
+                    .Fields.Add(strName, strTypeName, strFieldTypeName, i)
                     If .Fields.LastErr <> "" Then Throw New Exception(.Fields.LastErr)
                 Next
                 If moSqlDataReader.HasRows = True Then
