@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.7
+'* Version: 1.8
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -19,17 +19,19 @@
 '* 1.5		3/7/2022	Modify NextRecordset
 '* 1.6		9/7/2022	Add mRecordset2Xml,Recordset2Xml,AllRecordset2Xml
 '* 1.7		11/7/2022	Modify mRecordset2Xml,AllRecordset2Xml,mGetRSColInfXml
+'* 1.8	    26/7/2022	Modify Imports
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
+Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-#End If
 Imports PigToolsLiteLib
+#End If
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.7.3"
+    Private Const CLS_VERSION As String = "1.8.2"
     Private moSqlDataReader As SqlDataReader
 
 
@@ -534,10 +536,10 @@ Public Class Recordset
     ''' </summary>
     Private mlngRecordsAffected As Long
     Public ReadOnly Property RecordsAffected() As Long
-		Get
-			Return mlngRecordsAffected
-		End Get
-	End Property
+        Get
+            Return mlngRecordsAffected
+        End Get
+    End Property
 
     ''' <summary>
     ''' The maximum number of rows to convert the Recordset to JSON or XML

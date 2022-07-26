@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.12
+'* Version: 1.17
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -20,18 +20,20 @@
 '* 1.11		1/7/2021   Modify GetTableOrView2SQLOrVBFragment
 '* 1.12		2/7/2022	Use PigBaseLocal
 '* 1.16		4/7/2022	Modify GetTableOrView2VBCode
+'* 1.17		26/7/2022	Modify Imports
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
+Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-#End If
 Imports PigToolsLiteLib
+#End If
 
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.12.1"
+    Private Const CLS_VERSION As String = "1.17.1"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum EnmDBObjType

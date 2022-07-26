@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.8
+'* Version: 1.9
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -24,19 +24,22 @@
 '* 1.6		15/12/2021	Modify CacheQuery, and Rewrite the error handling code with LOG.
 '* 1.7		9/7/2022	Modify CacheQuery, add mCacheQuery
 '* 1.8		10/7/2022	Add XmlCacheQuery, modify mCacheQuery,CacheQuery
+'* 1.9		26/7/2022	Modify Imports, modify KeyName
 '**********************************
 Imports System.Data
-Imports PigKeyCacheLib
 #If NETFRAMEWORK Then
+Imports PigKeyCacheFwkLib
+Imports PigToolsWinLib
 Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
-#End If
+Imports PigKeyCacheLib
 Imports PigToolsLiteLib
+#End If
 
 Public Class CmdSQLSrvSp
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.8.10"
+    Private Const CLS_VERSION As String = "1.9.2"
     Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
@@ -253,8 +256,8 @@ Public Class CmdSQLSrvSp
 	Public ReadOnly Property KeyName(Optional HeadPartName As String = "") As String
 		Get
 			Try
-				Dim oPigMD5 As New PigToolsLiteLib.PigMD5(Me.DebugStr, PigToolsLiteLib.PigMD5.enmTextType.UTF8)
-				KeyName = oPigMD5.PigMD5
+                Dim oPigMD5 As New PigMD5(Me.DebugStr, PigMD5.enmTextType.UTF8)
+                KeyName = oPigMD5.PigMD5
 				If HeadPartName <> "" Then KeyName = HeadPartName & "." & KeyName
 				oPigMD5 = Nothing
 			Catch ex As Exception
@@ -333,10 +336,10 @@ Public Class CmdSQLSrvSp
                     LOG.StepName = "New PigKeyValue"
                     Select Case ResType
                         Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
-                            oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutRS.PigXml.MainXmlStr, PigToolsLiteLib.PigText.enmTextType.UTF8, PigKeyValue.EnmSaveType.SaveSpace)
-                        Case Else
-                            oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutStr, PigToolsLiteLib.PigText.enmTextType.UTF8, PigKeyValue.EnmSaveType.SaveSpace)
-                    End Select
+							oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutRS.PigXml.MainXmlStr, PigText.enmTextType.UTF8, PigKeyValue.EnmSaveType.SaveSpace)
+						Case Else
+							oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutStr, PigText.enmTextType.UTF8, PigKeyValue.EnmSaveType.SaveSpace)
+					End Select
                     If oPigKeyValue.LastErr <> "" Then Throw New Exception(oPigKeyValue.LastErr)
                     LOG.StepName = "PigKeyValueApp.SavePigKeyValue"
 					.PigKeyValueApp.SavePigKeyValue(oPigKeyValue)

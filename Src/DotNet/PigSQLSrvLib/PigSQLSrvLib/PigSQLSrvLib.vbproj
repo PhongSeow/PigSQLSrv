@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>PigSQLSrvLib</RootNamespace>
-    <TargetFrameworks>net20;net30;net48;</TargetFrameworks>
+    <TargetFrameworks>net20;net30;net40;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
@@ -21,9 +21,9 @@ Support cache query.
 Database connection management.
 It can run on Windows platforms only.
 </Description>
-    <Version>2.5.30</Version>
+    <Version>2.5.38</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON mirror database cache query Database connection management DBConnMgr</PackageTags>
-    <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
+    <PackageReleaseNotes>Re support .Net 4.0, optimize and support imports processing of NetFrameWork and Core at the same time.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +38,7 @@ It can run on Windows platforms only.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigKeyCacheLib" Version="3.3.20" />
+    <PackageReference Include="PigKeyCacheFwkLib" Version="3.3.28" />
   </ItemGroup>
 
 </Project>
