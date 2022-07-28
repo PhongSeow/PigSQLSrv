@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.18.3
+'* Version: 1.19.5
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -22,18 +22,22 @@
 '* 1.16	9/6/2022	Add SQLSrvToolsDemo
 '* 1.17	23/6/2022	Modify SQLSrvToolsDemo
 '* 1.18	24/6/2022	Modify SQLSrvToolsDemo
+'* 1.19	27/6/2022	Modify Imports
 '**********************************
 Imports System.Data
-Imports PigKeyCacheLib
-Imports PigCmdLib
 #If NETFRAMEWORK Then
 Imports PigSQLSrvLib
 Imports System.Data.SqlClient
+Imports PigKeyCacheFwkLib
+Imports PigCmdFwkLib
+Imports PigToolsWinLib
 #Else
 Imports PigSQLSrvCoreLib
 Imports Microsoft.Data.SqlClient
-#End If
+Imports PigKeyCacheLib
+Imports PigCmdLib
 Imports PigToolsLiteLib
+#End If
 
 
 Public Class ConsoleDemo
