@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.19.5
+'* Version: 1.20.1
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -23,21 +23,19 @@
 '* 1.17	23/6/2022	Modify SQLSrvToolsDemo
 '* 1.18	24/6/2022	Modify SQLSrvToolsDemo
 '* 1.19	27/6/2022	Modify Imports
+'* 1.20	29/6/2022	Modify Imports
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports PigSQLSrvLib
 Imports System.Data.SqlClient
-Imports PigKeyCacheFwkLib
-Imports PigCmdFwkLib
-Imports PigToolsWinLib
 #Else
 Imports PigSQLSrvCoreLib
 Imports Microsoft.Data.SqlClient
+#End If
 Imports PigKeyCacheLib
 Imports PigCmdLib
 Imports PigToolsLiteLib
-#End If
 
 
 Public Class ConsoleDemo
@@ -266,7 +264,7 @@ Public Class ConsoleDemo
                     Me.RS = Me.RS.NextRecordset
                     If Me.RS.LastErr <> "" Then
                         Console.WriteLine("Error:" & Me.RS.LastErr)
-                    ElseIf Me.rs Is Nothing Then
+                    ElseIf Me.RS Is Nothing Then
                         Console.WriteLine("NextRecordset is nothing")
                     Else
                         Console.WriteLine("OK")
@@ -870,6 +868,9 @@ Public Class ConsoleDemo
                                     Next
                                 Next
                             Next
+                            Console.WriteLine("IsColExists(1,""db_size"")=" & oXmlRS.IsColExists(1, "db_size"))
+                            Console.WriteLine("IsColExists(1,""filename"")=" & oXmlRS.IsColExists(1, "filename"))
+                            Console.WriteLine("IsColExists(2,""filename"")=" & oXmlRS.IsColExists(2, "filename"))
                         End If
                     End If
             End Select

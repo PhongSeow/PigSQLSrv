@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.8
+'* Version: 1.9
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -20,18 +20,18 @@
 '* 1.6		9/7/2022	Add mRecordset2Xml,Recordset2Xml,AllRecordset2Xml
 '* 1.7		11/7/2022	Modify mRecordset2Xml,AllRecordset2Xml,mGetRSColInfXml
 '* 1.8	    26/7/2022	Modify Imports
+'* 1.9		29/7/2022	Modify Imports
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
-Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-Imports PigToolsLiteLib
 #End If
+Imports PigToolsLiteLib
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.8.2"
+    Private Const CLS_VERSION As String = "1.9.2"
     Private moSqlDataReader As SqlDataReader
 
 

@@ -1,10 +1,6 @@
 ﻿
 Public Class PigBaseLocal
-#If NETFRAMEWORK Then
-    Inherits PigToolsWinLib.PigBase
-#Else
     Inherits PigToolsLiteLib.PigBase
-#End If
 
     Public Sub New(Version As String)
         MyBase.New(Version, System.Reflection.Assembly.GetExecutingAssembly().GetName.Version.ToString, System.Reflection.Assembly.GetExecutingAssembly().GetName.Name)

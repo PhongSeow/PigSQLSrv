@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.9
+'* Version: 1.10
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -25,22 +25,21 @@
 '* 1.7		9/7/2022	Modify CacheQuery, add mCacheQuery
 '* 1.8		10/7/2022	Add XmlCacheQuery, modify mCacheQuery,CacheQuery
 '* 1.9		26/7/2022	Modify Imports, modify KeyName
+'* 1.10		29/7/2022	Modify Imports
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
-Imports PigKeyCacheFwkLib
-Imports PigToolsWinLib
 Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
+#End If
 Imports PigKeyCacheLib
 Imports PigToolsLiteLib
-#End If
 
 Public Class CmdSQLSrvSp
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.9.2"
-    Private moSqlCommand As SqlCommand
+	Private Const CLS_VERSION As String = "1.10.2"
+	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
 		MyBase.New(CLS_VERSION)

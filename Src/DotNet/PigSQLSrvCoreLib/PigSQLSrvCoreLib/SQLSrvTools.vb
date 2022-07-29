@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.17
+'* Version: 1.18
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -21,19 +21,20 @@
 '* 1.12		2/7/2022	Use PigBaseLocal
 '* 1.16		4/7/2022	Modify GetTableOrView2VBCode
 '* 1.17		26/7/2022	Modify Imports
+'* 1.18		28/7/2022	Modify GetTableOrView2VBCode
+'* 1.19		29/7/2022	Modify Imports
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
-Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-Imports PigToolsLiteLib
 #End If
+Imports PigToolsLiteLib
 
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.17.1"
+    Private Const CLS_VERSION As String = "1.19.2"
     Private moConnSQLSrv As ConnSQLSrv
 
     Public Enum EnmDBObjType
@@ -265,6 +266,7 @@ Public Class SQLSrvTools
             Dim strProperty As String = ""
             Dim strValueMD5 As String = ""
             Dim strFillByRs As String = ""
+            Dim strFillByXmlRs As String = ""
             If NotMathFillByRsList <> "" Then
                 If Left(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList = "," & NotMathFillByRsList
                 If Right(NotMathFillByRsList, 1) <> "," Then NotMathFillByRsList &= ","
@@ -327,10 +329,16 @@ Public Class SQLSrvTools
                             strProperty &= vbTab & vbTab & "mUpdateCheck.Clear()" & Me.OsCrLf
                             strProperty &= vbTab & "End Sub" & Me.OsCrLf
                         End If
-                        strFillByRs &= vbTab & "Friend Function fFillByRs(ByRef InRs As Recordset) As String" & Me.OsCrLf
+                        '-------
+                        strFillByRs &= vbTab & "Friend Function fFillByRs(ByRef InRs As Recordset, Optional ByRef UpdateCnt As Integer = 0) As String" & Me.OsCrLf
                         strFillByRs &= vbTab & vbTab & "Try" & Me.OsCrLf
                         strFillByRs &= vbTab & vbTab & vbTab & "If InRs.EOF = False Then" & Me.OsCrLf
                         strFillByRs &= vbTab & vbTab & vbTab & vbTab & "With InRs.Fields" & Me.OsCrLf
+                        '-------
+                        strFillByXmlRs &= vbTab & "Friend Function fFillByXmlRs(ByRef InXmlRs As XmlRS, RSNo As Integer, RowNo As Integer, Optional ByRef UpdateCnt As Integer = 0) As String" & Me.OsCrLf
+                        strFillByXmlRs &= vbTab & vbTab & "Try" & Me.OsCrLf
+                        strFillByXmlRs &= vbTab & vbTab & vbTab & "If InXmlRs.IsEOF(RSNo) = False Then" & Me.OsCrLf
+                        strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & "With InXmlRs" & Me.OsCrLf
                         '-------
                         strValueMD5 &= vbTab & "Friend ReadOnly Property ValueMD5(Optional TextType As PigMD5.enmTextType = PigMD5.enmTextType.UTF8) As String" & Me.OsCrLf
                         strValueMD5 &= vbTab & vbTab & "Get" & Me.OsCrLf
@@ -366,7 +374,19 @@ Public Class SQLSrvTools
                             End If
                         End If
                         If InStr(NotMathFillByRsList, "," & strColumn_name & ",") = 0 Then
-                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "If .IsItemExists(""" & strColumn_name & """) = True Then Me." & strColumn_name & " = .Item(""" & strColumn_name & """)." & strValueType & Me.OsCrLf
+                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "If .IsItemExists(""" & strColumn_name & """) = True Then " & Me.OsCrLf
+                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "If Me." & strColumn_name & " <> .Item(""" & strColumn_name & """)." & strValueType & " Then" & Me.OsCrLf
+                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "Me." & strColumn_name & " = .Item(""" & strColumn_name & """)." & strValueType & Me.OsCrLf
+                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "UpdateCnt += 1" & Me.OsCrLf
+                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "End If" & Me.OsCrLf
+                            strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "End If" & Me.OsCrLf
+                            '--------
+                            strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "If .IsColExists(RSNo, """ & strColumn_name & """) = True Then " & Me.OsCrLf
+                            strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "If Me." & strColumn_name & " <> ." & strValueType & "(RSNo, RowNo, """ & strColumn_name & """)" & " Then" & Me.OsCrLf
+                            strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "Me." & strColumn_name & " = ." & strValueType & "(RSNo, RowNo, """ & strColumn_name & """)" & Me.OsCrLf
+                            strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "UpdateCnt += 1" & Me.OsCrLf
+                            strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & vbTab & vbTab & "End If" & Me.OsCrLf
+                            strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "End If" & Me.OsCrLf
                         End If
                         If InStr(NotMathMD5List, "," & strColumn_name & ",") = 0 Then
                             strValueMD5 &= vbTab & vbTab & vbTab & vbTab & vbTab & Me.GetValueMD5Row(strColumn_name, intDataCategory) & Me.OsCrLf
@@ -385,6 +405,15 @@ Public Class SQLSrvTools
                 strFillByRs &= vbTab & vbTab & "End Try" & Me.OsCrLf
                 strFillByRs &= vbTab & "End Function" & Me.OsCrLf
                 '-------
+                strFillByXmlRs &= vbTab & vbTab & vbTab & "Me.mUpdateCheck.Clear()" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & "End With" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & vbTab & vbTab & "End If" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & vbTab & vbTab & "Return ""OK""" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & vbTab & "Catch ex As Exception" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & vbTab & vbTab & "Return Me.GetSubErrInf(""fFillByXmlRs"", ex)" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & vbTab & "End Try" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & "End Function" & Me.OsCrLf
+                '-------
                 strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "End With" & Me.OsCrLf
                 strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "Dim oPigMD5 As New PigMD5(strText, TextType)" & Me.OsCrLf
                 strValueMD5 &= vbTab & vbTab & vbTab & vbTab & "ValueMD5 = oPigMD5.MD5" & Me.OsCrLf
@@ -402,6 +431,7 @@ Public Class SQLSrvTools
                 OutVBCode &= Me.OsCrLf & strProperty & Me.OsCrLf
             End If
             OutVBCode &= Me.OsCrLf & strFillByRs & Me.OsCrLf
+            OutVBCode &= Me.OsCrLf & strFillByXmlRs & Me.OsCrLf
             OutVBCode &= Me.OsCrLf & strValueMD5 & Me.OsCrLf
             OutVBCode &= "End Class" & Me.OsCrLf
             Return "OK"

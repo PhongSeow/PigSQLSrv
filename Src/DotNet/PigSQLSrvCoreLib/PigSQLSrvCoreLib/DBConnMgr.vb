@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Database connection management
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.10
+'* Version: 1.11
 '* Create Time: 17/10/2021
 '* 1.1	1/2/2022	Modify New
 '* 1.2	23/3/2022	Modify New, add MkEncKey,LoadDBConnDefs
@@ -16,15 +16,12 @@
 '* 1.8	22/5/2022	Modify SaveDBConnDefs,LoadDBConnDefs
 '* 1.9	2/7/2022	Use PigBaseLocal
 '* 1.10	26/7/2022	Modify Imports
+'* 1.11	29/7/2022	Modify Imports
 '**********************************
-#If NETFRAMEWORK Then
-Imports PigToolsWinLib
-#Else
 Imports PigToolsLiteLib
-#End If
 Friend Class DBConnMgr
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.10.1"
+    Private Const CLS_VERSION As String = "1.11.1"
     Friend Property fPigConfigApp As PigConfigApp
     Private Property mConfFilePath As String
     Public ReadOnly Property DBConnDefs As DBConnDefs

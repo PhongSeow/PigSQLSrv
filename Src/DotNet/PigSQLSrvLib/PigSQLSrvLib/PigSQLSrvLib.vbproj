@@ -21,9 +21,9 @@ Support cache query.
 Database connection management.
 It can run on Windows platforms only.
 </Description>
-    <Version>2.5.38</Version>
+    <Version>2.6.28</Version>
     <PackageTags>SQLServer  PigSQLSrvLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv CmdSQLSrvSp Recordset Fields Field Windows High availability Automatic JSON mirror database cache query Database connection management DBConnMgr</PackageTags>
-    <PackageReleaseNotes>Re support .Net 4.0, optimize and support imports processing of NetFrameWork and Core at the same time.</PackageReleaseNotes>
+    <PackageReleaseNotes>Optimize XmlRS and SQLSrvTools.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +38,7 @@ It can run on Windows platforms only.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigKeyCacheFwkLib" Version="3.3.28" />
+    <PackageReference Include="PigKeyCacheLib" Version="3.5.28" />
   </ItemGroup>
 
 </Project>
