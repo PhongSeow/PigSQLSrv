@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.18
+'* Version: 1.20
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -23,6 +23,7 @@
 '* 1.17		26/7/2022	Modify Imports
 '* 1.18		28/7/2022	Modify GetTableOrView2VBCode
 '* 1.19		29/7/2022	Modify Imports
+'* 1.20		30/7/2022	Add mExecuteNonQuery,MkDBFunc_IsDBObjExists, modify IsDBObjExists
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -34,8 +35,9 @@ Imports PigToolsLiteLib
 
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.19.2"
+    Private Const CLS_VERSION As String = "1.20.32"
     Private moConnSQLSrv As ConnSQLSrv
+    Private ReadOnly Property mPigFunc As New PigFunc
 
     Public Enum EnmDBObjType
         Unknow = 0
@@ -44,6 +46,12 @@ Public Class SQLSrvTools
         StoredProcedure = 30
         ScalarFunction = 40
         InlineFunction = 50
+        PrimaryKey = 60
+        ForeignKey = 70
+        Trigger = 80
+        DefaultConstraint = 90
+        CheckConstraint = 100
+        Rule = 110
     End Enum
 
     Public Sub New(ConnSQLSrv As ConnSQLSrv)
@@ -56,7 +64,94 @@ Public Class SQLSrvTools
         End Try
     End Sub
 
-    Public Function IsDBObjExists(DBObjType As EnmDBObjType, ObjName As String) As Boolean
+    Public Function MkDBFunc_IsDBObjExists() As String
+        Dim LOG As New PigStepLog("MkDBFunc_IsDBObjExists")
+        Try
+            Dim strFuncName As String = "_pfIsDBObjExists"
+            LOG.StepName = "IsDBObjExists"
+            Dim bolIsExists As Boolean = Me.IsDBObjExists(EnmDBObjType.ScalarFunction, strFuncName)
+            Dim strSQL As String = ""
+            If bolIsExists = True Then
+                strSQL = "ALTER "
+            Else
+                strSQL = "CREATE "
+            End If
+            Me.mPigFunc.AddMultiLineText(strSQL, " FUNCTION dbo." & strFuncName & "(@DBObjType varchar(10),@ObjName sysname,@ParentObjName sysname = NULL)")
+            Me.mPigFunc.AddMultiLineText(strSQL, "RETURNS bit")
+            Me.mPigFunc.AddMultiLineText(strSQL, "AS")
+            Me.mPigFunc.AddMultiLineText(strSQL, "BEGIN")
+            Me.mPigFunc.AddMultiLineText(strSQL, "DECLARE	@Ret bit", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "DECLARE @ParentObjID int = 0", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "IF @ParentObjName IS NOT NULL SET @ParentObjID=OBJECT_ID(@ParentObjName)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "IF @ParentObjID IS NULL", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "SET @Ret = 0", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, "ELSE IF EXISTS(select 1 from sysobjects WITH(NOLOCK) where name=@ObjName and xtype=@DBObjType AND parent_obj=@ParentObjID)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "SET @Ret = 1", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, "ELSE", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "SET @Ret = 0", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, "RETURN(@Ret)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "END")
+            LOG.StepName = "mExecuteNonQuery"
+            LOG.Ret = Me.mExecuteNonQuery(strSQL)
+            If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+            Return "OK"
+        Catch ex As Exception
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
+    Public Function MkDBFunc_IsTabColExists() As String
+        Dim LOG As New PigStepLog("MkDBFunc_IsTabColExists")
+        Try
+            Dim strFuncName As String = "_pfIsTabColExists"
+            LOG.StepName = "IsDBObjExists"
+            Dim bolIsExists As Boolean = Me.IsDBObjExists(EnmDBObjType.ScalarFunction, strFuncName)
+            Dim strSQL As String = ""
+            If bolIsExists = True Then
+                strSQL = "ALTER "
+            Else
+                strSQL = "CREATE "
+            End If
+            Me.mPigFunc.AddMultiLineText(strSQL, " FUNCTION dbo." & strFuncName & "(@TableName sysname,@ColName sysname)")
+            Me.mPigFunc.AddMultiLineText(strSQL, " RETURNS bit")
+            Me.mPigFunc.AddMultiLineText(strSQL, " AS")
+            Me.mPigFunc.AddMultiLineText(strSQL, " BEGIN")
+            Me.mPigFunc.AddMultiLineText(strSQL, " DECLARE	@Ret bit", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, " IF EXISTS(SELECT TOP 1 1 FROM syscolumns c WITH(NOLOCK)  JOIN sysobjects o  WITH(NOLOCK) ON c.id=o.id AND o.xtype='U' WHERE o.name=@TableName AND c.name=@ColName)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, " SET @Ret = 1", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, " ELSE", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, " SET @Ret = 0", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, " RETURN(@Ret)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, " END")
+            LOG.StepName = "mExecuteNonQuery"
+            LOG.Ret = Me.mExecuteNonQuery(strSQL)
+            If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+            Return "OK"
+        Catch ex As Exception
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
+    Public Function mExecuteNonQuery(SQL As String) As String
+        Dim LOG As New PigStepLog("mExecuteNonQuery")
+        Try
+            LOG.StepName = "New CmdSQLSrvText"
+            Dim oCmdSQLSrvText As New CmdSQLSrvText(SQL)
+            With oCmdSQLSrvText
+                .ActiveConnection = Me.moConnSQLSrv.Connection
+                LOG.StepName = "ExecuteNonQuery"
+                LOG.Ret = .ExecuteNonQuery()
+                If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+            End With
+            oCmdSQLSrvText = Nothing
+            Return "OK"
+        Catch ex As Exception
+            If Me.IsDebug Then LOG.AddStepNameInf(SQL)
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
+    Public Function IsDBObjExists(DBObjType As EnmDBObjType, ObjName As String, Optional ParentObjName As String = "") As Boolean
         Const SUB_NAME As String = "IsDBObjExists"
         Dim strStepName As String = ""
         Try
@@ -73,18 +168,34 @@ Public Class SQLSrvTools
                     strXType = "FN"
                 Case EnmDBObjType.InlineFunction
                     strXType = "IF"
+                Case EnmDBObjType.PrimaryKey
+                    strXType = "PK"
+                Case EnmDBObjType.ForeignKey
+                    strXType = "F"
+                Case EnmDBObjType.DefaultConstraint
+                    strXType = "D"
+                Case EnmDBObjType.Trigger
+                    strXType = "TR"
+                Case EnmDBObjType.CheckConstraint
+                    strXType = "C"
+                Case EnmDBObjType.Rule
+                    strXType = "R"
                 Case Else
                     Throw New Exception("Cannot support")
             End Select
-            Dim strSQL As String = "select 1 from sysobjects WITH(NOLOCK) where name=@ObjName and xtype=@DBObjType"
-            strStepName = "New CmdSQLSrvText"
+            Dim strSQL As String = "SELECT 1 FROM sysobjects WITH(NOLOCK) WHERE name=@ObjName AND xtype=@DBObjType"
+            If ParentObjName <> "" Then strSQL &= " AND parent_obj=OBJECT_ID(@ParentObjName)"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
                 .ActiveConnection = Me.moConnSQLSrv.Connection
                 .AddPara("@ObjName", SqlDbType.VarChar, 512)
-                .AddPara("@DBObjType", SqlDbType.VarChar, 10)
                 .ParaValue("@ObjName") = ObjName
+                .AddPara("@DBObjType", SqlDbType.VarChar, 10)
                 .ParaValue("@DBObjType") = strXType
+                If ParentObjName <> "" Then
+                    .AddPara("@ParentObjName", SqlDbType.VarChar, 512)
+                    .ParaValue("@ParentObjName") = ParentObjName
+                End If
                 strStepName = "Execute"
                 Dim rsAny = .Execute()
                 If .LastErr <> "" Then
