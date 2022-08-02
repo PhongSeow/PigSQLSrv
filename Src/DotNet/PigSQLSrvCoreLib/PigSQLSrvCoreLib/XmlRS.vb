@@ -158,6 +158,18 @@ Public Class XmlRS
         End Get
     End Property
 
+    Public ReadOnly Property BooleanValue(RSNo As Integer, RowNo As Integer, ColName As String) As Boolean
+        Get
+            Try
+                Dim intIndex As Integer = Me.mGetIndexByColName(RSNo, ColName)
+                Return Me.BooleanValue(RSNo, RowNo, intIndex)
+            Catch ex As Exception
+                Me.SetSubErrInf("BooleanValue", ex)
+                Return False
+            End Try
+        End Get
+    End Property
+
 
     Public ReadOnly Property BooleanValue(RSNo As Integer, RowNo As Integer, Index As Integer) As Boolean
         Get
