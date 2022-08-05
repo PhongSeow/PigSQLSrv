@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.16
+'* Version: 1.18
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -12,7 +12,7 @@
 '* 1.0.5	21/6/2021	Modify mIsDBOnline
 '* 1.0.6	21/7/2021	Modify mSetConnSQLServer
 '* 1.1		29/8/2021   Add support for .net core
-'* 1.2		24/9/2021   Add PigKeyValueApp,InitPigKeyValue
+'* 1.2		24/9/2021   Add mPigKeyValueApp,InitPigKeyValue
 '* 1.3		5/10/2021   Modify InitPigKeyValue
 '* 1.5		5/12/2021   Modify OpenOrKeepActive
 '* 1.6		6/12/2021   Add IsEncrypt,OpenOrKeepActive
@@ -25,6 +25,8 @@
 '* 1.13		9/7/2022	Add CacheQueryResTypeEnum
 '* 1.15		26/7/2022	Modify Imports
 '* 1.16		29/7/2022	Modify Imports
+'* 1.17		3/8/2022	Modify InitPigKeyValue
+'* 1.18		5/8/2022	Add HitCacheEnum, CacheWorkDir
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -32,23 +34,31 @@ Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
 #End If
-Imports PigKeyCacheLib
 Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
-    Inherits PigBaseLocal
-	Private Const CLS_VERSION As String = "1.16.1"
+	Inherits PigBaseLocal
+	Private Const CLS_VERSION As String = "1.18.3"
 	Public Connection As SqlConnection
-	Public PigKeyValueApp As PigKeyValueApp
 	Private mcstChkDBStatus As CmdSQLSrvText
+	Friend Property CacheWorkDir As String
+	Friend Property PigKeyValue As fPigKeyValue
 
-    Friend Enum CacheQueryResTypeEnum
-        XmlOutStr = 1
-        XmlOutRS = 2
-        JSon = 3
-    End Enum
 
-    Public Enum ConnStatusEnum
+	Public Enum HitCacheEnum
+		Null = 0
+		List = 1
+		ShareMem = 2
+		File = 3
+	End Enum
+
+	Friend Enum CacheQueryResTypeEnum
+		XmlOutStr = 1
+		XmlOutRS = 2
+		JSon = 3
+	End Enum
+
+	Public Enum ConnStatusEnum
 		Unknow = 0
 		PrincipalOnline = 10
 		MirrorOnline = 20
@@ -59,6 +69,8 @@ Public Class ConnSQLSrv
 		Mirror = 10
 		StandAlone = 20
 	End Enum
+
+
 
 	Private Property mLastConnSQLServer As String
 
@@ -392,13 +404,13 @@ Public Class ConnSQLSrv
 							End If
 							If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
 							.ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
-                            If Me.IsEncrypt = True Then
-                                .ConnectionString &= "Encrypt=True;"
-                            Else
-                                .ConnectionString &= "Encrypt=False;"
-                            End If
-                            LOG.StepName = "Open first time"
-                            Me.mConnOpen()
+							If Me.IsEncrypt = True Then
+								.ConnectionString &= "Encrypt=True;"
+							Else
+								.ConnectionString &= "Encrypt=False;"
+							End If
+							LOG.StepName = "Open first time"
+							Me.mConnOpen()
 							If Me.LastErr = "" Then
 								If Me.mIsDBOnline = True Then
 									If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
@@ -470,20 +482,20 @@ Public Class ConnSQLSrv
 
 	Public ReadOnly Property IsDBConnReady() As Boolean
 		Get
-            Try
-                IsDBConnReady = False
+			Try
+				IsDBConnReady = False
 				If Me.Connection IsNot Nothing Then
 					If Me.Connection.State = ConnectionState.Open Then
-                        Select Case Me.ConnStatus
-                            Case ConnStatusEnum.PrincipalOnline, ConnStatusEnum.MirrorOnline
-                                Return True
-                            Case Else
-                                Return False
-                        End Select
-                    End If
-                End If
+						Select Case Me.ConnStatus
+							Case ConnStatusEnum.PrincipalOnline, ConnStatusEnum.MirrorOnline
+								Return True
+							Case Else
+								Return False
+						End Select
+					End If
+				End If
 			Catch ex As Exception
-                Me.SetSubErrInf("IsDBConnReady", ex)
+				Me.SetSubErrInf("IsDBConnReady", ex)
 				Return False
 			End Try
 		End Get
@@ -548,14 +560,10 @@ Public Class ConnSQLSrv
 		End Try
 	End Function
 
-	Public Sub InitPigKeyValue()
+	Public Sub InitPigKeyValue(CacheWorkDir As String)
 		Try
-			If Me.IsWindows = True Then
-				Me.PigKeyValueApp = New PigKeyValueApp(Me.Connection.ConnectionString, PigKeyValueApp.EnmCacheLevel.ToShareMem)
-			Else
-				Me.PigKeyValueApp = New PigKeyValueApp()
-			End If
-			If Me.PigKeyValueApp.LastErr <> "" Then Throw New Exception(Me.PigKeyValueApp.LastErr)
+			Me.CacheWorkDir = CacheWorkDir
+			Me.PigKeyValue = New fPigKeyValue(Me.CacheWorkDir)
 			Me.ClearErr()
 		Catch ex As Exception
 			Me.SetSubErrInf("InitPigKeyValue", ex)

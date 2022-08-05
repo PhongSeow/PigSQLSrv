@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.12
+'* Version: 1.15
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -26,6 +26,8 @@
 '* 1.10		10/7/2022	Add XmlCacheQuery, modify mCacheQuery,CacheQuery
 '* 1.11		26/7/2022	Modify Imports, modify mCacheQuery
 '* 1.12		29/7/2022	Modify Imports
+'* 1.13		3/8/2022	Modify mCacheQuery
+'* 1.15		5/8/2022	Modify mCacheQuery
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -33,11 +35,10 @@ Imports System.Data.SqlClient
 #Else
 Imports Microsoft.Data.SqlClient
 #End If
-Imports PigKeyCacheLib
 Imports PigToolsLiteLib
 Public Class CmdSQLSrvText
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.12.2"
+    Private Const CLS_VERSION As String = "1.15.2"
     Public Property SQLText As String
     Private moSqlCommand As SqlCommand
 
@@ -240,45 +241,41 @@ Public Class CmdSQLSrvText
     ''' The cache query returns Recordset.AllRecordset2JSon. Note that for SQL statements with updated data, using the cache query may have unpredictable results.
     ''' </summary>
     ''' <returns></returns>
-    Public Function CacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, Optional CacheTime As Integer = 60) As String
+    Public Function CacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, Optional CacheTime As Integer = 120, Optional ByRef HitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.Null) As String
         Try
             CacheQuery = ""
-            Dim strRet As String = Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.JSon, CacheQuery,, CacheTime)
+            Dim strRet As String = Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.JSon, CacheQuery,, CacheTime, HitCache)
         Catch ex As Exception
             CacheQuery = ""
             Me.SetSubErrInf("CacheQuery", ex)
         End Try
     End Function
 
-    Public Function XmlCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ByRef OutXmlStr As String, Optional CacheTime As Integer = 60) As String
-        Return Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr, OutXmlStr,, CacheTime)
+    Public Function XmlCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ByRef OutXmlStr As String, Optional CacheTime As Integer = 120, Optional ByRef HitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.Null) As String
+        Return Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr, OutXmlStr,, CacheTime, HitCache)
     End Function
 
-    Public Function XmlCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ByRef OutRS As XmlRS, Optional CacheTime As Integer = 60) As String
-        Return Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS,, OutRS, CacheTime)
+    Public Function XmlCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ByRef OutRS As XmlRS, Optional CacheTime As Integer = 120, Optional ByRef HitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.Null) As String
+        Return Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS,, OutRS, CacheTime, HitCache)
     End Function
 
-    Private Function mCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ResType As ConnSQLSrv.CacheQueryResTypeEnum, Optional ByRef OutStr As String = "", Optional ByRef OutRS As XmlRS = Nothing, Optional CacheTime As Integer = 60) As String
+    Private Function mCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ResType As ConnSQLSrv.CacheQueryResTypeEnum, Optional ByRef OutStr As String = "", Optional ByRef OutRS As XmlRS = Nothing, Optional CacheTime As Integer = 60, Optional ByRef IsHitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.List, Optional TextType As PigText.enmTextType = PigText.enmTextType.UTF8) As String
         Dim LOG As New PigStepLog("mCacheQuery")
         Try
             With ConnSQLSrv
-                If .PigKeyValueApp Is Nothing Then
-                    LOG.StepName = "InitPigKeyValue"
-                    .InitPigKeyValue()
-                    If .LastErr <> "" Then Throw New Exception(.LastErr)
-                End If
+                Dim bolIsExec As Boolean = False, strValue As String = ""
+                If .PigKeyValue Is Nothing Then Throw New Exception("Not InitPigKeyValue")
                 Dim strKeyName As String = Me.KeyName
-                LOG.StepName = "GetPigKeyValue"
-                Dim oPigKeyValue As PigKeyValue = .PigKeyValueApp.GetPigKeyValue(strKeyName)
-                If .PigKeyValueApp.LastErr <> "" Then Throw New Exception(.PigKeyValueApp.LastErr)
-                Dim bolIsExec As Boolean = False
-                If oPigKeyValue Is Nothing Then
+                LOG.StepName = "GetKeyValue"
+                LOG.Ret = .PigKeyValue.GetKeyValue(strKeyName, strValue, TextType, CacheTime, IsHitCache)
+                If LOG.Ret <> "OK" Then
                     bolIsExec = True
-                ElseIf oPigKeyValue.IsExpired = True Then
+                ElseIf strValue = "" Then
                     bolIsExec = True
                 End If
                 If bolIsExec = True Then
                     If Me.ActiveConnection Is Nothing Then
+                        LOG.StepName = "Set ActiveConnection"
                         Me.ActiveConnection = ConnSQLSrv.Connection
                     End If
                     Dim rsAny As Recordset
@@ -291,36 +288,122 @@ Public Class CmdSQLSrvText
                             OutStr = rsAny.AllRecordset2JSon
                             If rsAny.LastErr <> "" Then Throw New Exception(rsAny.LastErr)
                         Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr
-                            LOG.StepName = "AllRecordset2JSon(XmlOutStr)"
+                            LOG.StepName = "AllRecordset2Xml(OutStr)"
                             LOG.Ret = rsAny.AllRecordset2Xml(OutStr)
                             If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
                         Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
-                            LOG.StepName = "AllRecordset2JSon(OutRS)"
+                            LOG.StepName = "AllRecordset2Xml(OutRS)"
                             LOG.Ret = rsAny.AllRecordset2Xml(OutRS)
                             If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
                         Case Else
                             Throw New Exception("Invalid ResType is " & ResType.ToString)
                     End Select
-                    LOG.StepName = "New PigKeyValue"
+                    LOG.StepName = "SaveKeyValue"
                     Select Case ResType
                         Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
-                            oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutRS.PigXml.MainXmlStr, PigText.enmTextType.UTF8, PigKeyValue.EnmSaveType.SaveSpace)
+                            strValue = OutRS.PigXml.XmlDocument.InnerXml
+                            LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, strValue, TextType)
                         Case Else
-                            oPigKeyValue = New PigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutStr, PigText.enmTextType.UTF8, PigKeyValue.EnmSaveType.SaveSpace)
+                            LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, OutStr, TextType)
                     End Select
-                    If oPigKeyValue.LastErr <> "" Then Throw New Exception(oPigKeyValue.LastErr)
-                    LOG.StepName = "PigKeyValueApp.SavePigKeyValue"
-                    .PigKeyValueApp.SavePigKeyValue(oPigKeyValue)
-                    If .PigKeyValueApp.LastErr <> "" Then Throw New Exception(.PigKeyValueApp.LastErr)
+                    If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+                Else
+                    Select Case ResType
+                        Case ConnSQLSrv.CacheQueryResTypeEnum.JSon, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr
+                            LOG.StepName = "oPigKeyValue.StrValue"
+                            OutStr = strValue
+                        Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
+                            LOG.StepName = "New XmlRS"
+                            OutRS = New XmlRS(strValue)
+                            If OutRS Is Nothing Then Throw New Exception("OutRS Is Nothing")
+                            If OutRS.LastErr <> "" Then
+                                LOG.AddStepNameInf(strValue)
+                                Throw New Exception(OutRS.LastErr)
+                            End If
+                        Case Else
+                            Throw New Exception("Invalid ResType is " & ResType.ToString)
+                    End Select
                 End If
-                mCacheQuery = oPigKeyValue.StrValue
-                oPigKeyValue = Nothing
             End With
-            Me.ClearErr()
+            Return "OK"
         Catch ex As Exception
-            Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
-            Return ""
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
         End Try
+        'Try
+        '    With ConnSQLSrv
+        '        If .fPigKeyValue Is Nothing Then
+        '            LOG.StepName = "InitPigKeyValue"
+        '            .InitPigKeyValue()
+        '            If .LastErr <> "" Then Throw New Exception(.LastErr)
+        '        End If
+        '        Dim strKeyName As String = Me.KeyName
+        '        LOG.StepName = "GetPigKeyValue"
+        '        Dim oPigKeyValue As mPigKeyValue = .fPigKeyValue.GetPigKeyValue(strKeyName)
+        '        If .fPigKeyValue.LastErr <> "" Then Throw New Exception(.fPigKeyValue.LastErr)
+        '        Dim bolIsExec As Boolean = False
+        '        If oPigKeyValue Is Nothing Then
+        '            bolIsExec = True
+        '        ElseIf oPigKeyValue.IsExpired = True Then
+        '            bolIsExec = True
+        '        ElseIf oPigKeyValue.BodyLen <= 0 Then
+        '            bolIsExec = True
+        '        End If
+        '        If bolIsExec = True Then
+        '            If Me.ActiveConnection Is Nothing Then
+        '                Me.ActiveConnection = ConnSQLSrv.Connection
+        '            End If
+        '            Dim rsAny As Recordset
+        '            LOG.StepName = "Execute"
+        '            rsAny = Me.Execute
+        '            If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+        '            Select Case ResType
+        '                Case ConnSQLSrv.CacheQueryResTypeEnum.JSon
+        '                    LOG.StepName = "AllRecordset2JSon"
+        '                    OutStr = rsAny.AllRecordset2JSon
+        '                    If rsAny.LastErr <> "" Then Throw New Exception(rsAny.LastErr)
+        '                Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr
+        '                    LOG.StepName = "AllRecordset2Xml(XmlOutStr)"
+        '                    LOG.Ret = rsAny.AllRecordset2Xml(OutStr)
+        '                    If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+        '                Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
+        '                    LOG.StepName = "AllRecordset2Xml(OutRS)"
+        '                    LOG.Ret = rsAny.AllRecordset2Xml(OutRS)
+        '                    If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+        '                Case Else
+        '                    Throw New Exception("Invalid ResType is " & ResType.ToString)
+        '            End Select
+        '            LOG.StepName = "New mPigKeyValue"
+        '            Select Case ResType
+        '                Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
+        '                    oPigKeyValue = New mPigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutRS.PigXml.MainXmlStr, PigText.enmTextType.UTF8, mPigKeyValue.EnmSaveType.SaveSpace)
+        '                Case Else
+        '                    oPigKeyValue = New mPigKeyValue(strKeyName, Now.AddSeconds(CacheTime), OutStr, PigText.enmTextType.UTF8, mPigKeyValue.EnmSaveType.SaveSpace)
+        '            End Select
+        '            If oPigKeyValue.LastErr <> "" Then Throw New Exception(oPigKeyValue.LastErr)
+        '            LOG.StepName = "PigKeyValueApp.SavePigKeyValue"
+        '            .fPigKeyValue.SavePigKeyValue(oPigKeyValue)
+        '            If .fPigKeyValue.LastErr <> "" Then Throw New Exception(.fPigKeyValue.LastErr)
+        '        Else
+        '            Select Case ResType
+        '                Case ConnSQLSrv.CacheQueryResTypeEnum.JSon, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr
+        '                    LOG.StepName = "oPigKeyValue.StrValue"
+        '                    OutStr = oPigKeyValue.StrValue
+        '                Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
+        '                    LOG.StepName = "New XmlRS"
+        '                    OutRS = New XmlRS(oPigKeyValue.StrValue)
+        '                    If OutRS Is Nothing Then Throw New Exception("OutRS Is Nothing")
+        '                    If OutRS.LastErr <> "" Then Throw New Exception(OutRS.LastErr)
+        '                Case Else
+        '                    Throw New Exception("Invalid ResType is " & ResType.ToString)
+        '            End Select
+        '            IsHitCache = True
+        '        End If
+        '        oPigKeyValue = Nothing
+        '    End With
+        '    Return "OK"
+        'Catch ex As Exception
+        '    Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        'End Try
     End Function
 
 End Class

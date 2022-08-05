@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.9
+'* Version: 1.10
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -21,6 +21,7 @@
 '* 1.7		11/7/2022	Modify mRecordset2Xml,AllRecordset2Xml,mGetRSColInfXml
 '* 1.8	    26/7/2022	Modify Imports
 '* 1.9		29/7/2022	Modify Imports
+'* 1.10		3/8/2022	Modify AllRecordset2Xml
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -31,7 +32,7 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.9.2"
+    Private Const CLS_VERSION As String = "1.10.2"
     Private moSqlDataReader As SqlDataReader
 
 
@@ -402,7 +403,14 @@ Public Class Recordset
             If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
             LOG.StepName = "New XmlRS"
             OutRS = New XmlRS(strXml)
-            If OutRS.LastErr <> "" Then Throw New Exception(OutRS.LastErr)
+            If OutRS Is Nothing Then
+                LOG.AddStepNameInf(strXml)
+                Throw New Exception("OutRS Is Nothing")
+            End If
+            If OutRS.LastErr <> "" Then
+                LOG.AddStepNameInf(strXml)
+                Throw New Exception(OutRS.LastErr)
+            End If
             Return "OK"
         Catch ex As Exception
             OutRS = Nothing
