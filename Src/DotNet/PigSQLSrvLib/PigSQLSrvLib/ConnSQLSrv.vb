@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.18
+'* Version: 1.19
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -27,6 +27,7 @@
 '* 1.16		29/7/2022	Modify Imports
 '* 1.17		3/8/2022	Modify InitPigKeyValue
 '* 1.18		5/8/2022	Add HitCacheEnum, CacheWorkDir
+'* 1.19		5/8/2022	Modify Property
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -38,7 +39,7 @@ Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
 	Inherits PigBaseLocal
-	Private Const CLS_VERSION As String = "1.18.3"
+	Private Const CLS_VERSION As String = "1.19.1"
 	Public Connection As SqlConnection
 	Private mcstChkDBStatus As CmdSQLSrvText
 	Friend Property CacheWorkDir As String
@@ -79,7 +80,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mintRunMode
 		End Get
-		Friend Set(ByVal value As RunModeEnum)
+		Friend Set(value As RunModeEnum)
 			mintRunMode = value
 		End Set
 	End Property
@@ -92,7 +93,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mintRefMirrSrvTime
 		End Get
-		Set(ByVal value As Integer)
+		Set(value As Integer)
 			If value <= 0 Then
 				mintRefMirrSrvTime = 30
 			Else
@@ -109,7 +110,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mdteLastRefMirrSrvTime
 		End Get
-		Friend Set(ByVal value As DateTime)
+		Friend Set(value As DateTime)
 			mdteLastRefMirrSrvTime = value
 		End Set
 	End Property
@@ -122,7 +123,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mstrPrincipalSQLServer
 		End Get
-		Friend Set(ByVal value As String)
+		Friend Set(value As String)
 			mstrPrincipalSQLServer = value
 		End Set
 	End Property
@@ -135,7 +136,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mstrMirrorSQLServer
 		End Get
-		Friend Set(ByVal value As String)
+		Friend Set(value As String)
 			mstrMirrorSQLServer = value
 		End Set
 	End Property
@@ -148,7 +149,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mstrCurrDatabase
 		End Get
-		Friend Set(ByVal value As String)
+		Friend Set(value As String)
 			mstrCurrDatabase = value
 		End Set
 	End Property
@@ -161,7 +162,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mstrDBUser
 		End Get
-		Friend Set(ByVal value As String)
+		Friend Set(value As String)
 			mstrDBUser = value
 		End Set
 	End Property
@@ -174,7 +175,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mstrDBUserPwd
 		End Get
-		Friend Set(ByVal value As String)
+		Friend Set(value As String)
 			mstrDBUserPwd = value
 		End Set
 	End Property
@@ -233,7 +234,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mbolIsTrustedConnection
 		End Get
-		Friend Set(ByVal value As Boolean)
+		Friend Set(value As Boolean)
 			mbolIsTrustedConnection = value
 		End Set
 	End Property
@@ -275,7 +276,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mintConnStatus
 		End Get
-		Friend Set(ByVal value As ConnStatusEnum)
+		Friend Set(value As ConnStatusEnum)
 			mintConnStatus = value
 		End Set
 	End Property
@@ -288,7 +289,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mlngCommandTimeout
 		End Get
-		Set(ByVal value As Long)
+		Set(value As Long)
 			mlngCommandTimeout = value
 		End Set
 	End Property
@@ -301,7 +302,7 @@ Public Class ConnSQLSrv
 		Get
 			Return mlngConnectionTimeout
 		End Get
-		Set(ByVal value As Long)
+		Set(value As Long)
 			mlngConnectionTimeout = value
 		End Set
 	End Property

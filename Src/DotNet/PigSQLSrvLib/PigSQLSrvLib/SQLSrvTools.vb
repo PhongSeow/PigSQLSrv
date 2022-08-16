@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.20
+'* Version: 1.21
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -24,6 +24,7 @@
 '* 1.18		28/7/2022	Modify GetTableOrView2VBCode
 '* 1.19		29/7/2022	Modify Imports
 '* 1.20		30/7/2022	Add mExecuteNonQuery,MkDBFunc_IsDBObjExists, modify IsDBObjExists
+'* 1.21		5/8/2022	Modify GetTableOrView2VBCode
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -35,7 +36,7 @@ Imports PigToolsLiteLib
 
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.20.32"
+    Private Const CLS_VERSION As String = "1.21.2"
     Private moConnSQLSrv As ConnSQLSrv
     Private ReadOnly Property mPigFunc As New PigFunc
 
@@ -471,7 +472,7 @@ Public Class SQLSrvTools
                                 strProperty &= vbTab & vbTab & "Get" & Me.OsCrLf
                                 strProperty &= vbTab & vbTab & vbTab & "Return m" & strColumn_name & Me.OsCrLf
                                 strProperty &= vbTab & vbTab & "End Get" & Me.OsCrLf
-                                strProperty &= vbTab & vbTab & "Friend Set(ByVal value As " & strVBDataType & ")" & Me.OsCrLf
+                                strProperty &= vbTab & vbTab & "Friend Set(value As " & strVBDataType & ")" & Me.OsCrLf
                                 If IsSetUpdateTime = True Then
                                     strProperty &= vbTab & vbTab & vbTab & "If value <> m" & strColumn_name & " Then" & Me.OsCrLf
                                     strProperty &= vbTab & vbTab & vbTab & vbTab & "Me.mUpdateCheck.Add(""" & strColumn_name & """)" & Me.OsCrLf

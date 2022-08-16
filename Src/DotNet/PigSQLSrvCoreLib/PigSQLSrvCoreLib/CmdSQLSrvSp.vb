@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.11
+'* Version: 1.12
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -27,6 +27,7 @@
 '* 1.9		26/7/2022	Modify Imports, modify KeyName
 '* 1.10		3/8/2022	Modify mCacheQuery
 '* 1.11		4/8/2022	Modify mCacheQuery
+'* 1.12		5/8/2022	Modify Property
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -38,7 +39,7 @@ Imports PigToolsLiteLib
 
 Public Class CmdSQLSrvSp
     Inherits PigBaseLocal
-	Private Const CLS_VERSION As String = "1.11.1"
+	Private Const CLS_VERSION As String = "1.12.1"
 	Private moSqlCommand As SqlCommand
 
 	Public Sub New(SpName As String)
@@ -71,7 +72,7 @@ Public Class CmdSQLSrvSp
 		Get
 			Return mstrSpName
 		End Get
-		Set(ByVal value As String)
+		Set(value As String)
 			mstrSpName = value
 		End Set
 	End Property

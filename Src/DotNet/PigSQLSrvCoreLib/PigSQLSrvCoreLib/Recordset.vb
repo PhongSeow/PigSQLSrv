@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.10
+'* Version: 1.11
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -22,6 +22,7 @@
 '* 1.8	    26/7/2022	Modify Imports
 '* 1.9		29/7/2022	Modify Imports
 '* 1.10		3/8/2022	Modify AllRecordset2Xml
+'* 1.11		5/8/2022	Modify Property
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -32,7 +33,7 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.10.2"
+    Private Const CLS_VERSION As String = "1.11.2"
     Private moSqlDataReader As SqlDataReader
 
 
@@ -470,7 +471,7 @@ Public Class Recordset
         Get
             Return Me.IsStrValueTrim
         End Get
-        Set(ByVal value As Boolean)
+        Set(value As Boolean)
             Me.IsStrValueTrim = value
         End Set
     End Property
@@ -561,7 +562,7 @@ Public Class Recordset
         Get
             Return Me.MaxTopJSonOrXmlRows
         End Get
-        Set(ByVal value As Long)
+        Set(value As Long)
             Me.MaxTopJSonOrXmlRows = value
         End Set
     End Property

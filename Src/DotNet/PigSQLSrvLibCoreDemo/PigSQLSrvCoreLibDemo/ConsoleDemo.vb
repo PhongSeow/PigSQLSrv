@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: ConsoleDemo for PigSQLSrv
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.20.1
+'* Version: 1.21.1
 '* Create Time: 17/4/2021
 '* 1.2	23/9/2021	Add Test Cache Query
 '* 1.3	5/10/2021	Imports PigKeyCacheLib
@@ -22,8 +22,9 @@
 '* 1.16	9/6/2022	Add SQLSrvToolsDemo
 '* 1.17	23/6/2022	Modify SQLSrvToolsDemo
 '* 1.18	24/6/2022	Modify SQLSrvToolsDemo
-'* 1.19	27/6/2022	Modify Imports
-'* 1.20	29/6/2022	Modify Imports
+'* 1.19	27/7/2022	Modify Imports
+'* 1.20	29/7/2022	Modify Imports
+'* 1.21	30/7/2022	Modify SQLSrvToolsDemo
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -33,7 +34,6 @@ Imports System.Data.SqlClient
 Imports PigSQLSrvCoreLib
 Imports Microsoft.Data.SqlClient
 #End If
-Imports PigKeyCacheLib
 Imports PigCmdLib
 Imports PigToolsLiteLib
 
@@ -139,6 +139,7 @@ Public Class ConsoleDemo
                                         Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
                                 End Select
                                 Me.ConnSQLSrv.ConnectionTimeout = 5
+                                Me.ConnSQLSrv.InitPigKeyValue("c:\temp\aaa")
                                 Exit Do
                             Case ConsoleKey.B
                                 Console.WriteLine("Input Principal SQLServer:" & Me.DBSrv)
@@ -168,6 +169,7 @@ Public Class ConsoleDemo
                                         'Console.WriteLine("DB Password=" & Me.DBPwd)
                                         Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.MirrDBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
                                 End Select
+                                Me.ConnSQLSrv.InitPigKeyValue("c:\temp\aaa")
                                 Exit Do
                         End Select
                     Loop
@@ -600,7 +602,7 @@ Public Class ConsoleDemo
                                     oCmdSQLSrvText.ParaValue("@name") = strName
                                     Dim strKeyName As String = oCmdSQLSrvText.KeyName
                                     Console.WriteLine("InitPigKeyValue=")
-                                    Me.ConnSQLSrv.InitPigKeyValue()
+                                    Me.ConnSQLSrv.InitPigKeyValue("c:\temp")
                                     Console.WriteLine(Me.ConnSQLSrv.LastErr)
                                     'Console.WriteLine("Before IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
                                     Console.WriteLine("CacheQuery=")
@@ -617,7 +619,7 @@ Public Class ConsoleDemo
                                     oCmdSQLSrvSp.ParaValue("@dbname") = "master"
                                     Dim strKeyName As String = oCmdSQLSrvSp.KeyName
                                     Console.WriteLine("InitPigKeyValue=")
-                                    Me.ConnSQLSrv.InitPigKeyValue()
+                                    Me.ConnSQLSrv.InitPigKeyValue("c:\temp")
                                     Console.WriteLine(Me.ConnSQLSrv.LastErr)
                                     'Console.WriteLine("Before IsPigKeyValueExists(" & strKeyName & ")=" & Me.ConnSQLSrv.PigKeyValueApp.IsPigKeyValueExists(strKeyName))
                                     Console.WriteLine("CacheQuery=")
@@ -751,11 +753,12 @@ Public Class ConsoleDemo
             Me.MenuDefinition = ""
             Me.MenuDefinition &= "GetTableOrView2VBCode#Generate VB class code corresponding to table or view|"
             Me.MenuDefinition &= "GetTableOrView2SQLOrVBFragment#Generate SQL statement or VB code fragments corresponding to tables or views|"
+            Me.MenuDefinition &= "MkDBFunc#Create database function|"
             Me.PigConsole.SimpleMenu("SQLSrvToolsDemo", Me.MenuDefinition, Me.MenuKey, PigConsole.EnmSimpleMenuExitType.QtoUp)
             Select Case Me.MenuKey
                 Case ""
                     Exit Do
-                Case "GetTableOrView2VBCode", "GetTableOrView2SQLOrVBFragment"
+                Case "GetTableOrView2VBCode", "GetTableOrView2SQLOrVBFragment", "MkDBFunc"
                     If Me.SQLSrvTools Is Nothing Then
                         If Me.ConnSQLSrv Is Nothing Then
                             Console.WriteLine("ConnSQLSrv Is Nothing")
@@ -767,6 +770,13 @@ Public Class ConsoleDemo
                     End If
                     If Me.SQLSrvTools IsNot Nothing Then
                         Select Case Me.MenuKey
+                            Case "MkDBFunc"
+                                Console.WriteLine("MkDBFunc_IsDBObjExists")
+                                Me.Ret = Me.SQLSrvTools.MkDBFunc_IsDBObjExists()
+                                Console.WriteLine(Me.Ret)
+                                Console.WriteLine("MkDBFunc_IsTabColExists")
+                                Me.Ret = Me.SQLSrvTools.MkDBFunc_IsTabColExists()
+                                Console.WriteLine(Me.Ret)
                             Case "GetTableOrView2VBCode"
                                 Me.PigConsole.GetLine("Input table or view name", Me.TableName)
                                 Me.PigConsole.GetLine("Input NotMathFillByRsList ,separated by ','", Me.NotMathFillByRsList)
@@ -814,6 +824,7 @@ Public Class ConsoleDemo
 
     Public Sub XmlDemo()
         Do While True
+            Dim intHitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.Null
             Console.Clear()
             Me.MenuDefinition = ""
             Me.MenuDefinition &= "TestCmdSQLSrvText#Test CmdSQLSrvText|"
@@ -830,11 +841,12 @@ Public Class ConsoleDemo
                         Dim oCmdSQLSrvText As New CmdSQLSrvText(Me.SQL)
                         Console.WriteLine("CacheQuery")
                         Dim strXml As String = ""
-                        Me.Ret = oCmdSQLSrvText.XmlCacheQuery(Me.ConnSQLSrv, strXml)
+                        Me.Ret = oCmdSQLSrvText.XmlCacheQuery(Me.ConnSQLSrv, strXml, 300, intHitCache)
                         If Me.Ret <> "OK" Then
                             Console.WriteLine(Me.Ret)
                         Else
                             Console.WriteLine(strXml)
+                            Console.WriteLine("HitCache=" & intHitCache.ToString)
                         End If
                     End If
                 Case "TestCmdSQLSrvSp"
@@ -846,10 +858,11 @@ Public Class ConsoleDemo
                         oCmdSQLSrvSp.ParaValue("@dbname") = "master"
                         Dim strXml As String = ""
                         Dim oXmlRS As XmlRS = Nothing
-                        Me.Ret = oCmdSQLSrvSp.XmlCacheQuery(Me.ConnSQLSrv, oXmlRS)
+                        Me.Ret = oCmdSQLSrvSp.XmlCacheQuery(Me.ConnSQLSrv, oXmlRS, 300, intHitCache)
                         If Me.Ret <> "OK" Then
                             Console.WriteLine(Me.Ret)
                         Else
+                            Console.WriteLine("HitCache=" & intHitCache.ToString)
                             Console.WriteLine("TotalRS=" & oXmlRS.TotalRS)
                             For i = 1 To oXmlRS.TotalRS
                                 Console.WriteLine("RS" & i)
