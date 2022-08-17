@@ -4,7 +4,7 @@
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.7.70</Version>
+    <Version>2.7.76</Version>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
     <Description>An interface class library specially designed for MS-SQL server.
@@ -25,12 +25,12 @@ It can run on Windows and Linux platforms.
     <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLib</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>SQLServer PigSQLSrvCoreLib ObjAdoDBLib CmdSQLSrvText ConnSQLSrv Recordset Fields Field Windows Linux Core  mirror Automatic high availability JSON cache query vbcode generate</PackageTags>
-    <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
+    <PackageReleaseNotes>Optimize SQLSrvTools.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.0" />
-    <PackageReference Include="PigToolsLiteLib" Version="3.1.68" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.1.80" />
   </ItemGroup>
 
   <ItemGroup>

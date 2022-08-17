@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.21
+'* Version: 1.22
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -25,6 +25,7 @@
 '* 1.19		29/7/2022	Modify Imports
 '* 1.20		30/7/2022	Add mExecuteNonQuery,MkDBFunc_IsDBObjExists, modify IsDBObjExists
 '* 1.21		5/8/2022	Modify GetTableOrView2VBCode
+'* 1.22		16/8/2022	Modify GetTableOrView2VBCode
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -508,7 +509,7 @@ Public Class SQLSrvTools
                     rs.MoveNext()
                     If rs.LastErr <> "" Then Throw New Exception(rs.LastErr)
                 Loop
-                strFillByRs &= vbTab & vbTab & vbTab & "Me.mUpdateCheck.Clear()" & Me.OsCrLf
+                strFillByRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "Me.mUpdateCheck.Clear()" & Me.OsCrLf
                 strFillByRs &= vbTab & vbTab & vbTab & vbTab & "End With" & Me.OsCrLf
                 strFillByRs &= vbTab & vbTab & vbTab & "End If" & Me.OsCrLf
                 strFillByRs &= vbTab & vbTab & vbTab & "Return ""OK""" & Me.OsCrLf
@@ -517,7 +518,7 @@ Public Class SQLSrvTools
                 strFillByRs &= vbTab & vbTab & "End Try" & Me.OsCrLf
                 strFillByRs &= vbTab & "End Function" & Me.OsCrLf
                 '-------
-                strFillByXmlRs &= vbTab & vbTab & vbTab & "Me.mUpdateCheck.Clear()" & Me.OsCrLf
+                strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & vbTab & "Me.mUpdateCheck.Clear()" & Me.OsCrLf
                 strFillByXmlRs &= vbTab & vbTab & vbTab & vbTab & "End With" & Me.OsCrLf
                 strFillByXmlRs &= vbTab & vbTab & vbTab & "End If" & Me.OsCrLf
                 strFillByXmlRs &= vbTab & vbTab & vbTab & "Return ""OK""" & Me.OsCrLf
