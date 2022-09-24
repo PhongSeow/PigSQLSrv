@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.15
+'* Version: 1.16
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -28,6 +28,7 @@
 '* 1.12		29/7/2022	Modify Imports
 '* 1.13		3/8/2022	Modify mCacheQuery
 '* 1.15		5/8/2022	Modify mCacheQuery
+'* 1.16		5/9/2022	Modify DebugStr
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -38,7 +39,7 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 Public Class CmdSQLSrvText
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.15.2"
+    Private Const CLS_VERSION As String = "1.16.2"
     Public Property SQLText As String
     Private moSqlCommand As SqlCommand
 
@@ -195,7 +196,7 @@ Public Class CmdSQLSrvText
                                     Case Field.EnumDataCategory.BooleanValue
                                         strDebugStr &= CStr(.Value)
                                     Case Field.EnumDataCategory.DateValue
-                                        strDebugStr &= mSQLStr(.Value.ToString)
+                                        strDebugStr &= mSQLStr(Format(.Value, "yyyy-MM-dd HH:mm:ss.fff"))
                                     Case Field.EnumDataCategory.IntValue, Field.EnumDataCategory.DecValue
                                         strDebugStr &= CStr(.Value)
                                     Case Field.EnumDataCategory.StrValue

@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Similar to ObjAdoDBLib.RecordSet
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.7
+'* Version: 1.8
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
@@ -16,6 +16,7 @@
 '* 1.5		3/7/2022	Modify IntValue,LngValue,DecValue,DateValue,StrValue
 '* 1.6		10/7/2022	Modify ValueForJSon, add DateFormat, add IsStrValueTrim
 '* 1.7		11/7/2022	Modify DataCategory
+'* 1.8		5/9/2022	Modify DateValue, add DateStrValue
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -25,7 +26,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.7.3"
+    Private Const CLS_VERSION As String = "1.8.1"
 
 
     Public Enum EnumDataCategory
@@ -114,7 +115,24 @@ Public Class Field
         End Get
     End Property
 
-    Public ReadOnly Property DateValue() As DateTime
+    Public ReadOnly Property DateStrValue() As String
+        Get
+            Try
+                If IsDBNull(moValue) = True Then
+                    Return Format(#1/1/1900#, Me.DateFormat)
+                ElseIf IsDate(moValue) = True Then
+                    Return Format(CDate(moValue), Me.DateFormat)
+                Else
+                    Return Format(#1/1/1900#, Me.DateFormat)
+                End If
+            Catch ex As Exception
+                Me.SetSubErrInf("DateValue.Get", ex)
+                Return Format(#1/1/1900#, Me.DateFormat)
+            End Try
+        End Get
+    End Property
+
+    Public ReadOnly Property DateValue() As Date
         Get
             Try
                 If IsDBNull(moValue) = True Then

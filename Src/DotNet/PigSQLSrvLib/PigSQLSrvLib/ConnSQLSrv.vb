@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.19
+'* Version: 1.21
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -28,6 +28,8 @@
 '* 1.17		3/8/2022	Modify InitPigKeyValue
 '* 1.18		5/8/2022	Add HitCacheEnum, CacheWorkDir
 '* 1.19		5/8/2022	Modify Property
+'* 1.20		5/9/2022	Modify datetime
+'* 1.21		18/9/2022	Modify InitPigKeyValue
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -39,11 +41,11 @@ Imports PigToolsLiteLib
 
 Public Class ConnSQLSrv
 	Inherits PigBaseLocal
-	Private Const CLS_VERSION As String = "1.19.1"
+	Private Const CLS_VERSION As String = "1.21.1"
 	Public Connection As SqlConnection
 	Private mcstChkDBStatus As CmdSQLSrvText
 	Friend Property CacheWorkDir As String
-	Friend Property PigKeyValue As fPigKeyValue
+	Friend Property PigKeyValue As PigKeyValue
 
 
 	Public Enum HitCacheEnum
@@ -105,12 +107,12 @@ Public Class ConnSQLSrv
 	''' <summary>
 	''' The last time the mirror database was refreshed
 	''' </summary>
-	Private mdteLastRefMirrSrvTime As DateTime
-	Public Property LastRefMirrSrvTime() As DateTime
+	Private mdteLastRefMirrSrvTime As Date
+	Public Property LastRefMirrSrvTime() As Date
 		Get
 			Return mdteLastRefMirrSrvTime
 		End Get
-		Friend Set(value As DateTime)
+		Friend Set(value As Date)
 			mdteLastRefMirrSrvTime = value
 		End Set
 	End Property
@@ -564,7 +566,7 @@ Public Class ConnSQLSrv
 	Public Sub InitPigKeyValue(CacheWorkDir As String)
 		Try
 			Me.CacheWorkDir = CacheWorkDir
-			Me.PigKeyValue = New fPigKeyValue(Me.CacheWorkDir)
+			Me.PigKeyValue = New PigKeyValue(Me.CacheWorkDir)
 			Me.ClearErr()
 		Catch ex As Exception
 			Me.SetSubErrInf("InitPigKeyValue", ex)

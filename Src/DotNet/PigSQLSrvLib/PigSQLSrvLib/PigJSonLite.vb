@@ -3,7 +3,7 @@
 '* Author: Seow Phong
 '* Describe: Simple JSON class.
 '* Home Url: http://www.seowphong.com
-'* Version: 1.3
+'* Version: 1.5
 '* Create Time: 8/8/2019
 '* 1.0.2    10/8/2020   Code changed from VB6 to VB.NET
 '* 1.0.3    12/8/2020   Some Function debugging 
@@ -21,11 +21,12 @@
 '* 1.1      14/9/2021  Modify xpJSonEleType,mAddJSonStr, and add AddOneObjectEle
 '* 1.2		2/7/2022	Use PigBaseLocal
 '* 1.3		5/8/2022	Modify Property
+'* 1.5		5/9/2022	Modify datetime
 '*******************************************************
 Imports System.Text
 Public Class PigJSonLite
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.3.1"
+    Private Const CLS_VERSION As String = "1.5.1"
 
     ''' <summary>The type of the JSON element</summary>
     Public Enum xpJSonEleType
@@ -94,7 +95,7 @@ Public Class PigJSonLite
     ''' </summary>
     ''' <param name="DateValue"></param>
     ''' <returns></returns>
-    Private Function mDate2Lng(DateValue As DateTime) As Long
+    Private Function mDate2Lng(DateValue As Date) As Long
         Dim dteStart As New DateTime(1970, 1, 1)
         Dim mtsTimeDiff As TimeSpan = DateValue - dteStart
         Try
@@ -167,7 +168,7 @@ Public Class PigJSonLite
     ''' <param name="EleKey">The key of the element, An empty string represents an array element without a key value.</param>
     ''' <param name="DateValue">The date value of the element</param>
     ''' <param name="IsFirstEle">Is it the first element</param>
-    Public Overloads Sub AddEle(EleKey As String, DateValue As DateTime, Optional IsFirstEle As Boolean = False)
+    Public Overloads Sub AddEle(EleKey As String, DateValue As Date, Optional IsFirstEle As Boolean = False)
         Try
             Dim lngDate As Long = Me.mDate2Lng(DateValue)
             If Me.LastErr <> "" Then Err.Raise(-1, , Me.LastErr)
@@ -186,7 +187,7 @@ Public Class PigJSonLite
     ''' <param name="IsLocalTime">Convert to local time</param>
     ''' <returns></returns>
 #If NET40_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
-    Private Function mLng2Date(LngValue As Long, Optional IsLocalTime As Boolean = True) As DateTime
+    Private Function mLng2Date(LngValue As Long, Optional IsLocalTime As Boolean = True) As Date
         Dim dteStart As New DateTime(1970, 1, 1)
         Try
             Dim intHourAdd As Integer = 0
@@ -204,7 +205,7 @@ Public Class PigJSonLite
         End Try
     End Function
 #Else
-    Private Function mLng2Date(LngValue As Long, Optional IsLocalTime As Boolean = True) As DateTime
+    Private Function mLng2Date(LngValue As Long, Optional IsLocalTime As Boolean = True) As Date
         Dim dteStart As New DateTime(1970, 1, 1)
         Try
             If IsLocalTime = False Then
