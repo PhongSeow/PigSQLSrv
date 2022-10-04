@@ -4,11 +4,12 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: PigKeyValue of SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.3
+'* Version: 1.5
 '* Create Time: 1/10/2022
 '* 1.1  1/10/2022   Modify New,mAddTableCol, add mNew,RefDBConn,SaveKeyValue
 '* 1.2  2/10/2022   Add mGetKeyValue,GetKeyValue,mCreateTableKeyValueHeadInf,mCreateTableKeyValueBodyInf,mSaveBodyToDB,mSaveHeadToDB
 '* 1.3  3/10/2022   Modify mGetKeyValue
+'* 1.5  4/10/2022   Add RemoveKeyValue,mRemoveKeyValue, modify mGetBodyFromDB,mGetHeadFromDB,mGetKeyValue
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -19,7 +20,7 @@ Imports Microsoft.Data.SqlClient
 Imports PigToolsLiteLib
 Public Class SQLSrvKeyValue
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.3.10"
+    Private Const CLS_VERSION As String = "1.5.8"
 
     Private Property mConnSQLSrv As ConnSQLSrv
     Private Property mPigFunc As New PigFunc
@@ -43,7 +44,7 @@ Public Class SQLSrvKeyValue
         End Get
     End Property
     Public Function RefDBConn() As String
-        Dim LOG As New PigStepLog("InitDB")
+        Dim LOG As New PigStepLog("RefDBConn")
         Try
             If Me.mConnSQLSrv.IsDBConnReady = False Then
                 LOG.StepName = "OpenOrKeepActive"
@@ -275,6 +276,8 @@ Public Class SQLSrvKeyValue
             LOG.Ret = Me.mSaveHeadToDB(KeyName, pbMain)
             If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
             '---------
+            Me.mRemoveKeyValue(KeyName, False)
+            '---------
             pbMain = Nothing
             Return "OK"
         Catch ex As Exception
@@ -343,16 +346,20 @@ Public Class SQLSrvKeyValue
                 Dim oPigMD5 As New PigMD5(ValueBytes)
                 If oPigMD5.PigMD5 <> strBodyPigMD5 Then Throw New Exception("PigMD5 mismatch")
                 oPigMD5 = Nothing
+                Dim abValue(0) As Byte
                 If Me.mPigKeyValue.IsCompress = True Then
-                    Dim abValue(0) As Byte
                     LOG.StepName = "SeowEnc.Decrypt"
                     LOG.Ret = Me.mSeowEnc.Decrypt(ValueBytes, abValue)
                     If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
-                    ValueBytes = abValue
+                    ReDim ValueBytes(abValue.Length - 1)
+                    abValue.CopyTo(ValueBytes, 0)
+                Else
+                    ReDim abValue(ValueBytes.Length - 1)
+                    ValueBytes.CopyTo(abValue, 0)
                 End If
                 HitCache = PigKeyValue.HitCacheEnum.DB
                 LOG.StepName = "mPigKeyValue.SaveKeyValue"
-                LOG.Ret = Me.mPigKeyValue.SaveKeyValue(KeyName, ValueBytes)
+                LOG.Ret = Me.mPigKeyValue.SaveKeyValue(KeyName, abValue)
             End If
             Return "OK"
         Catch ex As Exception
@@ -433,7 +440,7 @@ Public Class SQLSrvKeyValue
         Dim strSQL As String = ""
         Try
             With Me.mPigFunc
-                .AddMultiLineText(strSQL, "SELECT TOP 1 BodyLen,BodyPigMD5,CreateTime FROM dbo._ptKeyValueHeadInf WHERE KeyName=@KeyName")
+                .AddMultiLineText(strSQL, "SELECT TOP 1 BodyLen,BodyPigMD5,CreateTime FROM dbo._ptKeyValueHeadInf WITH (NOLOCK) WHERE KeyName=@KeyName")
             End With
             LOG.StepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
@@ -472,7 +479,7 @@ Public Class SQLSrvKeyValue
         Dim strSQL As String = ""
         Try
             With Me.mPigFunc
-                .AddMultiLineText(strSQL, "SELECT TOP 1 BodyData FROM dbo._ptKeyValueBodyInf WHERE BodyPigMD5=@BodyPigMD5")
+                .AddMultiLineText(strSQL, "SELECT TOP 1 BodyData FROM dbo._ptKeyValueBodyInf WITH (NOLOCK) WHERE BodyPigMD5=@BodyPigMD5")
             End With
             LOG.StepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
@@ -508,5 +515,39 @@ Public Class SQLSrvKeyValue
         End Try
     End Function
 
+    Public Function RemoveKeyValue(KeyName As String) As String
+        Return Me.mRemoveKeyValue(KeyName， True)
+    End Function
+
+    Private Function mRemoveKeyValue(KeyName As String, IsIncDB As Boolean) As String
+        Dim LOG As New PigStepLog("mRemoveKeyValue")
+        Try
+            Dim strError As String = ""
+            Dim strKeyNamePigMD5 As String = Me.mGetKeyNamePigMD5(KeyName)
+            If IsIncDB = True Then
+                Dim strSQL As String = "UPDATE dbo._ptKeyValueHeadInf SET CreateTime='1/1/1900' WHERE KeyName=@KeyName"
+                LOG.StepName = "New CmdSQLSrvText"
+                Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
+                With oCmdSQLSrvText
+                    .ActiveConnection = Me.mConnSQLSrv.Connection
+                    .AddPara("@KeyName", SqlDbType.VarChar, 32)
+                    .ParaValue("@KeyName") = KeyName
+                    LOG.StepName = "ExecuteNonQuery"
+                    If Me.IsDebug = True Then LOG.AddStepNameInf(.DebugStr)
+                    LOG.Ret = .ExecuteNonQuery
+                    If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+                End With
+            End If
+            '---------
+            LOG.StepName = "RemoveKeyValue"
+            LOG.Ret = Me.mPigKeyValue.RemoveKeyValue(KeyName)
+            If LOG.Ret <> "OK" Then strError &= LOG.StepLogInf
+            '---------
+            If strError <> "" Then Throw New Exception(strError)
+            Return "OK"
+        Catch ex As Exception
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
 
 End Class
