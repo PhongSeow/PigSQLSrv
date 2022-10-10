@@ -4,19 +4,20 @@
 '* License: Copyright (c) 2022 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: 用于 Recordset.AllRecordset2Xml 返回缓存数据的结果集处理|For recordset Allrecordset2xml returns the result set processing of cached data.
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.6
+'* Version: 1.7
 '* Create Time: 10/7/2021
 '* 1.1 11/7/2022 Modify New
 '* 1.2	26/7/2022	Modify Imports
 '* 1.3	28/7/2022	Add IsColExists
 '* 1.5	5/9/2022	Modify datetime
 '* 1.6	27/9/2022	Modify IntValue
+'* 1.7	10/10/2022	Modify IsEOF
 '**********************************
 Imports PigToolsLiteLib
 
 Public Class XmlRS
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.6.1"
+    Private Const CLS_VERSION As String = "1.7.1"
     Public ReadOnly Property PigXml As PigXml
     Public Sub New(XmlStr As String, Optional IsChgCtrlChar As Boolean = True)
         MyBase.New(CLS_VERSION)
@@ -346,7 +347,7 @@ Public Class XmlRS
         Get
             Try
                 Dim strXmlKey As String = "XmlRS.RS" & RSNo & ".IsEOF"
-                Return Me.PigXml.XmlDocGetInt(strXmlKey, True)
+                Return Me.PigXml.XmlDocGetBool(strXmlKey, True)
             Catch ex As Exception
                 Me.SetSubErrInf("IsEOF", ex)
                 Return True
