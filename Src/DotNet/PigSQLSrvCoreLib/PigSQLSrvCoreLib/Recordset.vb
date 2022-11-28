@@ -2,7 +2,7 @@
 '* Name: Recordset
 '* Author: Seow Phong
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
-'* Describe: Similar to ObjAdoDBLib.RecordSet
+'* Describe: 
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
 '* Version: 1.11
 '* Create Time: 5/6/2021
@@ -31,6 +31,9 @@ Imports System.Data.SqlClient
 Imports Microsoft.Data.SqlClient
 #End If
 Imports PigToolsLiteLib
+''' <summary>
+''' Recordset|结果集
+''' </summary>
 Public Class Recordset
     Inherits PigBaseLocal
     Private Const CLS_VERSION As String = "1.11.2"

@@ -18,6 +18,9 @@ Imports System.Data.SqlClient
 Imports Microsoft.Data.SqlClient
 #End If
 Imports PigToolsLiteLib
+''' <summary>
+''' 用于SQL Server 的键值|PigKeyValue of SQL Server
+''' </summary>
 Public Class SQLSrvKeyValue
     Inherits PigBaseLocal
     Private Const CLS_VERSION As String = "1.5.8"
@@ -43,6 +46,10 @@ Public Class SQLSrvKeyValue
             Return Me.mIsDBReady
         End Get
     End Property
+    ''' <summary>
+    ''' Refresh database connection|刷新数据库连接
+    ''' </summary>
+    ''' <returns></returns>
     Public Function RefDBConn() As String
         Dim LOG As New PigStepLog("RefDBConn")
         Try
@@ -133,7 +140,7 @@ Public Class SQLSrvKeyValue
             End With
             Return "OK"
         Catch ex As Exception
-            LOG.AddStepNameInf(STRSQL)
+            LOG.AddStepNameInf(strSQL)
             Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
         End Try
     End Function
@@ -204,10 +211,22 @@ Public Class SQLSrvKeyValue
     '    End Try
     'End Function
 
+    ''' <summary>
+    ''' Save Key Value|保存键值
+    ''' </summary>
+    ''' <param name="KeyName">Key Value Name|键值名称</param>
+    ''' <param name="DataBytes">Byte array for saving data|保存数据的字节数组</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function SaveKeyValue(KeyName As String, DataBytes As Byte()) As String
         Return Me.mSaveKeyValue(KeyName, DataBytes)
     End Function
 
+    ''' <summary>
+    ''' Save Key Value|保存键值
+    ''' </summary>
+    ''' <param name="KeyName">Key Value Name|键值名称</param>
+    ''' <param name="Base64SaveText">Base64 of byte array for saving data|保存数据的字节数组的Base64</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function SaveKeyValue(KeyName As String, Base64SaveText As String) As String
         Try
             Dim pbMain As New PigBytes(Base64SaveText)
@@ -221,6 +240,13 @@ Public Class SQLSrvKeyValue
         End Try
     End Function
 
+    ''' <summary>
+    ''' Save Key Value|保存键值
+    ''' </summary>
+    ''' <param name="KeyName">Key Value Name|键值名称</param>
+    ''' <param name="SaveText">Text to save data|保存数据的文本</param>
+    ''' <param name="TextType">Text Type|文本类型</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function SaveKeyValue(KeyName As String, SaveText As String, Optional TextType As PigText.enmTextType = PigText.enmTextType.UTF8) As String
         Try
             Dim ptMain As New PigText(SaveText, TextType)
@@ -286,10 +312,26 @@ Public Class SQLSrvKeyValue
     End Function
 
 
+    ''' <summary>
+    ''' Get Key Value|获取键值
+    ''' </summary>
+    ''' <param name="KeyName">Key Value Name|键值名称</param>
+    ''' <param name="ValueBytes">Byte array obtained|获取到的字节数组</param>
+    ''' <param name="CacheTimeSec">Seconds of cache time|缓存时间的秒数</param>
+    ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function GetKeyValue(KeyName As String, ByRef ValueBytes As Byte(), Optional CacheTimeSec As Integer = 60, Optional ByRef HitCache As PigKeyValue.HitCacheEnum = PigKeyValue.HitCacheEnum.Null) As String
         Return Me.mGetKeyValue(KeyName, ValueBytes, CacheTimeSec, HitCache)
     End Function
 
+    ''' <summary>
+    ''' Get Key Value|获取键值
+    ''' </summary>
+    ''' <param name="KeyName">Key Value Name|键值名称</param>
+    ''' <param name="Base64Value">Base64 of the obtained byte array|获取到的字节数组的Base64</param>
+    ''' <param name="CacheTimeSec">Seconds of cache time|缓存时间的秒数</param>
+    ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function GetKeyValue(KeyName As String, ByRef Base64Value As String, Optional CacheTimeSec As Integer = 60, Optional ByRef HitCache As PigKeyValue.HitCacheEnum = PigKeyValue.HitCacheEnum.Null) As String
         Dim LOG As New PigStepLog("GetKeyValue")
         Try
@@ -306,6 +348,15 @@ Public Class SQLSrvKeyValue
         End Try
     End Function
 
+    ''' <summary>
+    ''' Get Key Value|获取键值
+    ''' </summary>
+    ''' <param name="KeyName">Key Value Name|键值名称</param>
+    ''' <param name="TextValue">Text obtained|获取到的文本</param>
+    ''' <param name="TextType">Text Type|文本类型</param>
+    ''' <param name="CacheTimeSec">Seconds of cache time|缓存时间的秒数</param>
+    ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function GetKeyValue(KeyName As String, ByRef TextValue As String, Optional TextType As PigText.enmTextType = PigText.enmTextType.UTF8, Optional CacheTimeSec As Integer = 60, Optional ByRef HitCache As PigKeyValue.HitCacheEnum = PigKeyValue.HitCacheEnum.Null) As String
         Dim LOG As New PigStepLog("GetKeyValue")
         Try
@@ -515,6 +566,11 @@ Public Class SQLSrvKeyValue
         End Try
     End Function
 
+    ''' <summary>
+    ''' Delete Key Value|删除键值
+    ''' </summary>
+    ''' <param name="KeyName">Key Value Name|键值名称</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function RemoveKeyValue(KeyName As String) As String
         Return Me.mRemoveKeyValue(KeyName， True)
     End Function

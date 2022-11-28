@@ -37,6 +37,9 @@ Imports Microsoft.Data.SqlClient
 #End If
 Imports PigToolsLiteLib
 
+''' <summary>
+''' Common SQL Server toolsets|常用的SQL Server工具集
+''' </summary>
 Public Class SQLSrvTools
     Inherits PigBaseLocal
     Private Const CLS_VERSION As String = "1.25.8"
@@ -155,6 +158,13 @@ Public Class SQLSrvTools
         End Try
     End Function
 
+    ''' <summary>
+    ''' Specify whether the database object exists|指定数据库对象是否存在
+    ''' </summary>
+    ''' <param name="DBObjType">Database Object Type|数据库对象类型</param>
+    ''' <param name="ObjName">Object Name|对象名称</param>
+    ''' <param name="ParentObjName">Parent Object Name|父对象名称</param>
+    ''' <returns></returns>
     Public Function IsDBObjExists(DBObjType As EnmDBObjType, ObjName As String, Optional ParentObjName As String = "") As Boolean
         Const SUB_NAME As String = "IsDBObjExists"
         Dim strStepName As String = ""
@@ -255,6 +265,11 @@ Public Class SQLSrvTools
         End Try
     End Function
 
+    ''' <summary>
+    ''' Whether the login name exists|登录名是否存在
+    ''' </summary>
+    ''' <param name="LoginName">Login Name|登录名</param>
+    ''' <returns></returns>
     Public Function IsLoginUserExists(LoginName As String) As Boolean
         Const SUB_NAME As String = "IsLoginUserExists"
         Dim strStepName As String = ""
@@ -287,6 +302,11 @@ Public Class SQLSrvTools
         End Try
     End Function
 
+    ''' <summary>
+    ''' Whether the database user exists|数据库用户是否存在
+    ''' </summary>
+    ''' <param name="DBUserName">Database user|数据库用户</param>
+    ''' <returns></returns>
     Public Function IsDBUserExists(DBUserName As String) As Boolean
         Const SUB_NAME As String = "IsDBUserExists"
         Dim strStepName As String = ""
@@ -319,6 +339,12 @@ Public Class SQLSrvTools
         End Try
     End Function
 
+    ''' <summary>
+    ''' Whether the database table column exists|数据库表列是否存在
+    ''' </summary>
+    ''' <param name="TableName">TableName|表名</param>
+    ''' <param name="ColName">列名|Column name</param>
+    ''' <returns></returns>
     Public Function IsTabColExists(TableName As String, ColName As String) As Boolean
         Const SUB_NAME As String = "IsTabColExists"
         Dim strStepName As String = ""

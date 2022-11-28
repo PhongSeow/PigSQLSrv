@@ -37,6 +37,9 @@ Imports System.Data.SqlClient
 Imports Microsoft.Data.SqlClient
 #End If
 Imports PigToolsLiteLib
+''' <summary>
+''' Command for SQL Server SQL statement Text
+''' </summary>
 Public Class CmdSQLSrvText
     Inherits PigBaseLocal
     Private Const CLS_VERSION As String = "1.16.2"
@@ -103,6 +106,10 @@ Public Class CmdSQLSrvText
     End Sub
 
 
+    ''' <summary>
+    ''' Execute SQL statement without return result|执行没有返回结果的SQL语句
+    ''' </summary>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function ExecuteNonQuery() As String
         Const SUB_NAME As String = "ExecuteNonQuery"
         Try
@@ -115,6 +122,10 @@ Public Class CmdSQLSrvText
         End Try
     End Function
 
+    ''' <summary>
+    ''' Execute SQL statement|执行SQL语句
+    ''' </summary>
+    ''' <returns>Return result set|返回结果集</returns>
     Public Function Execute() As Recordset
         Dim LOG As New PigStepLog("Execute")
         Me.RecordsAffected = -1
@@ -239,9 +250,12 @@ Public Class CmdSQLSrvText
     End Property
 
     ''' <summary>
-    ''' The cache query returns Recordset.AllRecordset2JSon. Note that for SQL statements with updated data, using the cache query may have unpredictable results.
+    ''' Query with cache, the returned result is a JSON array|带缓存的查询，返回结果为JSon数组
     ''' </summary>
-    ''' <returns></returns>
+    ''' <param name="ConnSQLSrv">Database Connection|数据库连接</param>
+    ''' <param name="CacheTime">Cache time|缓存时间</param>
+    ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
+    ''' <returns>返回的JSON数组</returns>
     Public Function CacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, Optional CacheTime As Integer = 120, Optional ByRef HitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.Null) As String
         Try
             CacheQuery = ""
@@ -252,10 +266,26 @@ Public Class CmdSQLSrvText
         End Try
     End Function
 
+    ''' <summary>
+    ''' CacheQuery with XML output|输出结果为XML文本的CacheQuery
+    ''' </summary>
+    ''' <param name="ConnSQLSrv">Database Connection|数据库连接</param>
+    ''' <param name="OutXmlStr">XML text of the output result|输出结果的XML文本</param>
+    ''' <param name="CacheTime">Cache time|缓存时间</param>
+    ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function XmlCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ByRef OutXmlStr As String, Optional CacheTime As Integer = 120, Optional ByRef HitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.Null) As String
         Return Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr, OutXmlStr,, CacheTime, HitCache)
     End Function
 
+    ''' <summary>
+    ''' The output result is CacheQuery of XmlRS object|输出结果为XmlRS对象的CacheQuery
+    ''' </summary>
+    ''' <param name="ConnSQLSrv">Database Connection|数据库连接</param>
+    ''' <param name="OutRS">XML text of the output result|输出结果的XML文本</param>
+    ''' <param name="CacheTime">Cache time|缓存时间</param>
+    ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
+    ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function XmlCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ByRef OutRS As XmlRS, Optional CacheTime As Integer = 120, Optional ByRef HitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.Null) As String
         Return Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS,, OutRS, CacheTime, HitCache)
     End Function

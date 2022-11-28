@@ -2,7 +2,7 @@
 '* Name: XmlRS
 '* Author: Seow Phong
 '* License: Copyright (c) 2022 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
-'* Describe: 用于 Recordset.AllRecordset2Xml 返回缓存数据的结果集处理|For recordset Allrecordset2xml returns the result set processing of cached data.
+'* Describe: Xml result set|Xml结果集
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
 '* Version: 1.7
 '* Create Time: 10/7/2021
@@ -15,6 +15,9 @@
 '**********************************
 Imports PigToolsLiteLib
 
+''' <summary>
+''' Xml result set|Xml结果集
+''' </summary>
 Public Class XmlRS
     Inherits PigBaseLocal
     Private Const CLS_VERSION As String = "1.7.1"
@@ -35,6 +38,12 @@ Public Class XmlRS
         End Try
     End Sub
 
+    ''' <summary>
+    ''' Whether the specified column exists|指定的列是否存在
+    ''' </summary>
+    ''' <param name="RSNo"></param>
+    ''' <param name="ColName">列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property IsColExists(RSNo As Integer, ColName As String) As Boolean
         Get
             Try
@@ -52,6 +61,10 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Total number of result sets|结果集的总数
+    ''' </summary>
+    ''' <returns></returns>
     Public ReadOnly Property TotalRS As Integer
         Get
             Try
@@ -63,6 +76,11 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Number of rows in the result set|结果集的行数
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <returns></returns>
     Public ReadOnly Property TotalRows(RSNo As Integer) As Integer
         Get
             Try
@@ -75,6 +93,12 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' 列的数据类型
+    ''' </summary>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property TypeName(RSNo As Integer, Index As Integer) As String
         Get
             Try
@@ -137,6 +161,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the text value of a column and a row in the result set|指定结果集某列某行的文本值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property StrValue(RSNo As Integer, RowNo As Integer, Index As Integer) As String
         Get
             Try
@@ -149,6 +180,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the text value of a column and a row in the result set|指定结果集某列某行的文本值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property StrValue(RSNo As Integer, RowNo As Integer, ColName As String) As String
         Get
             Try
@@ -161,6 +199,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Whether the specified column exists|指定结果集某列某行的布尔值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property BooleanValue(RSNo As Integer, RowNo As Integer, ColName As String) As Boolean
         Get
             Try
@@ -174,6 +219,13 @@ Public Class XmlRS
     End Property
 
 
+    ''' <summary>
+    ''' Whether the specified column exists|指定结果集某列某行的布尔值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property BooleanValue(RSNo As Integer, RowNo As Integer, Index As Integer) As Boolean
         Get
             Try
@@ -186,6 +238,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Whether the specified column exists|指定结果集某列某行的布尔值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property BoolValue(RSNo As Integer, RowNo As Integer, Index As Integer) As Boolean
         Get
             Try
@@ -198,6 +257,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Whether the specified column exists|指定结果集某列某行的布尔值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property BoolValue(RSNo As Integer, RowNo As Integer, ColName As String) As Boolean
         Get
             Try
@@ -210,6 +276,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the Boolean value of a column and a row in the result set. Null is TRUE|指定结果集某列某行的布尔值，空为TRUE
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property BoolValueEmpTrue(RSNo As Integer, RowNo As Integer, Index As Integer) As Boolean
         Get
             Try
@@ -222,6 +295,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the Boolean value of a column and a row in the result set. Null is TRUE|指定结果集某列某行的布尔值，空为TRUE
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property BoolValueEmpTrue(RSNo As Integer, RowNo As Integer, ColName As String) As Boolean
         Get
             Try
@@ -234,6 +314,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the date value of a column and a row in the result set|指定结果集某列某行的日期值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property DateValue(RSNo As Integer, RowNo As Integer, Index As Integer) As Date
         Get
             Try
@@ -246,6 +333,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the date value of a column and a row in the result set|指定结果集某列某行的日期值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property DateValue(RSNo As Integer, RowNo As Integer, ColName As String) As Date
         Get
             Try
@@ -258,6 +352,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the integer value of a column and a row in the result set|指定结果集某列某行的整数值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property IntValue(RSNo As Integer, RowNo As Integer, Index As Integer) As Integer
         Get
             Try
@@ -270,6 +371,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the integer value of a column and a row in the result set|指定结果集某列某行的整数值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property IntValue(RSNo As Integer, RowNo As Integer, ColName As String) As Integer
         Get
             Try
@@ -282,6 +390,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the long integer value of a column and a row in the result set|指定结果集某列某行的长整型值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property LongValue(RSNo As Integer, RowNo As Integer, Index As Integer) As Long
         Get
             Try
@@ -294,6 +409,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the long integer value of a column and a row in the result set|指定结果集某列某行的长整型值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property LongValue(RSNo As Integer, RowNo As Integer, ColName As String) As Long
         Get
             Try
@@ -306,6 +428,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the decimal value of a column and a row in the result set|指定结果集某列某行的小数值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="Index">Index value of the column|列的索引值</param>
+    ''' <returns></returns>
     Public ReadOnly Property DecValue(RSNo As Integer, RowNo As Integer, Index As Integer) As Decimal
         Get
             Try
@@ -318,6 +447,13 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' Specify the decimal value of a column and a row in the result set|指定结果集某列某行的小数值
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <param name="RowNo">Row number|行号</param>
+    ''' <param name="ColName">Column name|列名</param>
+    ''' <returns></returns>
     Public ReadOnly Property DecValue(RSNo As Integer, RowNo As Integer, ColName As String) As Decimal
         Get
             Try
@@ -331,6 +467,11 @@ Public Class XmlRS
     End Property
 
 
+    ''' <summary>
+    ''' Number of columns in the result set|结果集的列数
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <returns></returns>
     Public ReadOnly Property TotalCols(RSNo As Integer) As Integer
         Get
             Try
@@ -343,6 +484,11 @@ Public Class XmlRS
         End Get
     End Property
 
+    ''' <summary>
+    ''' To the last row of the current result set|是否到当前结果集的最后一行
+    ''' </summary>
+    ''' <param name="RSNo">Result set No|结果集号</param>
+    ''' <returns></returns>
     Public ReadOnly Property IsEOF(RSNo As Integer) As Boolean
         Get
             Try

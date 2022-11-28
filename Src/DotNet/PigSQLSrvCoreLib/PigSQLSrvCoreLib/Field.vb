@@ -2,7 +2,7 @@
 '* Name: Field
 '* Author: Seow Phong
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
-'* Describe: Similar to ObjAdoDBLib.RecordSet
+'* Describe: 
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
 '* Version: 1.8
 '* Create Time: 5/6/2021
