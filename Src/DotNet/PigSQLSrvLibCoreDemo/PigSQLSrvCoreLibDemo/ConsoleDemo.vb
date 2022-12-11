@@ -839,14 +839,32 @@ Public Class ConsoleDemo
                     Else
                         Me.PigConsole.GetLine("Input SQL", Me.SQL)
                         Dim oCmdSQLSrvText As New CmdSQLSrvText(Me.SQL)
-                        Console.WriteLine("CacheQuery")
-                        Dim strXml As String = ""
-                        Me.Ret = oCmdSQLSrvText.XmlCacheQuery(Me.ConnSQLSrv, strXml, 300, intHitCache)
-                        If Me.Ret <> "OK" Then
-                            Console.WriteLine(Me.Ret)
+                        If Me.PigConsole.IsYesOrNo("Is use XmlRS") = True Then
+                            Console.WriteLine("XmlCacheQuery")
+                            Dim oXmlRS As XmlRS = Nothing
+                            Me.Ret = oCmdSQLSrvText.XmlCacheQuery(Me.ConnSQLSrv, oXmlRS, 300, intHitCache)
+                            If Me.Ret <> "OK" Then
+                                Console.WriteLine(Me.Ret)
+                            Else
+                                Console.WriteLine("TotalRS=" & oXmlRS.TotalRS)
+                                For i = 1 To oXmlRS.TotalRS
+                                    Console.WriteLine("IsEOF(" & i & ")=" & oXmlRS.IsEOF(i))
+                                    Console.WriteLine("TotalCols(" & i & ")=" & oXmlRS.TotalCols(i))
+                                    Console.WriteLine("TotalRows(" & i & ")=" & oXmlRS.TotalRows(i))
+                                Next
+                                Console.WriteLine(oXmlRS.PigXml.MainXmlStr)
+                                Console.WriteLine("HitCache=" & intHitCache.ToString)
+                            End If
                         Else
-                            Console.WriteLine(strXml)
-                            Console.WriteLine("HitCache=" & intHitCache.ToString)
+                            Console.WriteLine("XmlCacheQuery")
+                            Dim strXml As String = ""
+                            Me.Ret = oCmdSQLSrvText.XmlCacheQuery(Me.ConnSQLSrv, strXml, 300, intHitCache)
+                            If Me.Ret <> "OK" Then
+                                Console.WriteLine(Me.Ret)
+                            Else
+                                Console.WriteLine(strXml)
+                                Console.WriteLine("HitCache=" & intHitCache.ToString)
+                            End If
                         End If
                     End If
                 Case "TestCmdSQLSrvSp"

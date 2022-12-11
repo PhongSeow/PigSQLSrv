@@ -51,6 +51,12 @@ Public Class PigBaseLocal
         Return MyBase.GetSubErrInf(SubName, StepName, exIn, IsStackTrace)
     End Function
 
+    Friend Shadows ReadOnly Property MyID() As String
+        Get
+            Return MyBase.MyID
+        End Get
+    End Property
+
     Friend Shadows ReadOnly Property AppVersion() As String
         Get
             Return MyBase.AppVersion
