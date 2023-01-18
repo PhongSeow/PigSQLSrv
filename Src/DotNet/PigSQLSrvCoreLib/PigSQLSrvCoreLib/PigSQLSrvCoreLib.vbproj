@@ -4,7 +4,7 @@
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.8.56</Version>
+    <Version>2.8.60</Version>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
     <Description>An interface class library specially designed for MS-SQL server.
@@ -17,7 +17,7 @@ Database connection management.
 Generate SQL statements or VB code for tables or views.
 It can run on Windows and Linux platforms.
 </Description>
-    <Copyright>Copyright (c) 2021-2022 Seow Phong</Copyright>
+    <Copyright>Copyright (c) 2021-2023 Seow Phong</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
     <PackageIcon>SeowPhongLogo.png</PackageIcon>
@@ -30,7 +30,7 @@ It can run on Windows and Linux platforms.
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
-    <PackageReference Include="PigToolsLiteLib" Version="3.3.92" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.3.96" />
   </ItemGroup>
 
   <ItemGroup>
