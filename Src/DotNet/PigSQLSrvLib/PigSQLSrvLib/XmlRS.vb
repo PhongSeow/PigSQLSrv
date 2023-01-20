@@ -13,7 +13,12 @@
 '* 1.6	27/9/2022	Modify IntValue
 '* 1.7	10/10/2022	Modify IsEOF
 '**********************************
+#If NETFRAMEWORK Then
+Imports PigToolsWinLib
+#Else
 Imports PigToolsLiteLib
+#End If
+
 
 ''' <summary>
 ''' Xml result set|Xml结果集

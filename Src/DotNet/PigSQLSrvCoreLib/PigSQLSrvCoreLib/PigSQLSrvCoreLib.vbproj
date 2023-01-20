@@ -4,7 +4,7 @@
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.8.60</Version>
+    <Version>2.8.66</Version>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
     <Description>An interface class library specially designed for MS-SQL server.
@@ -29,8 +29,8 @@ It can run on Windows and Linux platforms.
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
-    <PackageReference Include="PigToolsLiteLib" Version="3.3.96" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.3.108" />
   </ItemGroup>
 
   <ItemGroup>

@@ -33,10 +33,12 @@
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
+Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-#End If
 Imports PigToolsLiteLib
+#End If
+
 
 ''' <summary>
 ''' SqlCommand for SQL Server StoredProcedure

@@ -15,7 +15,12 @@
 '* 1.7	26/7/2022	Modify Imports
 '* 1.8	29/7/2022	Modify Imports
 '**********************************
+#If NETFRAMEWORK Then
+Imports PigToolsWinLib
+#Else
 Imports PigToolsLiteLib
+#End If
+
 
 Friend Class DBConnDef
     Inherits PigBaseLocal
