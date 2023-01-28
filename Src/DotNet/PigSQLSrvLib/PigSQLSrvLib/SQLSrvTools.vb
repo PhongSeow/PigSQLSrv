@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.25
+'* Version: 1.26
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -28,6 +28,7 @@
 '* 1.22		16/8/2022	Modify GetTableOrView2VBCode
 '* 1.23		5/9/2022	Modify datetime
 '* 1.25		11/10/2022	Modify GetTableOrView2VBCode
+'* 1.26		28/1/2023	Modify SpHelpFields2SQLSrvTypeStr
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -44,7 +45,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.25.8"
+    Private Const CLS_VERSION As String = "1.26.2"
     Private moConnSQLSrv As ConnSQLSrv
     Private ReadOnly Property mPigFunc As New PigFunc
 
@@ -612,9 +613,17 @@ Public Class SQLSrvTools
 
     Public Function SpHelpFields2SQLSrvTypeStr(SpHelpFields As Fields) As String
         Try
-            SpHelpFields2SQLSrvTypeStr = SpHelpFields.Item("Type").StrValue
+            Dim strTypeName As String = SpHelpFields.Item("Type").StrValue
+            SpHelpFields2SQLSrvTypeStr = strTypeName
             If SpHelpFields.Item("TrimTrailingBlanks").StrValue <> "(n/a)" Then
-                SpHelpFields2SQLSrvTypeStr &= " (" & SpHelpFields.Item("Length").StrValue & ")"
+                Select Case strTypeName
+                    Case "varchar", "char"
+                    Case Else
+                        SpHelpFields2SQLSrvTypeStr &= " "
+                End Select
+                Dim strLength As String = SpHelpFields.Item("Length").StrValue
+                If strLength = "-1" Then strLength = "max"
+                SpHelpFields2SQLSrvTypeStr &= "(" & strLength & ")"
             End If
         Catch ex As Exception
             Me.SetSubErrInf("SpHelpFields2SQLSrvTypeStr", ex)
