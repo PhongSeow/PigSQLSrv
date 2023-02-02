@@ -33,11 +33,10 @@
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
-Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-Imports PigToolsLiteLib
 #End If
+Imports PigToolsLiteLib
 
 
 ''' <summary>
@@ -45,7 +44,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class CmdSQLSrvSp
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.13.1"
+    Private Const CLS_VERSION As String = "1.13.2"
     Private moSqlCommand As SqlCommand
 
     Public Sub New(SpName As String)

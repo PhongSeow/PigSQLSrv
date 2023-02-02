@@ -33,17 +33,16 @@
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
-Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-Imports PigToolsLiteLib
 #End If
+Imports PigToolsLiteLib
 ''' <summary>
 ''' Command for SQL Server SQL statement Text
 ''' </summary>
 Public Class CmdSQLSrvText
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.16.2"
+    Private Const CLS_VERSION As String = "1.16.3"
     Public Property SQLText As String
     Private moSqlCommand As SqlCommand
 

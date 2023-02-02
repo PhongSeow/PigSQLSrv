@@ -14,18 +14,16 @@
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
-Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-Imports PigToolsLiteLib
 #End If
-
+Imports PigToolsLiteLib
 ''' <summary>
 ''' 用于SQL Server 的键值|PigKeyValue of SQL Server
 ''' </summary>
 Public Class SQLSrvKeyValue
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.5.8"
+    Private Const CLS_VERSION As String = "1.5.10"
 
     Private Property mConnSQLSrv As ConnSQLSrv
     Private Property mPigFunc As New PigFunc

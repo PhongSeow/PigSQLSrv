@@ -13,11 +13,7 @@
 '* 1.6	27/9/2022	Modify IntValue
 '* 1.7	10/10/2022	Modify IsEOF
 '**********************************
-#If NETFRAMEWORK Then
-Imports PigToolsWinLib
-#Else
 Imports PigToolsLiteLib
-#End If
 
 
 ''' <summary>
@@ -25,7 +21,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class XmlRS
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.7.1"
+    Private Const CLS_VERSION As String = "1.7.2"
     Public ReadOnly Property PigXml As PigXml
     Public Sub New(XmlStr As String, Optional IsChgCtrlChar As Boolean = True)
         MyBase.New(CLS_VERSION)

@@ -15,16 +15,12 @@
 '* 1.7	26/7/2022	Modify Imports
 '* 1.8	29/7/2022	Modify Imports
 '**********************************
-#If NETFRAMEWORK Then
-Imports PigToolsWinLib
-#Else
 Imports PigToolsLiteLib
-#End If
 
 
 Friend Class DBConnDef
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.8.1"
+    Private Const CLS_VERSION As String = "1.8.2"
 
     Friend fPigConfigSession As PigConfigSession
 

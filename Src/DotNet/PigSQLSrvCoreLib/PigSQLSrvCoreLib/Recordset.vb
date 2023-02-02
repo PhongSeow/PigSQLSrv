@@ -27,18 +27,17 @@
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
-Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-Imports PigToolsLiteLib
 #End If
+Imports PigToolsLiteLib
 
 ''' <summary>
 ''' Recordset|结果集
 ''' </summary>
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.11.2"
+    Private Const CLS_VERSION As String = "1.11.3"
     Private moSqlDataReader As SqlDataReader
 
 

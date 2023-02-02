@@ -18,17 +18,13 @@
 '* 1.10	26/7/2022	Modify Imports
 '* 1.11	29/7/2022	Modify Imports
 '**********************************
-#If NETFRAMEWORK Then
-Imports PigToolsWinLib
-#Else
 Imports PigToolsLiteLib
-#End If
 
 
 Friend Class DBConnDefs
     Inherits PigBaseLocal
     Implements IEnumerable(Of DBConnDef)
-    Private Const CLS_VERSION As String = "1.11.2"
+    Private Const CLS_VERSION As String = "1.11.3"
     Private ReadOnly moList As New List(Of DBConnDef)
 
     Friend fPigConfigApp As PigConfigApp

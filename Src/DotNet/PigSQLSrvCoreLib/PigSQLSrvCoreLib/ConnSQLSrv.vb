@@ -34,18 +34,17 @@
 Imports System.Data
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
-Imports PigToolsWinLib
 #Else
 Imports Microsoft.Data.SqlClient
-Imports PigToolsLiteLib
 #End If
+Imports PigToolsLiteLib
 
 ''' <summary>
 ''' Connection for SQL Server
 ''' </summary>
 Public Class ConnSQLSrv
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.21.1"
+    Private Const CLS_VERSION As String = "1.21.2"
     Public Connection As SqlConnection
     Private mcstChkDBStatus As CmdSQLSrvText
     Friend Property CacheWorkDir As String

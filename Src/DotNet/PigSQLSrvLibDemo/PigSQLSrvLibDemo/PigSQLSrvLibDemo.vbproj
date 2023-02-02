@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>PigSQLSrvLibDemo</RootNamespace>
-    <TargetFrameworks>net20;net30;net40;</TargetFrameworks>
+    <TargetFrameworks>net20;net30;net35;net40;net45;net46;net47;net48;</TargetFrameworks>
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <Authors>Seow Phong</Authors>
 	  <Company>Seow Phong Studio</Company>
@@ -13,30 +13,14 @@
 	  <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
 	  <RepositoryType>GIT</RepositoryType>
 	  <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvLibDemo</RepositoryUrl>
-	  <Version>2.8.68</Version>
+	  <Version>2.8.70</Version>
 	  <PackageTags>PigSQLSrvLib SQLServer Windows Mirror automatic high availability JSON cache query</PackageTags>
 	  <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="My Project\" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="ObjAdoDBLib">
-      <Version>1.0.1</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="ObjAdoDBLib">
-      <Version>1.0.1</Version>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="PigCmdLib" Version="2.2.6" />
-    <PackageReference Include="PigSQLSrvLib" Version="2.8.68" />
+    <PackageReference Include="PigCmdLib" Version="2.2.8" />
+    <PackageReference Include="PigSQLSrvLib" Version="2.8.70" />
   </ItemGroup>
 
 </Project>

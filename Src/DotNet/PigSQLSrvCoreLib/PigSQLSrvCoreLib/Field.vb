@@ -26,7 +26,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.8.1"
+    Private Const CLS_VERSION As String = "1.8.2"
 
 
     Public Enum EnumDataCategory
