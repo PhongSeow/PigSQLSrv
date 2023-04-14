@@ -4,19 +4,21 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: 
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.8
+'* Version: 1.10
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify New
 '* 1.0.3	21/7/2021	Modify New,DataCategory
 '* 1.0.4	28/7/2021	Modify New,DataCategory, add FieldTypeName
-'* 1.1		29/8/2021   Add support for .net core
-'* 1.2		9/6/2022    Modify EnumDataCategory,ValueForJSon
-'* 1.3		24/6/2022   Rename DataCategoryEnum to EnumDataCategory
-'* 1.4		2/7/2022	Use PigBaseLocal
-'* 1.5		3/7/2022	Modify IntValue,LngValue,DecValue,DateValue,StrValue
-'* 1.6		10/7/2022	Modify ValueForJSon, add DateFormat, add IsStrValueTrim
-'* 1.7		11/7/2022	Modify DataCategory
-'* 1.8		5/9/2022	Modify DateValue, add DateStrValue
+'* 1.1	29/8/2021   Add support for .net core
+'* 1.2	9/6/2022    Modify EnumDataCategory,ValueForJSon
+'* 1.3	24/6/2022   Rename DataCategoryEnum to EnumDataCategory
+'* 1.4	2/7/2022	Use PigBaseLocal
+'* 1.5	3/7/2022	Modify IntValue,LngValue,DecValue,DateValue,StrValue
+'* 1.6	10/7/2022	Modify ValueForJSon, add DateFormat, add IsStrValueTrim
+'* 1.7	11/7/2022	Modify DataCategory
+'* 1.8	5/9/2022	Modify DateValue, add DateStrValue
+'* 1.9	10/4/2022	Add LongValue
+'* 1.10	12/10/2022	Modify Date Initial Time
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -26,7 +28,7 @@ Imports Microsoft.Data.SqlClient
 #End If
 Public Class Field
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.8.2"
+    Private Const CLS_VERSION As String = "1.10.2"
 
 
     Public Enum EnumDataCategory
@@ -119,15 +121,15 @@ Public Class Field
         Get
             Try
                 If IsDBNull(moValue) = True Then
-                    Return Format(#1/1/1900#, Me.DateFormat)
+                    Return Format(#1/1/1753#, Me.DateFormat)
                 ElseIf IsDate(moValue) = True Then
                     Return Format(CDate(moValue), Me.DateFormat)
                 Else
-                    Return Format(#1/1/1900#, Me.DateFormat)
+                    Return Format(#1/1/1753#, Me.DateFormat)
                 End If
             Catch ex As Exception
                 Me.SetSubErrInf("DateValue.Get", ex)
-                Return Format(#1/1/1900#, Me.DateFormat)
+                Return Format(#1/1/1753#, Me.DateFormat)
             End Try
         End Get
     End Property
@@ -136,15 +138,15 @@ Public Class Field
         Get
             Try
                 If IsDBNull(moValue) = True Then
-                    Return #1/1/1900#
+                    Return #1/1/1753#
                 ElseIf IsDate(moValue) = True Then
                     Return CDate(moValue)
                 Else
-                    Return #1/1/1900#
+                    Return #1/1/1753#
                 End If
             Catch ex As Exception
                 Me.SetSubErrInf("DateValue.Get", ex)
-                Return #1/1/1900#
+                Return #1/1/1753#
             End Try
         End Get
     End Property
@@ -178,6 +180,23 @@ Public Class Field
                 End If
             Catch ex As Exception
                 Me.SetSubErrInf("LngValue.Get", ex)
+                Return 0
+            End Try
+        End Get
+    End Property
+
+    Public ReadOnly Property LongValue() As Long
+        Get
+            Try
+                If IsDBNull(moValue) = True Then
+                    Return 0
+                ElseIf IsNumeric(moValue) = True Then
+                    Return CLng(moValue)
+                Else
+                    Return 0
+                End If
+            Catch ex As Exception
+                Me.SetSubErrInf("LongValue.Get", ex)
                 Return 0
             End Try
         End Get

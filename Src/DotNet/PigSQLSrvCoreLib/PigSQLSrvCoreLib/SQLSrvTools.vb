@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.26
+'* Version: 1.30
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -17,7 +17,7 @@
 '* 1.8		23/6/2021   Modify GetTableOrView2VBCode, add DataTypeStr,SpHelpFields2SQLSrvTypeStr
 '* 1.9		25/6/2021   Modify GetTableOrView2VBCode
 '* 1.10		26/6/2021   Modify GetTableOrView2VBCode
-'* 1.11		1/7/2021   Modify GetTableOrView2SQLOrVBFragment
+'* 1.11		1/7/2021    Modify GetTableOrView2SQLOrVBFragment
 '* 1.12		2/7/2022	Use PigBaseLocal
 '* 1.16		4/7/2022	Modify GetTableOrView2VBCode
 '* 1.17		26/7/2022	Modify Imports
@@ -29,6 +29,10 @@
 '* 1.23		5/9/2022	Modify datetime
 '* 1.25		11/10/2022	Modify GetTableOrView2VBCode
 '* 1.26		28/1/2023	Modify SpHelpFields2SQLSrvTypeStr
+'* 1.27		6/3/2023	Add DropTable,ChkObjNameIsInvalid,IsReservedKeywords
+'* 1.28		31/3/2023	Modify GetTableOrView2VBCode
+'* 1.29		3/4/2023	Modify GetTableOrView2SQLOrVBFragment
+'* 1.30		12/4/2023	Modify GetTableOrView2VBCode,GetTableOrView2SQLOrVBFragment
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -43,8 +47,8 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.26.3"
-    Private moConnSQLSrv As ConnSQLSrv
+    Private Const CLS_VERSION As String = "1.30.2"
+    Private Property mConnSQLSrv As ConnSQLSrv
     Private ReadOnly Property mPigFunc As New PigFunc
 
     Public Enum EnmDBObjType
@@ -65,7 +69,7 @@ Public Class SQLSrvTools
     Public Sub New(ConnSQLSrv As ConnSQLSrv)
         MyBase.New(CLS_VERSION)
         Try
-            moConnSQLSrv = ConnSQLSrv
+            mConnSQLSrv = ConnSQLSrv
             Me.ClearErr()
         Catch ex As Exception
             Me.SetSubErrInf("New", ex)
@@ -146,7 +150,7 @@ Public Class SQLSrvTools
             LOG.StepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(SQL)
             With oCmdSQLSrvText
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 LOG.StepName = "ExecuteNonQuery"
                 LOG.Ret = .ExecuteNonQuery()
                 If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
@@ -202,7 +206,7 @@ Public Class SQLSrvTools
             If ParentObjName <> "" Then strSQL &= " AND parent_obj=OBJECT_ID(@ParentObjName)"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 .AddPara("@ObjName", SqlDbType.VarChar, 512)
                 .ParaValue("@ObjName") = ObjName
                 .AddPara("@DBObjType", SqlDbType.VarChar, 10)
@@ -242,7 +246,7 @@ Public Class SQLSrvTools
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 .AddPara("@DBName", SqlDbType.VarChar, 512)
                 .ParaValue("@DBName") = DBName
                 strStepName = "Execute"
@@ -279,7 +283,7 @@ Public Class SQLSrvTools
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 .AddPara("@LoginName", SqlDbType.VarChar, 512)
                 .ParaValue("@LoginName") = LoginName
                 strStepName = "Execute"
@@ -316,7 +320,7 @@ Public Class SQLSrvTools
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 .AddPara("@DBUserName", SqlDbType.VarChar, 512)
                 .ParaValue("@DBUserName") = DBUserName
                 strStepName = "Execute"
@@ -355,7 +359,7 @@ Public Class SQLSrvTools
             strStepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
             With oCmdSQLSrvText
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 .AddPara("@TableName", SqlDbType.VarChar, 512)
                 .AddPara("@ColName", SqlDbType.VarChar, 512)
                 .ParaValue("@TableName") = TableName
@@ -421,7 +425,7 @@ Public Class SQLSrvTools
             Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_help")
             With oCmdSQLSrvSp
                 LOG.StepName = "Set ActiveConnection"
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 If .LastErr <> "" Then
                     LOG.AddStepNameInf("sp_help")
                     Throw New Exception(.LastErr)
@@ -495,9 +499,12 @@ Public Class SQLSrvTools
                         Else
                             If strColumn_name <> "LastUpdateTime" Then
                                 strProperty &= vbTab & "Private m" & strColumn_name & " As " & strVBDataType
-                                If strVBDataType = "DateTime" Then
-                                    strProperty &= " = #1/1/1900#"
-                                End If
+                                Select Case strVBDataType
+                                    Case "DateTime"
+                                        strProperty &= " = #1/1/1753#"
+                                    Case "String"
+                                        strProperty &= " = """""
+                                End Select
                                 strProperty &= Me.OsCrLf
                                 strProperty &= vbTab & "Public Property " & strColumn_name & "() As " & strVBDataType & Me.OsCrLf
                                 strProperty &= vbTab & vbTab & "Get" & Me.OsCrLf
@@ -595,7 +602,7 @@ Public Class SQLSrvTools
                 Case Field.EnumDataCategory.IntValue
                     DataCategory2ValueType = "IntValue"
                 Case Field.EnumDataCategory.LongValue
-                    DataCategory2ValueType = "LngValue"
+                    DataCategory2ValueType = "LongValue"
                 Case Field.EnumDataCategory.OtherValue
                     DataCategory2ValueType = ""
                 Case Field.EnumDataCategory.StrValue
@@ -809,6 +816,10 @@ Public Class SQLSrvTools
         ''' </summary>
         CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue = 5
         ''' <summary>
+        ''' 生成调用 CmdSQLSrvSp 或 CmdSQLSrvText 的 UPDATE SQL 语句 的VB代码|VB code calling AddPara and ParaValue of CmdSQLSrvSp or CmdSQLSrvText
+        ''' </summary>
+        CmdSQLSrvSpOrCmdSQLSrvText_UpdCols = 8
+        ''' <summary>
         ''' 每列判断并更新|The columns of each data table are judged and updated
         ''' </summary>
         UpdatePerCol = 6
@@ -844,12 +855,14 @@ Public Class SQLSrvTools
                     OutFragment &= "SET @Rows=0" & Me.OsCrLf
                 Case EnmWhatFragment.ExecSpParas
                     OutFragment &= "EXEC SpName "
+                Case EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_UpdCols
+                    OutFragment &= "Dim strUpdCols As String = """"" & Me.OsCrLf
             End Select
             LOG.StepName = "New CmdSQLSrvSp"
             Dim oCmdSQLSrvSp As New CmdSQLSrvSp("sp_help")
             With oCmdSQLSrvSp
                 LOG.StepName = "Set ActiveConnection"
-                .ActiveConnection = Me.moConnSQLSrv.Connection
+                .ActiveConnection = Me.mConnSQLSrv.Connection
                 If .LastErr <> "" Then
                     LOG.AddStepNameInf("sp_help")
                     Throw New Exception(.LastErr)
@@ -866,6 +879,7 @@ Public Class SQLSrvTools
                 rs = rs.NextRecordset
                 Do While Not rs.EOF
                     Dim strColName As String = rs.Fields.Item("Column_name").StrValue
+                    Dim strLength As String = rs.Fields.Item("Length").StrValue
                     Dim strSQLSrvType As String = rs.Fields.Item("Type").StrValue
                     Dim strSqlDbType As String = Me.SQLSrvType2SqlDbType(strSQLSrvType)
                     Dim strSQLSrvTypeStr As String = Me.SpHelpFields2SQLSrvTypeStr(rs.Fields)
@@ -876,9 +890,16 @@ Public Class SQLSrvTools
                             OutFragment &= vbTab & ".ParaValue(""@" & strColName & """) = InObj." & strColName & Me.OsCrLf
                         Case EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue
                             OutFragment &= vbTab & "If InObj.IsUpdate(""" & strColName & """) = True Then" & Me.OsCrLf
-                            OutFragment &= vbTab & vbTab & ".AddPara(""@" & strColName & """, " & strSqlDbType & ")" & Me.OsCrLf
+                            OutFragment &= vbTab & vbTab & ".AddPara(""@" & strColName & """, " & strSqlDbType
+                            Select Case strSQLSrvType
+                                Case "varchar"
+                                    OutFragment &= " , " & strLength
+                            End Select
+                            OutFragment &= ")" & Me.OsCrLf
                             OutFragment &= vbTab & vbTab & ".ParaValue(""@" & strColName & """) = InObj." & strColName & Me.OsCrLf
                             OutFragment &= vbTab & "End If" & Me.OsCrLf
+                        Case EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_UpdCols
+                            OutFragment &= "If InObj.IsUpdate(""" & strColName & """) = True Then strUpdCols &= ""," & strColName & "=@" & strColName & """" & Me.OsCrLf
                         Case EnmWhatFragment.SpInParas, EnmWhatFragment.SpInParasSetNull
                             OutFragment &= vbTab & ",@" & strColName & " " & strSQLSrvTypeStr
                             Select Case WhatFragment
@@ -902,11 +923,85 @@ Public Class SQLSrvTools
                 Select Case WhatFragment
                     Case EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara, EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_AddPara_ParaValue, EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_ParaValue
                         OutFragment &= "End With" & Me.OsCrLf
+                    Case EnmWhatFragment.CmdSQLSrvSpOrCmdSQLSrvText_UpdCols
+                        OutFragment &= "If strUpdCols = """" Then Throw New Exception(""There is nothing to update"")" & Me.OsCrLf
+                        OutFragment &= "strUpdCols = Mid(strUpdCols, 2)" & Me.OsCrLf
+                        OutFragment &= "strSQL = ""UPDATE dbo.TabName SET "" & strUpdCols & "" WHERE KeyID=@KeyID""" & Me.OsCrLf
                 End Select
             End With
             Return "OK"
         Catch ex As Exception
             Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
+    Public Function DropTable(TabName As String) As String
+        Dim LOG As New PigStepLog("DropTable")
+        Dim strSQL As String = ""
+        Try
+            If Me.IsDBObjExists(EnmDBObjType.UserTable, TabName) = False Then Throw New Exception(TabName & " not exists.")
+            strSQL = "DROP TABLE dbo." & TabName
+            LOG.StepName = "New CmdSQLSrvText"
+            Dim oCmdSQLSrvText As New CmdSQLSrvText(strSQL)
+            With oCmdSQLSrvText
+                .ActiveConnection = Me.mConnSQLSrv.Connection
+                LOG.StepName = "ExecuteNonQuery"
+                LOG.Ret = .ExecuteNonQuery()
+                If LOG.Ret <> "OK" Then
+                    Me.PrintDebugLog(LOG.SubName, LOG.StepLogInf)
+                    Throw New Exception(LOG.Ret)
+                End If
+            End With
+            Return "OK"
+        Catch ex As Exception
+            LOG.AddStepNameInf(strSQL)
+            Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' 是否保留关键字|Keep keyword or not
+    ''' </summary>
+    ''' <param name="ObjName"></param>
+    ''' <returns></returns>
+    Public Function IsReservedKeywords(ObjName As String) As Boolean
+        Const RKLIST As String = "<create><table><insert><into><alues><delete><from><update><set><where><drop><alteradd><select><from><distinct><all><and><or><not><left><right><join><outer><cross><inner><using><inner><full><on><as><order><by><desc><asc><between><union><intersect><except><is><null><distinct><having>"
+        Try
+            ObjName = "<" & ObjName & ">"
+            If InStr(RKLIST, ObjName) > 0 Then
+                Return True
+            Else
+                Return False
+            End If
+        Catch ex As Exception
+            Return Nothing
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' 检查是否无效的对象名|Check for invalid object names
+    ''' </summary>
+    ''' <param name="ObjName"></param>
+    ''' <returns>Returning OK means passing</returns>
+    Public Function ChkObjNameIsInvalid(ObjName As String) As String
+        Const SPECIAL_CHARACTERS As String = "~!%6&*()-+`={}[];',./:""<>? "
+        Try
+            Select Case Len(ObjName)
+                Case 1 To 128
+                Case Else
+                    Throw New Exception("Invalid object name length")
+            End Select
+            Select Case Left(ObjName, 1)
+                Case "0" To "9"
+                    Throw New Exception("Object name cannot start with a number")
+            End Select
+            For i = 0 To Len(ObjName) - 1
+                If InStr(Mid(SPECIAL_CHARACTERS, ObjName, i), 1) > 0 Then Throw New Exception("The object name contains special characters.")
+            Next
+            If Me.IsReservedKeywords(ObjName) = True Then Throw New Exception("")
+            Return "OK"
+        Catch ex As Exception
+            Return ex.Message.ToString
         End Try
     End Function
 

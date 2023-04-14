@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2022 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Xml result set|Xml结果集
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.7
+'* Version: 1.8
 '* Create Time: 10/7/2021
 '* 1.1 11/7/2022 Modify New
 '* 1.2	26/7/2022	Modify Imports
@@ -12,6 +12,7 @@
 '* 1.5	5/9/2022	Modify datetime
 '* 1.6	27/9/2022	Modify IntValue
 '* 1.7	10/10/2022	Modify IsEOF
+'* 1.8	12/10/2022	Modify Date Initial Time
 '**********************************
 Imports PigToolsLiteLib
 
@@ -329,7 +330,7 @@ Public Class XmlRS
                 Return Me.PigXml.XmlDocGetDate(strXmlKey)
             Catch ex As Exception
                 Me.SetSubErrInf("DateValue", ex)
-                Return #1/1/1900#
+                Return #1/1/1753#
             End Try
         End Get
     End Property
@@ -348,7 +349,7 @@ Public Class XmlRS
                 Return Me.DateValue(RSNo, RowNo, intIndex)
             Catch ex As Exception
                 Me.SetSubErrInf("DateValue", ex)
-                Return #1/1/1900#
+                Return #1/1/1753#
             End Try
         End Get
     End Property
