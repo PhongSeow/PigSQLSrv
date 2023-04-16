@@ -8,7 +8,7 @@
     <Company>Seow Phong Studio</Company>
     <Copyright>Copyright (c) 2021-2023 Seow Phong</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
+    <PackageProjectUrl>https://en.seowphong.com</PackageProjectUrl>
     <PackageIcon>SeowPhongLogo.png</PackageIcon>
     <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvLib</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
@@ -23,7 +23,7 @@ Generate SQL statements or VB code for tables or views.
 Common SQL Server operation tool functions.
 It can run on Windows platforms only.
 </Description>
-    <Version>2.8.80</Version>
+    <Version>2.8.82</Version>
     <PackageTags>SQL Server;PigSQLSrvCoreLib;CmdSQLSrvText;ConnSQLSrv;Recordset;Fields;Field;Windows;Linux; mirror database;high availability;JSON;XML;cache query;vbcode generate;duplication;compression;Directory scanning;</PackageTags>
     <PackageReleaseNotes>Add new function of SQLSrvTools, and fix some bugs.</PackageReleaseNotes>
   </PropertyGroup>
@@ -40,7 +40,7 @@ It can run on Windows platforms only.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigToolsLiteLib" Version="3.3.130" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.3.132" />
   </ItemGroup>
 
 </Project>

@@ -9,18 +9,18 @@
 	  <Product>PigSQLSrvCoreLib Demo Console</Product>
 	  <Description>Demo console program for PigSQLSrvCoreLib</Description>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <PackageProjectUrl>https://en.seowphong.com/oss/PigSQLSrv/</PackageProjectUrl>
+	  <PackageProjectUrl>https://en.seowphong.com</PackageProjectUrl>
 	  <RepositoryType>GIT</RepositoryType>
 	  <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLibDemo</RepositoryUrl>
-	  <Version>2.8.80</Version>
+	  <Version>2.8.82</Version>
 	  <PackageTags>ObjAdoDBLib SQLServer Windows Linux Ado Core Mirror automatic high availability JSON cache query</PackageTags>
 	  <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
 	  <Copyright>Copyright (c) 2021-2023 Seow Phong</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigCmdLib" Version="2.2.20" />
-    <PackageReference Include="PigSQLSrvCoreLib" Version="2.8.80" />
+    <PackageReference Include="PigCmdLib" Version="2.2.22" />
+    <PackageReference Include="PigSQLSrvCoreLib" Version="2.8.82" />
   </ItemGroup>
 
 </Project>
