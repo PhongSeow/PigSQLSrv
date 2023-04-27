@@ -23,9 +23,9 @@ Generate SQL statements or VB code for tables or views.
 Common SQL Server operation tool functions.
 It can run on Windows platforms only.
 </Description>
-    <Version>2.8.82</Version>
+    <Version>2.8.86</Version>
     <PackageTags>SQL Server;PigSQLSrvCoreLib;CmdSQLSrvText;ConnSQLSrv;Recordset;Fields;Field;Windows;Linux; mirror database;high availability;JSON;XML;cache query;vbcode generate;duplication;compression;Directory scanning;</PackageTags>
-    <PackageReleaseNotes>Add new function of SQLSrvTools, and fix some bugs.</PackageReleaseNotes>
+    <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,7 +40,7 @@ It can run on Windows platforms only.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigToolsLiteLib" Version="3.3.132" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.3.136" />
   </ItemGroup>
 
 </Project>
