@@ -4,7 +4,7 @@
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
     <TargetFrameworks>net7.0;net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.8.92</Version>
+    <Version>2.8.96</Version>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
     <Description>An interface class library specially designed for MS-SQL server.
@@ -26,7 +26,9 @@ It can run on Windows and Linux platforms.
     <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLib</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <PackageTags>SQL Server;PigSQLSrvCoreLib;CmdSQLSrvText;ConnSQLSrv;Recordset;Fields;Field;Windows;Linux; mirror database;high availability;JSON;XML;cache query;vbcode generate;duplication;compression;Directory scanning;</PackageTags>
-    <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
+    <PackageReleaseNotes>Add Readme of package.</PackageReleaseNotes>
+    <Title>Pig SQLServer Core library</Title>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -37,8 +39,16 @@ It can run on Windows and Linux platforms.
   <ItemGroup>
     <None Include="SeowPhongLogo.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
+      <PackagePath>\</PackagePath>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
 
 </Project>
