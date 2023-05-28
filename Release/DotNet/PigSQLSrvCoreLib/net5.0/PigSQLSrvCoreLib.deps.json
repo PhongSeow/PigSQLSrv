@@ -6,10 +6,10 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v5.0": {
-      "PigSQLSrvCoreLib/2.8.96": {
+      "PigSQLSrvCoreLib/2.8.98": {
         "dependencies": {
           "Microsoft.Data.SqlClient": "5.1.1",
-          "PigToolsLiteLib": "3.3.152"
+          "PigToolsLiteLib": "3.3.158"
         },
         "runtime": {
           "PigSQLSrvCoreLib.dll": {}
@@ -248,14 +248,14 @@
           }
         }
       },
-      "PigToolsLiteLib/3.3.152": {
+      "PigToolsLiteLib/3.3.158": {
         "dependencies": {
           "Microsoft.Win32.Registry": "5.0.0"
         },
         "runtime": {
           "lib/net5.0/PigToolsLiteLib.dll": {
-            "assemblyVersion": "3.3.152.0",
-            "fileVersion": "3.3.152.0"
+            "assemblyVersion": "3.3.158.0",
+            "fileVersion": "3.3.158.0"
           }
         }
       },
@@ -513,7 +513,7 @@
     }
   },
   "libraries": {
-    "PigSQLSrvCoreLib/2.8.96": {
+    "PigSQLSrvCoreLib/2.8.98": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -651,12 +651,12 @@
       "path": "microsoft.win32.systemevents/6.0.0",
       "hashPath": "microsoft.win32.systemevents.6.0.0.nupkg.sha512"
     },
-    "PigToolsLiteLib/3.3.152": {
+    "PigToolsLiteLib/3.3.158": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-vt+UIHgEYVw1NekS/UBsk9c7m7Fz5n+L2A2pKF8MqW0yF4I7BMgg5Ha9gr3KVlofYCEazpLK4AJwdTwp8CdSbg==",
-      "path": "pigtoolslitelib/3.3.152",
-      "hashPath": "pigtoolslitelib.3.3.152.nupkg.sha512"
+      "sha512": "sha512-SI8DKRVNtKMnPOsqfR7AC3hlkzD8vInokm9xyY14DLSbSdopLV175EtokvKnekoLpAu6rrq4lOj7P8UMnr+2NA==",
+      "path": "pigtoolslitelib/3.3.158",
+      "hashPath": "pigtoolslitelib.3.3.158.nupkg.sha512"
     },
     "System.Configuration.ConfigurationManager/6.0.1": {
       "type": "package",

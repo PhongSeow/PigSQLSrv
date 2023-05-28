@@ -13,19 +13,10 @@
     <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvLib</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
     <Description>An interface class library specially designed for MS-SQL server.
-Friendly calling interface for Command of SQL Server StoredProcedure and SQL statement Text.
-Support automatic switch connection of mirror database for high availability.
-Support the transformation of query results into JSON and XML.
-Key value based on SQL Server.
-Support cache query.
-Database connection management.
-Generate SQL statements or VB code for tables or views.
-Common SQL Server operation tool functions.
-It can run on Windows platforms only.
 </Description>
-    <Version>2.8.96</Version>
+    <Version>2.8.98</Version>
     <PackageTags>SQL Server;PigSQLSrvCoreLib;CmdSQLSrvText;ConnSQLSrv;Recordset;Fields;Field;Windows;Linux; mirror database;high availability;JSON;XML;cache query;vbcode generate;duplication;compression;Directory scanning;</PackageTags>
-    <PackageReleaseNotes>Add Readme of package.</PackageReleaseNotes>
+    <PackageReleaseNotes>Reference the latest class library and update readme.</PackageReleaseNotes>
     <Title>Pig SQLServer library</Title>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
@@ -49,7 +40,7 @@ It can run on Windows platforms only.
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigToolsLiteLib" Version="3.3.152" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.3.158" />
   </ItemGroup>
 
 </Project>

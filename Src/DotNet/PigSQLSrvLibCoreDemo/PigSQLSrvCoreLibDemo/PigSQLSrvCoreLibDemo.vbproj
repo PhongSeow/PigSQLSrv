@@ -12,15 +12,23 @@
 	  <PackageProjectUrl>https://en.seowphong.com</PackageProjectUrl>
 	  <RepositoryType>GIT</RepositoryType>
 	  <RepositoryUrl>https://github.com/PhongSeow/PigSQLSrv/tree/master/Src/DotNet/PigSQLSrvCoreLibDemo</RepositoryUrl>
-	  <Version>2.8.82</Version>
+	  <Version>2.8.98</Version>
 	  <PackageTags>ObjAdoDBLib SQLServer Windows Linux Ado Core Mirror automatic high availability JSON cache query</PackageTags>
 	  <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
 	  <Copyright>Copyright (c) 2021-2023 Seow Phong</Copyright>
+	  <PackageReadmeFile>SampleDemo.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigCmdLib" Version="2.2.22" />
-    <PackageReference Include="PigSQLSrvCoreLib" Version="2.8.82" />
+    <None Include="..\..\..\..\Release\DotNet\PigSQLSrvCoreLibDemo\SampleDemo.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PigCmdLib" Version="2.2.50" />
+    <PackageReference Include="PigSQLSrvCoreLib" Version="2.8.98" />
   </ItemGroup>
 
 </Project>
