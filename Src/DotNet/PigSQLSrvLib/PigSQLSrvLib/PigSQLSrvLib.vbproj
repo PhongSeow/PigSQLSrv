@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>PigSQLSrvLib</RootNamespace>
-    <TargetFrameworks>net20;net30;net35;net40;net45;net46;net47;net48;</TargetFrameworks>
+    <TargetFrameworks>net20;net30;net35;net40;net45;net46;net47;net48;net7.0;net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
@@ -14,9 +14,9 @@
     <RepositoryType>GIT</RepositoryType>
     <Description>An interface class library specially designed for MS-SQL server.
 </Description>
-    <Version>2.8.100</Version>
+    <Version>2.8.102</Version>
     <PackageTags>SQL Server;PigSQLSrvCoreLib;CmdSQLSrvText;ConnSQLSrv;Recordset;Fields;Field;Windows;Linux; mirror database;high availability;JSON;XML;cache query;vbcode generate;duplication;compression;Directory scanning;</PackageTags>
-    <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
+    <PackageReleaseNotes>Merge PigSQLSrvCoreLib into PigSQLSrvLib.</PackageReleaseNotes>
     <Title>Pig SQLServer library</Title>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
@@ -41,6 +41,42 @@
 
   <ItemGroup>
     <PackageReference Include="PigToolsLiteLib" Version="3.3.160" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>5.1.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>5.1.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>5.1.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>5.1.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>5.1.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="Microsoft.Data.SqlClient">
+      <Version>5.1.1</Version>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

@@ -10,5 +10,5 @@ An interface class library specially designed for MS-SQL server.
  - Database connection management.
  - Generate SQL statements or VB code for tables or views.
  - Common SQL Server operation tool functions.
- - It can run on Windows platforms only.
+ - It can run on Windows and Linux platforms.
 - [View demo ](https://www.nuget.org/packages/PigSQLSrvLibDemo/)

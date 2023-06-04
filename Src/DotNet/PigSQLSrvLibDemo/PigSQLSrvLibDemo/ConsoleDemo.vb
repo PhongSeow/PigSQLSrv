@@ -30,14 +30,13 @@
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
-Imports PigSQLSrvLib
 Imports System.Data.SqlClient
 #Else
-Imports PigSQLSrvCoreLib
 Imports Microsoft.Data.SqlClient
 #End If
 Imports PigToolsLiteLib
 Imports PigCmdLib
+Imports PigSQLSrvLib
 
 
 
