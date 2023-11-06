@@ -14,9 +14,9 @@
     <RepositoryType>GIT</RepositoryType>
     <Description>An interface class library specially designed for MS-SQL server.
 </Description>
-    <Version>2.8.122.8</Version>
-    <PackageTags>SQLServer;Tools;Develop;CmdSQLSrvText;ConnSQLSrv;Recordset;Field;Windows;Linux;MirrorServer;HA;SQL2Json;SQL2XML;CacheQuery;VBcode generate;StoredProcedure;KeyValue;</PackageTags>
-    <PackageReleaseNotes>To address compatibility with older versions of the. NET Framework, it has been re released separately from PigSQLSrvCoreLib.</PackageReleaseNotes>
+    <Version>2.8.126</Version>
+    <PackageTags>SQLServer;Tools;Develop;CmdSQLSrvText;ConnSQLSrv;Recordset;Field;Windows;Linux;MirrorServer;HA;SQL2Json;SQL2XML;CacheQuery;VBcode generate;StoredProcedure;KeyValue;LocalDB;</PackageTags>
+    <PackageReleaseNotes>Add shortcuts to connect to LocalDB.</PackageReleaseNotes>
     <Title>Pig SQLServer library</Title>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>

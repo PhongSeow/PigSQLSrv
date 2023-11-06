@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.21
+'* Version: 1.22
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -30,6 +30,7 @@
 '* 1.19		5/8/2022	Modify Property
 '* 1.20		5/9/2022	Modify datetime
 '* 1.21		18/9/2022	Modify InitPigKeyValue
+'* 1.22		6/11/2023	Modify New
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -44,7 +45,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class ConnSQLSrv
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.21.2"
+    Private Const CLS_VERSION As String = "1.22.6"
     Public Connection As SqlConnection
     Private mcstChkDBStatus As CmdSQLSrvText
     Friend Property CacheWorkDir As String
@@ -193,6 +194,30 @@ Public Class ConnSQLSrv
     Public Sub New(SQLServer As String, CurrDatabase As String)
         MyBase.New(CLS_VERSION)
         Me.mNew(SQLServer, CurrDatabase)
+    End Sub
+
+    ''' <summary>
+    ''' Trusted Connectionst and stand-alone mode or LocalDB
+    ''' </summary>
+    ''' <param name="SQLServerOrLocalDBInstance">SQL Server hostname or ip</param>
+    ''' <param name="CurrDatabase">current database</param>
+    ''' <param name="IsLocalDB">Is connect to LocalDB</param>
+    Public Sub New(SQLServerOrLocalDBInstance As String, CurrDatabase As String, IsLocalDB As Boolean)
+        MyBase.New(CLS_VERSION)
+        If IsLocalDB = True Then
+            SQLServerOrLocalDBInstance = "(localdb)\" & SQLServerOrLocalDBInstance
+        End If
+        Me.mNew(SQLServerOrLocalDBInstance, CurrDatabase)
+    End Sub
+
+    ''' <summary>
+    ''' Connect to the default instance MSSQLLocalDB of LocalDB
+    ''' </summary>
+    ''' <param name="CurrDatabase">current database</param>
+    Public Sub New(CurrDatabase As String)
+        MyBase.New(CLS_VERSION)
+        Dim strSQLServer As String = "(localdb)\MSSQLLocalDB"
+        Me.mNew(strSQLServer, CurrDatabase)
     End Sub
 
     ''' <summary>

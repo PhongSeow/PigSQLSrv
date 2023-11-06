@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "PigSQLSrvCoreLib/2.8.122": {
+      "PigSQLSrvCoreLib/2.8.126": {
         "dependencies": {
           "Microsoft.Data.SqlClient": "5.1.2",
           "PigToolsLiteLib": "3.5.22"
@@ -416,7 +416,7 @@
     }
   },
   "libraries": {
-    "PigSQLSrvCoreLib/2.8.122": {
+    "PigSQLSrvCoreLib/2.8.126": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

@@ -27,14 +27,15 @@
 '* 1.21	30/7/2022	Modify SQLSrvToolsDemo
 '* 1.22	28/1/2023	Modify SQLSrvToolsDemo
 '* 1.23	1/2/2023	Modify Imports
+'* 1.25	6/11/2023	Modify Imports
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
-Imports PigSQLSrvLib
 Imports System.Data.SqlClient
+Imports PigSQLSrvLib
 #Else
-Imports PigSQLSrvCoreLib
 Imports Microsoft.Data.SqlClient
+Imports PigSQLSrvCoreLib
 #End If
 Imports PigToolsLiteLib
 Imports PigCmdLib
@@ -113,6 +114,7 @@ Public Class ConsoleDemo
                     Console.WriteLine("Press Q to Up")
                     Console.WriteLine("Press A to SQL Server(StandAlone mode)")
                     Console.WriteLine("Press B to SQL Server(Mirror mode)")
+                    Console.WriteLine("Press C to SQL Server(LocalDB)")
                     Do While True
                         Me.CurrConsoleKey = Console.ReadKey(True).Key
                         Select Case Me.CurrConsoleKey
@@ -172,6 +174,17 @@ Public Class ConsoleDemo
                                         'Console.WriteLine("DB Password=" & Me.DBPwd)
                                         Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.MirrDBSrv, Me.CurrDB, Me.DBUser, Me.DBPwd)
                                 End Select
+                                Me.ConnSQLSrv.InitPigKeyValue("c:\temp\aaa")
+                                Exit Do
+                            Case ConsoleKey.C
+                                If Me.PigConsole.IsYesOrNo("Do you want to use the default instance") = True Then
+                                    Me.PigConsole.GetLine("Input Default DB", Me.CurrDB)
+                                    Me.ConnSQLSrv = New ConnSQLSrv(Me.CurrDB)
+                                Else
+                                    Me.PigConsole.GetLine("Enter the instance name of LocalDB", Me.DBSrv)
+                                    Me.PigConsole.GetLine("Input Default DB", Me.CurrDB)
+                                    Me.ConnSQLSrv = New ConnSQLSrv(Me.DBSrv, Me.CurrDB, True)
+                                End If
                                 Me.ConnSQLSrv.InitPigKeyValue("c:\temp\aaa")
                                 Exit Do
                         End Select
