@@ -14,9 +14,9 @@
     <RepositoryType>GIT</RepositoryType>
     <Description>An interface class library specially designed for MS-SQL server.
 </Description>
-    <Version>2.8.126</Version>
+    <Version>2.8.128</Version>
     <PackageTags>SQLServer;Tools;Develop;CmdSQLSrvText;ConnSQLSrv;Recordset;Field;Windows;Linux;MirrorServer;HA;SQL2Json;SQL2XML;CacheQuery;VBcode generate;StoredProcedure;KeyValue;LocalDB;</PackageTags>
-    <PackageReleaseNotes>Add shortcuts to connect to LocalDB.</PackageReleaseNotes>
+    <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
     <Title>Pig SQLServer library</Title>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigToolsLiteLib" Version="3.5.22" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.5.26" />
   </ItemGroup>
 
 </Project>
