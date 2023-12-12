@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <RootNamespace>PigSQLSrvCoreLib</RootNamespace>
-    <TargetFrameworks>net7.0;net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
+    <TargetFrameworks>net7.0;net8.0;net6.0;net5.0;netcoreapp3.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.8.138</Version>
+    <Version>2.8.150</Version>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
     <Description>An interface class library specially designed for MS-SQL server.
@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
-    <PackageReference Include="PigToolsLiteLib" Version="3.5.36" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.5.38" />
   </ItemGroup>
 
   <ItemGroup>
