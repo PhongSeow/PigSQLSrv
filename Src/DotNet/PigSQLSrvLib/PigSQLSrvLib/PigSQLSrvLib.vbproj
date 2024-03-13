@@ -14,7 +14,7 @@
     <RepositoryType>GIT</RepositoryType>
     <Description>An interface class library specially designed for MS-SQL server.
 </Description>
-    <Version>2.8.166</Version>
+    <Version>2.8.168</Version>
     <PackageTags>SQLServer;Tools;Develop;CmdSQLSrvText;ConnSQLSrv;Recordset;Field;Windows;Linux;MirrorServer;HA;SQL2Json;SQL2XML;CacheQuery;VBcode generate;StoredProcedure;KeyValue;LocalDB;</PackageTags>
     <PackageReleaseNotes>Reference the latest class library.</PackageReleaseNotes>
     <Title>Pig SQLServer library</Title>
