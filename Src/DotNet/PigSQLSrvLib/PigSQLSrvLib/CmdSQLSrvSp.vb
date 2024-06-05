@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.13
+'* Version: 1.15
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -29,6 +29,7 @@
 '* 1.11		4/8/2022	Modify mCacheQuery
 '* 1.12		5/8/2022	Modify Property
 '* 1.13		5/9/2022	Modify DebugStr
+'* 1.15		5/6/2024	Modify mCacheQuery
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -44,7 +45,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class CmdSQLSrvSp
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.13.2"
+    Private Const CLS_VERSION As String = "1." & "15" & "." & "32"
     Private moSqlCommand As SqlCommand
 
     Public Sub New(SpName As String)
@@ -321,20 +322,31 @@ Public Class CmdSQLSrvSp
         Return Me.mCacheQuery(ConnSQLSrv, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS,, OutRS, CacheTime, HitCache)
     End Function
 
-    Private Function mCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ResType As ConnSQLSrv.CacheQueryResTypeEnum, Optional ByRef OutStr As String = "", Optional ByRef OutRS As XmlRS = Nothing, Optional CacheTime As Integer = 60, Optional ByRef IsHitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.List, Optional TextType As PigText.enmTextType = PigText.enmTextType.UTF8) As String
+    Private Function mCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ResType As ConnSQLSrv.CacheQueryResTypeEnum, Optional ByRef OutStr As String = "", Optional ByRef OutRS As XmlRS = Nothing, Optional CacheTime As Integer = 60, Optional ByRef IsHitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.List) As String
         Dim LOG As New PigStepLog("mCacheQuery")
         Try
             With ConnSQLSrv
-                Dim bolIsExec As Boolean = False, strValue As String = ""
+                Dim bolIsExec As Boolean = False, pbValue As New PigBytes
                 If .PigKeyValue Is Nothing Then Throw New Exception("Not InitPigKeyValue")
                 Dim strKeyName As String = Me.KeyName
                 LOG.StepName = "GetKeyValue"
-                LOG.Ret = .PigKeyValue.GetKeyValue(strKeyName, strValue, TextType, CacheTime, IsHitCache)
+                LOG.Ret = .PigKeyValue.GetKeyValue(strKeyName, pbValue.Main, CacheTime, IsHitCache)
                 If LOG.Ret <> "OK" Then
                     bolIsExec = True
-                ElseIf strValue = "" Then
+                ElseIf pbValue.Main Is Nothing Then
+                    bolIsExec = True
+                ElseIf pbValue.Main.Length <= 0 Then
                     bolIsExec = True
                 End If
+#If NET40_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
+                If bolIsExec = False Then
+                    LOG.StepName = "UnCompress"
+                    LOG.Ret = pbValue.UnCompress
+                    If LOG.Ret <> "OK" Then
+                        bolIsExec = True
+                    End If
+                End If
+#End If
                 If bolIsExec = True Then
                     If Me.ActiveConnection Is Nothing Then
                         LOG.StepName = "Set ActiveConnection"
@@ -357,29 +369,34 @@ Public Class CmdSQLSrvSp
                             LOG.StepName = "AllRecordset2Xml(OutRS)"
                             LOG.Ret = rsAny.AllRecordset2Xml(OutRS)
                             If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+                            OutStr = OutRS.PigXml.XmlDocument.InnerXml
                         Case Else
                             Throw New Exception("Invalid ResType is " & ResType.ToString)
                     End Select
+                    LOG.StepName = "New PigText(OutStr)"
+                    Dim ptText As New PigText(OutStr, PigText.enmTextType.UTF8)
+                    If ptText.LastErr <> "" Then Throw New Exception(ptText.LastErr)
                     LOG.StepName = "SaveKeyValue"
-                    Select Case ResType
-                        Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
-                            strValue = OutRS.PigXml.XmlDocument.InnerXml
-                            LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, strValue, TextType)
-                        Case Else
-                            LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, OutStr, TextType)
-                    End Select
+#If NET40_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
+                    LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, ptText.CompressTextBytes)
+#Else
+                    LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, ptText.TextBytes)
+#End If
                     If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
                 Else
+                    LOG.StepName = "New PigText(pbValue.Main)"
+                    Dim ptText As New PigText(pbValue.Main)
+                    If ptText.LastErr <> "" Then Throw New Exception(ptText.LastErr)
                     Select Case ResType
                         Case ConnSQLSrv.CacheQueryResTypeEnum.JSon, ConnSQLSrv.CacheQueryResTypeEnum.XmlOutStr
                             LOG.StepName = "oPigKeyValue.StrValue"
-                            OutStr = strValue
+                            OutStr = ptText.Text
                         Case ConnSQLSrv.CacheQueryResTypeEnum.XmlOutRS
                             LOG.StepName = "New XmlRS"
-                            OutRS = New XmlRS(strValue)
+                            OutRS = New XmlRS(ptText.Text)
                             If OutRS Is Nothing Then Throw New Exception("OutRS Is Nothing")
                             If OutRS.LastErr <> "" Then
-                                LOG.AddStepNameInf(strValue)
+                                LOG.AddStepNameInf(ptText.Text)
                                 Throw New Exception(OutRS.LastErr)
                             End If
                         Case Else
