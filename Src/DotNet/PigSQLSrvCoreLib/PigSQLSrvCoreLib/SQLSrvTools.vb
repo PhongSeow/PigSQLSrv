@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.30
+'* Version: 1.31
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -33,6 +33,7 @@
 '* 1.28		31/3/2023	Modify GetTableOrView2VBCode
 '* 1.29		3/4/2023	Modify GetTableOrView2SQLOrVBFragment
 '* 1.30		12/4/2023	Modify GetTableOrView2VBCode,GetTableOrView2SQLOrVBFragment
+'* 1.31  21/7/2024  Modify PigFunc to PigFuncLite
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -47,9 +48,9 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.30.2"
+    Private Const CLS_VERSION As String = "1." & "31" & "." & "2"
     Private Property mConnSQLSrv As ConnSQLSrv
-    Private ReadOnly Property mPigFunc As New PigFunc
+    Private ReadOnly Property mPigFunc As New PigFuncLite
 
     Public Enum EnmDBObjType
         Unknow = 0
@@ -88,21 +89,21 @@ Public Class SQLSrvTools
             Else
                 strSQL = "CREATE "
             End If
-            Me.mPigFunc.AddMultiLineText(strSQL, " FUNCTION dbo." & strFuncName & "(@DBObjType varchar(10),@ObjName sysname,@ParentObjName sysname = NULL)")
+            Me.mPigFunc.AddMultiLineText(strSQL, " Function dbo." & strFuncName & "(@DBObjType varchar(10),@ObjName sysname,@ParentObjName sysname = NULL)")
             Me.mPigFunc.AddMultiLineText(strSQL, "RETURNS bit")
-            Me.mPigFunc.AddMultiLineText(strSQL, "AS")
+            Me.mPigFunc.AddMultiLineText(strSQL, "As")
             Me.mPigFunc.AddMultiLineText(strSQL, "BEGIN")
-            Me.mPigFunc.AddMultiLineText(strSQL, "DECLARE	@Ret bit", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, "DECLARE @ParentObjID int = 0", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, "IF @ParentObjName IS NOT NULL SET @ParentObjID=OBJECT_ID(@ParentObjName)", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, "IF @ParentObjID IS NULL", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, "SET @Ret = 0", 2)
-            Me.mPigFunc.AddMultiLineText(strSQL, "ELSE IF EXISTS(select 1 from sysobjects WITH(NOLOCK) where name=@ObjName and xtype=@DBObjType AND parent_obj=@ParentObjID)", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, "SET @Ret = 1", 2)
-            Me.mPigFunc.AddMultiLineText(strSQL, "ELSE", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, "SET @Ret = 0", 2)
-            Me.mPigFunc.AddMultiLineText(strSQL, "RETURN(@Ret)", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, "END")
+            Me.mPigFunc.AddMultiLineText(strSQL, "Declare	@Ret bit", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "Declare @ParentObjID int = 0", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "If @ParentObjName Is Not NULL Set @ParentObjID=OBJECT_ID(@ParentObjName)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "If @ParentObjID Is NULL", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "Set @Ret = 0", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, "Else If EXISTS(Select 1 from sysobjects With(NOLOCK) where name=@ObjName And xtype=@DBObjType And parent_obj=@ParentObjID)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "Set @Ret = 1", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, "Else", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "Set @Ret = 0", 2)
+            Me.mPigFunc.AddMultiLineText(strSQL, "Return(@Ret)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, "End")
             LOG.StepName = "mExecuteNonQuery"
             LOG.Ret = Me.mExecuteNonQuery(strSQL)
             If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
@@ -124,12 +125,12 @@ Public Class SQLSrvTools
             Else
                 strSQL = "CREATE "
             End If
-            Me.mPigFunc.AddMultiLineText(strSQL, " FUNCTION dbo." & strFuncName & "(@TableName sysname,@ColName sysname)")
+            Me.mPigFunc.AddMultiLineText(strSQL, " Function dbo." & strFuncName & "(@TableName sysname,@ColName sysname)")
             Me.mPigFunc.AddMultiLineText(strSQL, " RETURNS bit")
-            Me.mPigFunc.AddMultiLineText(strSQL, " AS")
+            Me.mPigFunc.AddMultiLineText(strSQL, " As")
             Me.mPigFunc.AddMultiLineText(strSQL, " BEGIN")
-            Me.mPigFunc.AddMultiLineText(strSQL, " DECLARE	@Ret bit", 1)
-            Me.mPigFunc.AddMultiLineText(strSQL, " IF EXISTS(SELECT TOP 1 1 FROM syscolumns c WITH(NOLOCK)  JOIN sysobjects o  WITH(NOLOCK) ON c.id=o.id AND o.xtype='U' WHERE o.name=@TableName AND c.name=@ColName)", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, " Declare	@Ret bit", 1)
+            Me.mPigFunc.AddMultiLineText(strSQL, " If EXISTS(Select TOP 1 1 FROM syscolumns c With(NOLOCK)  JOIN sysobjects o  With(NOLOCK) On c.id=o.id And o.xtype='U' WHERE o.name=@TableName AND c.name=@ColName)", 1)
             Me.mPigFunc.AddMultiLineText(strSQL, " SET @Ret = 1", 2)
             Me.mPigFunc.AddMultiLineText(strSQL, " ELSE", 1)
             Me.mPigFunc.AddMultiLineText(strSQL, " SET @Ret = 0", 2)
