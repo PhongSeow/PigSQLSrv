@@ -50,7 +50,7 @@ Public Class SQLSrvTools
     Inherits PigBaseLocal
     Private Const CLS_VERSION As String = "1." & "31" & "." & "2"
     Private Property mConnSQLSrv As ConnSQLSrv
-    Private ReadOnly Property mPigFunc As New PigFuncLite
+    Private ReadOnly Property mPigFunc As New PigFunc
 
     Public Enum EnmDBObjType
         Unknow = 0

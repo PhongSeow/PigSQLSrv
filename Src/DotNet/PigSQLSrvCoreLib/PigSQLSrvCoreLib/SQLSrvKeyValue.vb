@@ -27,7 +27,7 @@ Public Class SQLSrvKeyValue
     Private Const CLS_VERSION As String = "1." & "6" & ".10"
 
     Private Property mConnSQLSrv As ConnSQLSrv
-    Private Property mPigFunc As New PigFuncLite
+    Private Property mPigFunc As New PigFunc
     Private Property mPigKeyValue As PigKeyValue
     Private Property mSeowEnc As SeowEnc
 

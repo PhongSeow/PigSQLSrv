@@ -4,12 +4,13 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: PigKeyValue of SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.5
+'* Version: 1.6
 '* Create Time: 1/10/2022
 '* 1.1  1/10/2022   Modify New,mAddTableCol, add mNew,RefDBConn,SaveKeyValue
 '* 1.2  2/10/2022   Add mGetKeyValue,GetKeyValue,mCreateTableKeyValueHeadInf,mCreateTableKeyValueBodyInf,mSaveBodyToDB,mSaveHeadToDB
 '* 1.3  3/10/2022   Modify mGetKeyValue
 '* 1.5  4/10/2022   Add RemoveKeyValue,mRemoveKeyValue, modify mGetBodyFromDB,mGetHeadFromDB,mGetKeyValue
+'* 1.6  21/7/2024  Modify PigFunc to PigFuncLite
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -23,7 +24,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class SQLSrvKeyValue
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.5.10"
+    Private Const CLS_VERSION As String = "1." & "6" & ".10"
 
     Private Property mConnSQLSrv As ConnSQLSrv
     Private Property mPigFunc As New PigFunc
