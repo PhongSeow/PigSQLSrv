@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Database connection management
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.11
+'* Version: 1.12
 '* Create Time: 17/10/2021
 '* 1.1	1/2/2022	Modify New
 '* 1.2	23/3/2022	Modify New, add MkEncKey,LoadDBConnDefs
@@ -17,12 +17,13 @@
 '* 1.9	2/7/2022	Use PigBaseLocal
 '* 1.10	26/7/2022	Modify Imports
 '* 1.11	29/7/2022	Modify Imports
+'* 1.12 28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports PigToolsLiteLib
 
 Friend Class DBConnMgr
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.11.2"
+    Private Const CLS_VERSION As String = "1." & "12" & "." & "2"
     Friend Property fPigConfigApp As PigConfigApp
     Private Property mConfFilePath As String
     Public ReadOnly Property DBConnDefs As DBConnDefs
@@ -42,7 +43,7 @@ Friend Class DBConnMgr
     End Sub
 
     Public Function MkEncKey(ByRef Base64EncKey As String) As String
-        Dim LOG As New PigStepLog("MkEncKey")
+        Dim LOG As New StruStepLog : LOG.SubName = "MkEncKey"
         Try
             LOG.StepName = "MkEncKey"
             LOG.Ret = Me.fPigConfigApp.MkEncKey(Base64EncKey)
@@ -59,7 +60,7 @@ Friend Class DBConnMgr
 
 
     Public Function LoadDBConnDefs() As String
-        Dim LOG As New PigStepLog("LoadDBConnDefs")
+        Dim LOG As New StruStepLog : LOG.SubName = "LoadDBConnDefs"
         Try
             LOG.StepName = "LoadConfigFile"
             LOG.Ret = Me.fPigConfigApp.LoadConfigFile(Me.mConfFilePath, PigConfigApp.EnmSaveType.Xml)
@@ -132,7 +133,7 @@ Friend Class DBConnMgr
     End Function
 
     Public Function SaveDBConnDefs() As String
-        Dim LOG As New PigStepLog("SaveDBConnDefs")
+        Dim LOG As New StruStepLog : LOG.SubName = "SaveDBConnDefs"
         Try
 
             LOG.StepName = "LoadConfigFile"

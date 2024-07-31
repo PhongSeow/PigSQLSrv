@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2022 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Xml result set|Xml结果集
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.8
+'* Version: 1.9
 '* Create Time: 10/7/2021
 '* 1.1 11/7/2022 Modify New
 '* 1.2	26/7/2022	Modify Imports
@@ -13,6 +13,7 @@
 '* 1.6	27/9/2022	Modify IntValue
 '* 1.7	10/10/2022	Modify IsEOF
 '* 1.8	12/10/2022	Modify Date Initial Time
+'* 1.9  28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports PigToolsLiteLib
 
@@ -22,11 +23,11 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class XmlRS
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.7.2"
+    Private Const CLS_VERSION As String = "1" & "." & "9" & "." & "2"
     Public ReadOnly Property PigXml As PigXml
     Public Sub New(XmlStr As String, Optional IsChgCtrlChar As Boolean = True)
         MyBase.New(CLS_VERSION)
-        Dim LOG As New PigStepLog("New")
+        Dim LOG As New StruStepLog : LOG.SubName = "New"
         Try
             Me.PigXml = New PigXml(False, IsChgCtrlChar)
             LOG.StepName = "SetMainXml"

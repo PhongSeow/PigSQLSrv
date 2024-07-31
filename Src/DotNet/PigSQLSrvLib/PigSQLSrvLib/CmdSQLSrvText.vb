@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.17
+'* Version: 1.18
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -30,6 +30,7 @@
 '* 1.15		5/8/2022	Modify mCacheQuery
 '* 1.16		5/9/2022	Modify DebugStr
 '* 1.17		5/6/2024	Modify mCacheQuery
+'* 1.18     28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -43,13 +44,13 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class CmdSQLSrvText
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1." & "17" & "." & "8"
+    Private Const CLS_VERSION As String = "1." & "18" & "." & "8"
     Public Property SQLText As String
     Private moSqlCommand As SqlCommand
 
     Public Sub New(SQLText As String)
         MyBase.New(CLS_VERSION)
-        Dim LOG As New PigStepLog("New")
+        Dim LOG As New StruStepLog : LOG.SubName = "New"
         Try
             Me.SQLText = SQLText
             moSqlCommand = New SqlCommand
@@ -83,7 +84,7 @@ Public Class CmdSQLSrvText
     End Property
 
     Public Sub AddPara(ParaName As String, DataType As SqlDbType)
-        Dim LOG As New PigStepLog("AddPara")
+        Dim LOG As New StruStepLog : LOG.SubName = "AddPara"
         Try
             If moSqlCommand.Parameters.IndexOf(ParaName) >= 0 Then Throw New Exception("ParaName already exists.")
             LOG.StepName = "Parameters.Add"
@@ -95,7 +96,7 @@ Public Class CmdSQLSrvText
     End Sub
 
     Public Sub AddPara(ParaName As String, DataType As SqlDbType, Size As Long)
-        Dim LOG As New PigStepLog("AddPara")
+        Dim LOG As New StruStepLog : LOG.SubName = "AddPara"
         Try
             If moSqlCommand.Parameters.IndexOf(ParaName) >= 0 Then Throw New Exception("ParaName already exists.")
             LOG.StepName = "Parameters.Add"
@@ -128,7 +129,7 @@ Public Class CmdSQLSrvText
     ''' </summary>
     ''' <returns>Return result set|返回结果集</returns>
     Public Function Execute() As Recordset
-        Dim LOG As New PigStepLog("Execute")
+        Dim LOG As New StruStepLog : LOG.SubName = "Execute"
         Me.RecordsAffected = -1
         Try
             LOG.StepName = "ExecuteReader"
@@ -189,7 +190,7 @@ Public Class CmdSQLSrvText
     ''' </summary>
     Public ReadOnly Property DebugStr() As String
         Get
-            Dim LOG As New PigStepLog("DebugStr")
+            Dim LOG As New StruStepLog : LOG.SubName = "DebugStr"
             Try
                 Dim strDebugStr As String = Me.SQLText & vbCrLf
                 Dim bolIsBegin As Boolean = False
@@ -292,7 +293,7 @@ Public Class CmdSQLSrvText
     End Function
 
     Private Function mCacheQuery(ByRef ConnSQLSrv As ConnSQLSrv, ResType As ConnSQLSrv.CacheQueryResTypeEnum, Optional ByRef OutStr As String = "", Optional ByRef OutRS As XmlRS = Nothing, Optional CacheTime As Integer = 60, Optional ByRef IsHitCache As ConnSQLSrv.HitCacheEnum = ConnSQLSrv.HitCacheEnum.List) As String
-        Dim LOG As New PigStepLog("mCacheQuery")
+        Dim LOG As New StruStepLog : LOG.SubName = "mCacheQuery"
         Try
             With ConnSQLSrv
                 Dim bolIsExec As Boolean = False, pbValue As New PigBytes

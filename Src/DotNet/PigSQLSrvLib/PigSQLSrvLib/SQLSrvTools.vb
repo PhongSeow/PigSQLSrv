@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Common SQL server tools
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.31
+'* Version: 1.32
 '* Create Time: 1/9/2021
 '* 1.0		1/9/2021   Add IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
 '* 1.1		17/9/2021   Modify IsDBObjExists,IsDBUserExists,IsDatabaseExists,IsLoginUserExists
@@ -33,7 +33,8 @@
 '* 1.28		31/3/2023	Modify GetTableOrView2VBCode
 '* 1.29		3/4/2023	Modify GetTableOrView2SQLOrVBFragment
 '* 1.30		12/4/2023	Modify GetTableOrView2VBCode,GetTableOrView2SQLOrVBFragment
-'* 1.31  21/7/2024  Modify PigFunc to PigFuncLite
+'* 1.31     21/7/2024  Modify PigFunc to PigFuncLite
+'* 1.32     28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -48,7 +49,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class SQLSrvTools
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1." & "31" & "." & "2"
+    Private Const CLS_VERSION As String = "1." & "32" & "." & "2"
     Private Property mConnSQLSrv As ConnSQLSrv
     Private ReadOnly Property mPigFunc As New PigFunc
 
@@ -78,7 +79,7 @@ Public Class SQLSrvTools
     End Sub
 
     Public Function MkDBFunc_IsDBObjExists() As String
-        Dim LOG As New PigStepLog("MkDBFunc_IsDBObjExists")
+        Dim LOG As New StruStepLog : LOG.SubName = "MkDBFunc_IsDBObjExists"
         Try
             Dim strFuncName As String = "_pfIsDBObjExists"
             LOG.StepName = "IsDBObjExists"
@@ -114,7 +115,7 @@ Public Class SQLSrvTools
     End Function
 
     Public Function MkDBFunc_IsTabColExists() As String
-        Dim LOG As New PigStepLog("MkDBFunc_IsTabColExists")
+        Dim LOG As New StruStepLog : LOG.SubName = "MkDBFunc_IsTabColExists"
         Try
             Dim strFuncName As String = "_pfIsTabColExists"
             LOG.StepName = "IsDBObjExists"
@@ -146,7 +147,7 @@ Public Class SQLSrvTools
     End Function
 
     Public Function mExecuteNonQuery(SQL As String) As String
-        Dim LOG As New PigStepLog("mExecuteNonQuery")
+        Dim LOG As New StruStepLog : LOG.SubName = "mExecuteNonQuery"
         Try
             LOG.StepName = "New CmdSQLSrvText"
             Dim oCmdSQLSrvText As New CmdSQLSrvText(SQL)
@@ -397,7 +398,7 @@ Public Class SQLSrvTools
     ''' <param name="IsSetUpdateTime">是否设置更新时间|Is set update time</param>
     ''' <returns></returns>
     Public Function GetTableOrView2VBCode(TableOrViewName As String, ByRef OutVBCode As String, Optional NotMathFillByRsList As String = "", Optional NotMathMD5List As String = "", Optional IsSimpleProperty As Boolean = True, Optional IsSetUpdateTime As Boolean = False) As String
-        Dim LOG As New PigStepLog("GetTableOrView2VBCode")
+        Dim LOG As New StruStepLog : LOG.SubName = "GetTableOrView2VBCode"
         Try
             OutVBCode = "Imports PigToolsLiteLib" & Me.OsCrLf
 #If NETFRAMEWORK Then
@@ -840,7 +841,7 @@ Public Class SQLSrvTools
     ''' <param name="NotMathColList">不需要的列名列表，以,分隔|List of unwanted column names, separated by ","</param>
     ''' <returns></returns>
     Public Function GetTableOrView2SQLOrVBFragment(TableOrViewName As String, WhatFragment As EnmWhatFragment, ByRef OutFragment As String, Optional NotMathColList As String = "") As String
-        Dim LOG As New PigStepLog("GetTableOrView2SQLOrVBFragment")
+        Dim LOG As New StruStepLog : LOG.SubName = "GetTableOrView2SQLOrVBFragment"
         Try
             If NotMathColList <> "" Then
                 If Left(NotMathColList, 1) <> "," Then NotMathColList = "," & NotMathColList
@@ -937,7 +938,7 @@ Public Class SQLSrvTools
     End Function
 
     Public Function DropTable(TabName As String) As String
-        Dim LOG As New PigStepLog("DropTable")
+        Dim LOG As New StruStepLog : LOG.SubName = "DropTable"
         Dim strSQL As String = ""
         Try
             If Me.IsDBObjExists(EnmDBObjType.UserTable, TabName) = False Then Throw New Exception(TabName & " not exists.")

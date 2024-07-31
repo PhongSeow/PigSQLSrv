@@ -31,6 +31,7 @@
 '* 1.20		5/9/2022	Modify datetime
 '* 1.21		18/9/2022	Modify InitPigKeyValue
 '* 1.22		6/11/2023	Modify New
+'* 1.23     28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -45,7 +46,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class ConnSQLSrv
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.22.6"
+    Private Const CLS_VERSION As String = "1" & "." & "23" & "." & "6"
     Public Connection As SqlConnection
     Private mcstChkDBStatus As CmdSQLSrvText
     Friend Property CacheWorkDir As String
@@ -359,7 +360,7 @@ Public Class ConnSQLSrv
     ''' Open or keep the database connection available|打开或保持数据库的连接状态
     ''' </summary>
     Public Sub OpenOrKeepActive()
-        Dim LOG As New PigStepLog("OpenOrKeepActive")
+        Dim LOG As New StruStepLog : LOG.SubName = "OpenOrKeepActive"
         Try
             Select Case Me.RunMode
                 Case RunModeEnum.StandAlone
@@ -557,7 +558,7 @@ Public Class ConnSQLSrv
     End Sub
 
     Private Function mIsDBOnline() As Boolean
-        Dim LOG As New PigStepLog("mIsDBOnline")
+        Dim LOG As New StruStepLog : LOG.SubName = "mIsDBOnline"
         Try
             If Me.Connection Is Nothing Then Throw New Exception("No connection established")
             If Me.Connection.State <> ConnectionState.Open Then Throw New Exception("The current connection status is " & Me.Connection.State.ToString)

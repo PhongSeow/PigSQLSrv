@@ -4,13 +4,14 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: PigKeyValue of SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.6
+'* Version: 1.7
 '* Create Time: 1/10/2022
 '* 1.1  1/10/2022   Modify New,mAddTableCol, add mNew,RefDBConn,SaveKeyValue
 '* 1.2  2/10/2022   Add mGetKeyValue,GetKeyValue,mCreateTableKeyValueHeadInf,mCreateTableKeyValueBodyInf,mSaveBodyToDB,mSaveHeadToDB
 '* 1.3  3/10/2022   Modify mGetKeyValue
 '* 1.5  4/10/2022   Add RemoveKeyValue,mRemoveKeyValue, modify mGetBodyFromDB,mGetHeadFromDB,mGetKeyValue
 '* 1.6  21/7/2024  Modify PigFunc to PigFuncLite
+'* 1.7  28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -24,7 +25,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class SQLSrvKeyValue
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1." & "6" & ".10"
+    Private Const CLS_VERSION As String = "1." & "7" & ".10"
 
     Private Property mConnSQLSrv As ConnSQLSrv
     Private Property mPigFunc As New PigFunc
@@ -52,7 +53,7 @@ Public Class SQLSrvKeyValue
     ''' </summary>
     ''' <returns></returns>
     Public Function RefDBConn() As String
-        Dim LOG As New PigStepLog("RefDBConn")
+        Dim LOG As New StruStepLog : LOG.SubName = "RefDBConn"
         Try
             If Me.mConnSQLSrv.IsDBConnReady = False Then
                 LOG.StepName = "OpenOrKeepActive"
@@ -82,7 +83,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Sub mNew(ConnSQLSrv As ConnSQLSrv, CacheWorkDir As String, IsCompress As Boolean, Optional MaxWorkList As Integer = 100)
-        Dim LOG As New PigStepLog("mNew")
+        Dim LOG As New StruStepLog : LOG.SubName = "mNew"
         Try
             LOG.StepName = "New PigKeyValue"
             Me.mPigKeyValue = New PigKeyValue(CacheWorkDir, IsCompress, MaxWorkList)
@@ -114,7 +115,7 @@ Public Class SQLSrvKeyValue
         End Try
     End Sub
     Private Function mCreateTableKeyValueHeadInf() As String
-        Dim LOG As New PigStepLog("mCreateTableKeyValueHeadInf")
+        Dim LOG As New StruStepLog : LOG.SubName = "mCreateTableKeyValueHeadInf"
         Dim strSQL As String = ""
         Try
             Dim strTabName As String = ""
@@ -147,7 +148,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mCreateTableKeyValueBodyInf() As String
-        Dim LOG As New PigStepLog("mCreateTableKeyValueBodyInf")
+        Dim LOG As New StruStepLog : LOG.SubName = "mCreateTableKeyValueBodyInf"
         Dim strSQL As String = ""
         Try
             Dim strTabName As String = ""
@@ -272,7 +273,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mSaveKeyValue(KeyName As String, DataBytes As Byte()) As String
-        Dim LOG As New PigStepLog("mSaveKeyValue")
+        Dim LOG As New StruStepLog : LOG.SubName = "mSaveKeyValue"
         Try
             LOG.StepName = "Check DataBytes"
             If DataBytes Is Nothing Then Throw New Exception("DataBytes Is Nothing")
@@ -334,7 +335,7 @@ Public Class SQLSrvKeyValue
     ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
     ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function GetKeyValue(KeyName As String, ByRef Base64Value As String, Optional CacheTimeSec As Integer = 60, Optional ByRef HitCache As PigKeyValue.HitCacheEnum = PigKeyValue.HitCacheEnum.Null) As String
-        Dim LOG As New PigStepLog("GetKeyValue")
+        Dim LOG As New StruStepLog : LOG.SubName = "GetKeyValue"
         Try
             Dim abValue(0) As Byte
             LOG.StepName = "mGetKeyValue"
@@ -359,7 +360,7 @@ Public Class SQLSrvKeyValue
     ''' <param name="HitCache">Hit Cache Level|命中缓存级别</param>
     ''' <returns>Execution result: OK indicates success, and others are error messages|执行结果，OK表示成功，其他为错误信息</returns>
     Public Function GetKeyValue(KeyName As String, ByRef TextValue As String, Optional TextType As PigText.enmTextType = PigText.enmTextType.UTF8, Optional CacheTimeSec As Integer = 60, Optional ByRef HitCache As PigKeyValue.HitCacheEnum = PigKeyValue.HitCacheEnum.Null) As String
-        Dim LOG As New PigStepLog("GetKeyValue")
+        Dim LOG As New StruStepLog : LOG.SubName = "GetKeyValue"
         Try
             Dim abValue(0) As Byte
             LOG.StepName = "mGetKeyValue"
@@ -376,7 +377,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mGetKeyValue(KeyName As String, ByRef ValueBytes As Byte(), Optional CacheTimeSec As Integer = 60, Optional ByRef HitCache As PigKeyValue.HitCacheEnum = PigKeyValue.HitCacheEnum.Null) As String
-        Dim LOG As New PigStepLog("mGetKeyValue")
+        Dim LOG As New StruStepLog : LOG.SubName = "mGetKeyValue"
         Try
             Dim dteCreateTime As Date, bolIsNeedGetFromDB As Boolean = False
             LOG.Ret = Me.mPigKeyValue.GetKeyValue(KeyName, ValueBytes, CacheTimeSec, HitCache)
@@ -422,7 +423,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mSaveBodyToDB(ValuePigMD5 As String, ByRef SaveData As Byte()) As String
-        Dim LOG As New PigStepLog("mSaveBodyToDB")
+        Dim LOG As New StruStepLog : LOG.SubName = "mSaveBodyToDB"
         Dim strSQL As String = ""
         Try
             With Me.mPigFunc
@@ -453,7 +454,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mSaveHeadToDB(KeyName As String, ByRef PbBody As PigBytes) As String
-        Dim LOG As New PigStepLog("mSaveBodyToDB")
+        Dim LOG As New StruStepLog : LOG.SubName = "mSaveHeadToDB"
         Dim strSQL As String = ""
         Try
             If PbBody Is Nothing Then Throw New Exception("PbBody Is Nothing")
@@ -488,7 +489,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mGetHeadFromDB(KeyNamePigMD5 As String, ByRef BodyLen As Long, ByRef BodyPigMD5 As String, ByRef CreateTime As Date) As String
-        Dim LOG As New PigStepLog("mGetHeadFromDB")
+        Dim LOG As New StruStepLog : LOG.SubName = "mGetHeadFromDB"
         Dim strSQL As String = ""
         Try
             With Me.mPigFunc
@@ -527,7 +528,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mGetBodyFromDB(BodyPigMD5 As String, BodyLen As Long, ByRef BodyData As Byte()) As String
-        Dim LOG As New PigStepLog("mGetBodyFromDB")
+        Dim LOG As New StruStepLog : LOG.SubName = "mGetBodyFromDB"
         Dim strSQL As String = ""
         Try
             With Me.mPigFunc
@@ -577,7 +578,7 @@ Public Class SQLSrvKeyValue
     End Function
 
     Private Function mRemoveKeyValue(KeyName As String, IsIncDB As Boolean) As String
-        Dim LOG As New PigStepLog("mRemoveKeyValue")
+        Dim LOG As New StruStepLog : LOG.SubName = "mRemoveKeyValue"
         Try
             Dim strError As String = ""
             Dim strKeyNamePigMD5 As String = Me.mGetKeyNamePigMD5(KeyName)

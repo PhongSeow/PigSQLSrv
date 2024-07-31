@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: 
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.11
+'* Version: 1.12
 '* Create Time: 5/6/2021
 '* 1.0.2	6/6/2021	Modify EOF,Fields,MoveNext
 '* 1.0.3	21/6/2021	Add Finalize,Close
@@ -23,6 +23,7 @@
 '* 1.9		29/7/2022	Modify Imports
 '* 1.10		3/8/2022	Modify AllRecordset2Xml
 '* 1.11		5/8/2022	Modify Property
+'* 1.12     28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -37,7 +38,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class Recordset
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1.11.3"
+    Private Const CLS_VERSION As String = "1" & "." & "12" & "." & "3"
     Private moSqlDataReader As SqlDataReader
 
 
@@ -119,7 +120,7 @@ Public Class Recordset
     End Sub
 
     Public Sub MoveNext()
-        Dim LOG As New PigStepLog("MoveNext")
+        Dim LOG As New StruStepLog : LOG.SubName = "MoveNext"
         Try
             LOG.StepName = "Read"
             If moSqlDataReader.Read() = True Then
@@ -194,7 +195,7 @@ Public Class Recordset
     ''' <param name="OutXml">输出的XML片段|Output XML fragment</param>
     ''' <returns></returns>
     Private Function mGetRSColInfXml(ByRef OutXml) As String
-        Dim LOG As New PigStepLog("mGetRSColInfXml")
+        Dim LOG As New StruStepLog : LOG.SubName = "mGetRSColInfXml"
         Try
             LOG.StepName = "New PigXml"
             Dim oPigXml As New PigXml(False)
@@ -237,7 +238,7 @@ Public Class Recordset
     End Function
 
     Private Function mRecordset2Xml(ByRef OutXml As String, Optional TopRows As Long = -1, Optional RSNo As Integer = 0) As String
-        Dim LOG As New PigStepLog("mRecordset2Xml")
+        Dim LOG As New StruStepLog : LOG.SubName = "mRecordset2Xml"
         Try
             Dim intRowNo As Integer = 0
             LOG.StepName = "New PigXml"
@@ -285,7 +286,7 @@ Public Class Recordset
     End Function
 
     Private Function mRecordset2JSon(Optional TopRows As Long = -1) As String
-        Dim LOG As New PigStepLog("mRecordset2JSon")
+        Dim LOG As New StruStepLog : LOG.SubName = "mRecordset2JSon"
         Try
             Dim intRowNo As Integer = 0
             LOG.StepName = "New PigJSon"
@@ -326,7 +327,7 @@ Public Class Recordset
     ''' Convert recordset to simple JSON array, The returned result cannot be used as a standalone JSON.|当前结果集转换成简单的JSON数组，返回结果不能作为独立的 JSon 使用。
     ''' </summary>
     Public Function Recordset2SimpleJSonArray() As String
-        Dim LOG As New PigStepLog("Recordset2SimpleJSonArray")
+        Dim LOG As New StruStepLog : LOG.SubName = "Recordset2SimpleJSonArray"
         Try
             Dim intRowNo As Integer = 0
             LOG.StepName = "New PigJSonLite"
@@ -358,7 +359,7 @@ Public Class Recordset
 
 
     Public Function AllRecordset2Xml(ByRef OutStr As String) As String
-        Dim LOG As New PigStepLog("AllRecordset2Xml")
+        Dim LOG As New StruStepLog : LOG.SubName = "AllRecordset2Xml"
         Try
             Dim oPigXml As New PigXml(False)
             With oPigXml
@@ -400,7 +401,7 @@ Public Class Recordset
     End Function
 
     Public Function AllRecordset2Xml(ByRef OutRS As XmlRS) As String
-        Dim LOG As New PigStepLog("AllRecordset2Xml")
+        Dim LOG As New StruStepLog : LOG.SubName = "AllRecordset2Xml"
         Try
             Dim strXml As String = ""
             LOG.StepName = "AllRecordset2Xml(OutStr)"
@@ -428,7 +429,7 @@ Public Class Recordset
     ''' </summary>
     ''' <returns></returns>
     Public Function AllRecordset2JSon() As String
-        Dim LOG As New PigStepLog("AllRecordset2JSon")
+        Dim LOG As New StruStepLog : LOG.SubName = "AllRecordset2JSon"
         Try
             Dim intRSNo As Integer = 0
             LOG.StepName = "New PigJSonLite"
@@ -488,7 +489,7 @@ Public Class Recordset
     End Sub
 
     Private Sub mNew(SqlDataReader As SqlDataReader)
-        Dim LOG As New PigStepLog("mNew")
+        Dim LOG As New StruStepLog : LOG.SubName = "mNew"
         Try
             With Me
                 LOG.StepName = "ExecuteReader"

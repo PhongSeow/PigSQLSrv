@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2022 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: DBConnDef 的集合类|Collection class of DBConnDef
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.11
+'* Version: 1.12
 '* Create Time: 1/2/2022
 '* 1.1	16/3/2022	Modify Add,AddOrGet
 '* 1.2	16/3/2022	Modify Add,AddOrGet
@@ -17,6 +17,7 @@
 '* 1.9	2/7/2022	Use PigBaseLocal
 '* 1.10	26/7/2022	Modify Imports
 '* 1.11	29/7/2022	Modify Imports
+'* 1.12 28/7/2024   Modify PigStepLog to StruStepLog
 '**********************************
 Imports PigToolsLiteLib
 
@@ -24,7 +25,7 @@ Imports PigToolsLiteLib
 Friend Class DBConnDefs
     Inherits PigBaseLocal
     Implements IEnumerable(Of DBConnDef)
-    Private Const CLS_VERSION As String = "1.11.3"
+    Private Const CLS_VERSION As String = "1" & "." & "12" & "." & "3"
     Private ReadOnly moList As New List(Of DBConnDef)
 
     Friend fPigConfigApp As PigConfigApp
@@ -97,7 +98,7 @@ Friend Class DBConnDefs
     End Function
 
     Private Function mAdd(NewItem As DBConnDef) As String
-        Dim LOG As New PigStepLog("mAdd")
+        Dim LOG As New StruStepLog : LOG.SubName = "mAdd"
         Try
             If Me.IsItemExists(NewItem.DBConnName) = True Then Throw New Exception(NewItem.DBConnName & " already exists.")
             LOG.StepName = "List.Add"
@@ -147,7 +148,7 @@ Friend Class DBConnDefs
     End Function
 
     Public Function Add(DBConnName As String, PrincipalSQLServer As String, MirrorSQLServer As String, CurrDatabase As String, DBUser As String, DBUserPwd As String, Optional DBConnDesc As String = "") As DBConnDef
-        Dim LOG As New PigStepLog("Add")
+        Dim LOG As New StruStepLog : LOG.SubName = "Add"
         Try
             'LOG.StepName = "New DBConnDef"
             'Add = New DBConnDef(DBConnName, PrincipalSQLServer， MirrorSQLServer, CurrDatabase, DBUser, DBUserPwd)
@@ -172,7 +173,7 @@ Friend Class DBConnDefs
 
 
     Public Function Add(DBConnName As String, SQLServer As String, CurrDatabase As String, DBUser As String, DBUserPwd As String, Optional DBConnDesc As String = "") As DBConnDef
-        Dim LOG As New PigStepLog("Add")
+        Dim LOG As New StruStepLog : LOG.SubName = "Add"
         Try
             'LOG.StepName = "New DBConnDef"
             'Add = New DBConnDef(DBConnName, SQLServer， CurrDatabase, DBUser, DBUserPwd)
@@ -196,7 +197,7 @@ Friend Class DBConnDefs
     End Function
 
     Public Function Add(DBConnName As String, SQLServer As String, CurrDatabase As String, Optional DBConnDesc As String = "") As DBConnDef
-        Dim LOG As New PigStepLog("Add")
+        Dim LOG As New StruStepLog : LOG.SubName = "Add"
         Try
             If Me.fPigConfigApp.PigConfigSessions.IsItemExists(DBConnName) = True Then
                 Throw New Exception(DBConnName & " already exists.")
@@ -229,7 +230,7 @@ Friend Class DBConnDefs
     End Function
 
     Public Function Add(DBConnName As String, PrincipalSQLServer As String, MirrorSQLServer As String, CurrDatabase As String, Optional DBConnDesc As String = "") As DBConnDef
-        Dim LOG As New PigStepLog("Add")
+        Dim LOG As New StruStepLog : LOG.SubName = "Add"
         Try
             'LOG.StepName = "New DBConnDef"
             'Add = New DBConnDef(DBConnName, PrincipalSQLServer， MirrorSQLServer, CurrDatabase)
@@ -254,7 +255,7 @@ Friend Class DBConnDefs
 
 
     Public Function Remove(DBConnName As String) As String
-        Dim LOG As New PigStepLog("Remove.DBConnName")
+        Dim LOG As New StruStepLog : LOG.SubName = "Remove"
         Try
             LOG.StepName = "For Each"
             For Each oDBConnDef As DBConnDef In moList
@@ -271,7 +272,7 @@ Friend Class DBConnDefs
     End Function
 
     Public Function Remove(Index As Integer) As String
-        Dim LOG As New PigStepLog("Remove.Index")
+        Dim LOG As New StruStepLog : LOG.SubName = "Remove"
         Try
             LOG.StepName = "Index=" & Index.ToString
             moList.RemoveAt(Index)
