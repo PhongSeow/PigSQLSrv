@@ -6,7 +6,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Seow Phong</Authors>
     <Company>Seow Phong Studio</Company>
-    <Copyright>Copyright (c) 2021-2024 Seow Phong</Copyright>
+    <Copyright>Copyright (c) 2021-2025 Seow Phong</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://en.seowphong.com</PackageProjectUrl>
     <PackageIcon>SeowPhongLogo.png</PackageIcon>
@@ -14,7 +14,7 @@
     <RepositoryType>GIT</RepositoryType>
     <Description>An interface class library specially designed for MS-SQL server.
 </Description>
-    <Version>2.8.208</Version>
+    <Version>2.8.210</Version>
     <PackageTags>SQLServer;Tools;Develop;CmdSQLSrvText;ConnSQLSrv;Recordset;Field;Windows;Linux;MirrorServer;HA;SQL2Json;SQL2XML;CacheQuery;VBcode generate;StoredProcedure;KeyValue;LocalDB;</PackageTags>
     <PackageReleaseNotes>Rewrite some of the code.</PackageReleaseNotes>
     <Title>Pig SQLServer library</Title>
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="PigToolsLiteLib" Version="3.6.18" />
+    <PackageReference Include="PigToolsLiteLib" Version="3.6.20" />
   </ItemGroup>
 
 </Project>
