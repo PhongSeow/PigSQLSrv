@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.18
+'* Version: 1.19
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -31,6 +31,7 @@
 '* 1.16		5/9/2022	Modify DebugStr
 '* 1.17		5/6/2024	Modify mCacheQuery
 '* 1.18     28/7/2024   Modify PigStepLog to StruStepLog
+'* 1.19     16/12/2025  Modify mCacheQuery
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -44,7 +45,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class CmdSQLSrvText
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1." & "18" & "." & "8"
+    Private Const CLS_VERSION As String = "1." & "19" & "." & "2"
     Public Property SQLText As String
     Private moSqlCommand As SqlCommand
 
@@ -346,13 +347,22 @@ Public Class CmdSQLSrvText
                     LOG.StepName = "New PigText(OutStr)"
                     Dim ptText As New PigText(OutStr, PigText.enmTextType.UTF8)
                     If ptText.LastErr <> "" Then Throw New Exception(ptText.LastErr)
+                    Dim intReDoTimes As Integer = 0
+ReDo:
                     LOG.StepName = "SaveKeyValue"
 #If NET40_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
                     LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, ptText.CompressTextBytes)
 #Else
                     LOG.Ret = .PigKeyValue.SaveKeyValue(KeyName, ptText.TextBytes)
 #End If
-                    If LOG.Ret <> "OK" Then Throw New Exception(LOG.Ret)
+                    If LOG.Ret <> "OK" Then
+                        If intReDoTimes < 3 Then
+                            System.Threading.Thread.Sleep(1000)
+                            intReDoTimes += 1
+                            GoTo ReDo
+                        End If
+                        Throw New Exception(LOG.Ret)
+                    End If
                 Else
                     LOG.StepName = "New PigText(pbValue.Main)"
                     Dim ptText As New PigText(pbValue.Main)
