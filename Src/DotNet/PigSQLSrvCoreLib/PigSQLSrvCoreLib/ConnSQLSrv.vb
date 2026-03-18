@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.22
+'* Version: 1.26
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -32,6 +32,7 @@
 '* 1.21		18/9/2022	Modify InitPigKeyValue
 '* 1.22		6/11/2023	Modify New
 '* 1.23     28/7/2024   Modify PigStepLog to StruStepLog
+'* 1.25     12/2/2026   Modify OpenOrKeepActive
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -384,6 +385,9 @@ Public Class ConnSQLSrv
                                 Else
                                     .ConnectionString &= "Encrypt=False;"
                                 End If
+                                '.ConnectionString &= "Encrypt=True;"
+                                '.ConnectionString &= "TrustServerCertificate=yes;TLS Version=Tls1;"
+                                Console.WriteLine(.ConnectionString)
                                 LOG.StepName = "Open"
                                 Me.mConnOpen()
                                 If Me.LastErr <> "" Then
@@ -537,7 +541,7 @@ Public Class ConnSQLSrv
         Try
             Dim strConn As String = ""
             DBUserPwd = Replace(DBUserPwd, "'", "''")
-            strConn = "Server=" & SQLServer & ";Database=" & CurrDatabase & ";Uid='" & DBUser & "';Pwd='" & DBUserPwd & "';"
+            strConn = "Server=" & SQLServer & ";Database=" & CurrDatabase & ";Uid=" & DBUser & ";Pwd=" & DBUserPwd & ";"
             strConn &= "MultipleActiveResultSets=true;"
             Me.Connection.ConnectionString = strConn
             Me.ClearErr()

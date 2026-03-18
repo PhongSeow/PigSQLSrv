@@ -39,6 +39,8 @@ Imports Microsoft.Data.SqlClient
 Imports PigSQLSrvCoreLib
 #End If
 Imports PigToolsLiteLib
+Imports PigCmdLib
+
 
 Public Class ConsoleDemo
     Public ConnSQLSrv As ConnSQLSrv
