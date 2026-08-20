@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Command for SQL Server SQL statement Text
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.19
+'* Version: 1.20
 '* Create Time: 15/5/2021
 '* 1.0.2	18/4/2021	Modify Execute,ParaValue
 '* 1.0.3	17/5/2021	Modify ParaValue,ActiveConnection,Execute
@@ -32,8 +32,10 @@
 '* 1.17		5/6/2024	Modify mCacheQuery
 '* 1.18     28/7/2024   Modify PigStepLog to StruStepLog
 '* 1.19     16/12/2025  Modify mCacheQuery
+'* 1.20     20/8/2026  Add ExecuteNonQueryAsync,ExecuteAsync
 '**********************************
 Imports System.Data
+Imports System.Threading.Tasks
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
 #Else
@@ -45,7 +47,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class CmdSQLSrvText
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1." & "19" & "." & "2"
+    Private Const CLS_VERSION As String = "1." & "20" & "." & "28"
     Public Property SQLText As String
     Private moSqlCommand As SqlCommand
 
@@ -389,5 +391,42 @@ ReDo:
             Return Me.GetSubErrInf(LOG.SubName, LOG.StepName, ex)
         End Try
     End Function
+
+#If NET45_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
+    Public Async Function ExecuteNonQueryAsync() As Task(Of String)
+        Const SUB_NAME As String = "ExecuteNonQueryAsync"
+        Try
+            Me.RecordsAffected = Await moSqlCommand.ExecuteNonQueryAsync()
+            Return "OK"
+        Catch ex As Exception
+            Me.RecordsAffected = -1
+            Me.PrintDebugLog(SUB_NAME, "Catch ex As Exception", Me.DebugStr)
+            Return Me.GetSubErrInf(SUB_NAME, ex)
+        End Try
+    End Function
+
+    Public Async Function ExecuteAsync() As Task(Of Recordset)
+        Dim LOG As New StruStepLog : LOG.SubName = "ExecuteAsync"
+        Try
+            LOG.StepName = "ExecuteReader"
+            Dim oSqlDataReader As SqlDataReader = Await moSqlCommand.ExecuteReaderAsync()
+            LOG.StepName = "New Recordset"
+            Dim oExecuteAsync As Recordset = New Recordset(oSqlDataReader)
+            If oExecuteAsync Is Nothing Then
+                LOG.Ret = "oExecuteAsync Is Nothing"
+                Throw New Exception(LOG.Ret)
+            End If
+            Me.RecordsAffected = -1
+            Me.ClearErr()
+            Return oExecuteAsync
+        Catch ex As Exception
+            Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
+            Me.RecordsAffected = -1
+            Return Nothing
+        End Try
+    End Function
+
+#End If
+
 
 End Class

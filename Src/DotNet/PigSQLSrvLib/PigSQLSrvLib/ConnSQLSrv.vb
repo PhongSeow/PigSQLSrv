@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2021 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: Connection for SQL Server
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.22
+'* Version: 1.25
 '* Create Time: 18/5/2021
 '* 1.0.2	18/6/2021	Modify OpenOrKeepActive
 '* 1.0.3	19/6/2021	Modify OpenOrKeepActive, ConnStatusEnum,IsDBConnReady and add mIsDBOnline,RefMirrSrvTime,LastRefMirrSrvTime
@@ -32,6 +32,7 @@
 '* 1.21		18/9/2022	Modify InitPigKeyValue
 '* 1.22		6/11/2023	Modify New
 '* 1.23     28/7/2024   Modify PigStepLog to StruStepLog
+'* 1.25     20/8/2026   Add OpenOrKeepActiveAsync
 '**********************************
 Imports System.Data
 #If NETFRAMEWORK Then
@@ -46,7 +47,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class ConnSQLSrv
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1" & "." & "23" & "." & "6"
+    Private Const CLS_VERSION As String = "1" & "." & "25" & "." & "12"
     Public Connection As SqlConnection
     Private mcstChkDBStatus As CmdSQLSrvText
     Friend Property CacheWorkDir As String
@@ -347,6 +348,7 @@ Public Class ConnSQLSrv
         End Try
     End Sub
 
+
     Private Sub mConnOpen()
         Try
             Me.Connection.Open()
@@ -355,6 +357,152 @@ Public Class ConnSQLSrv
             Me.SetSubErrInf("mConnOpen", ex)
         End Try
     End Sub
+
+#If NET45_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
+    Public Async Sub OpenOrKeepActiveAsync()
+        Dim LOG As New StruStepLog : LOG.SubName = "OpenOrKeepActiveAsync"
+        Try
+            Select Case Me.RunMode
+                Case RunModeEnum.StandAlone
+                    If Me.Connection Is Nothing Then
+                        LOG.StepName = "New SqlConnection"
+                        Me.Connection = New SqlConnection
+                    End If
+                    With Me.Connection
+                        Select Case .State
+                            Case ConnectionState.Closed
+                                LOG.StepName = "SetConnSQLServer"
+                                If Me.IsTrustedConnection = True Then
+                                    Me.mSetConnSQLServer(Me.PrincipalSQLServer, Me.CurrDatabase)
+                                Else
+                                    Me.mSetConnSQLServer(Me.PrincipalSQLServer, Me.DBUser, Me.DBUserPwd, Me.CurrDatabase)
+                                End If
+                                If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+                                .ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
+                                If Me.IsEncrypt = True Then
+                                    .ConnectionString &= "Encrypt=True;"
+                                Else
+                                    .ConnectionString &= "Encrypt=False;"
+                                End If
+                                LOG.StepName = "OpenAsync"
+                                Await Me.Connection.OpenAsync()
+                                If Me.LastErr <> "" Then
+                                    Me.ConnStatus = ConnStatusEnum.Offline
+                                    Throw New Exception(Me.LastErr)
+                                End If
+                                Me.ConnStatus = ConnStatusEnum.PrincipalOnline
+                        End Select
+                    End With
+                Case RunModeEnum.Mirror
+                    If Me.MirrorSQLServer = "" Then Throw New Exception("Mirror SQLServer is not defined")
+                    Dim bolIsConn As Boolean = False
+                    Select Case Me.ConnStatus
+                        Case ConnStatusEnum.Unknow, ConnStatusEnum.Offline
+                            If Me.mLastConnSQLServer = "" Or mLastConnSQLServer = Me.MirrorSQLServer Then
+                                Me.mLastConnSQLServer = Me.PrincipalSQLServer
+                            Else
+                                Me.mLastConnSQLServer = Me.MirrorSQLServer
+                            End If
+                            bolIsConn = True
+                        Case Else
+                            If Math.Abs(DateDiff("s", Me.LastRefMirrSrvTime, Now)) > Me.RefMirrSrvTime Then
+                                If Me.mIsDBOnline = True Then
+                                    Me.LastRefMirrSrvTime = Now
+                                Else
+                                    If Me.ConnStatus = ConnStatusEnum.PrincipalOnline Then
+                                        Me.mLastConnSQLServer = Me.MirrorSQLServer
+                                    Else
+                                        Me.mLastConnSQLServer = Me.PrincipalSQLServer
+                                    End If
+                                    bolIsConn = True
+                                End If
+                            End If
+                    End Select
+                    If bolIsConn = True Then
+                        If Not Me.Connection Is Nothing Then
+                            If Me.Connection.State <> ConnectionState.Closed Then
+                                Me.mConnClose()
+                            End If
+                            Me.Connection = Nothing
+                        End If
+                        LOG.StepName = "New SqlConnection"
+                        Me.Connection = New SqlConnection
+                        With Me.Connection
+                            LOG.StepName = "SetConnSQLServer first time"
+                            If Me.IsTrustedConnection = True Then
+                                Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.CurrDatabase)
+                            Else
+                                Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.DBUser, Me.DBUserPwd, Me.CurrDatabase)
+                            End If
+                            If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+                            .ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
+                            If Me.IsEncrypt = True Then
+                                .ConnectionString &= "Encrypt=True;"
+                            Else
+                                .ConnectionString &= "Encrypt=False;"
+                            End If
+                            LOG.StepName = "Open first time(OpenAsync)"
+                            Await Me.Connection.OpenAsync()
+                            If Me.LastErr = "" Then
+                                If Me.mIsDBOnline = True Then
+                                    If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
+                                        Me.ConnStatus = ConnStatusEnum.PrincipalOnline
+                                    Else
+                                        Me.ConnStatus = ConnStatusEnum.MirrorOnline
+                                    End If
+                                    Me.LastRefMirrSrvTime = Now
+                                End If
+                                bolIsConn = False
+                            End If
+                        End With
+                        If bolIsConn = True Then
+                            If Me.mLastConnSQLServer = "" Or mLastConnSQLServer = Me.MirrorSQLServer Then
+                                Me.mLastConnSQLServer = Me.PrincipalSQLServer
+                            Else
+                                Me.mLastConnSQLServer = Me.MirrorSQLServer
+                            End If
+                            With Me.Connection
+                                LOG.StepName = "SetConnSQLServer second time(OpenAsync)"
+                                If Me.IsTrustedConnection = True Then
+                                    Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.CurrDatabase)
+                                Else
+                                    Me.mSetConnSQLServer(Me.mLastConnSQLServer, Me.DBUser, Me.DBUserPwd, Me.CurrDatabase)
+                                End If
+                                If Me.LastErr <> "" Then Throw New Exception(Me.LastErr)
+                                .ConnectionString &= "Connect Timeout=" & Me.ConnectionTimeout & ";"
+                                LOG.StepName = "Open second time"
+                                Await Me.Connection.OpenAsync()
+                                If Me.LastErr = "" Then
+                                    LOG.StepName = "mIsDBOnline second time"
+                                    If Me.mIsDBOnline = True Then
+                                        If Me.mLastConnSQLServer = Me.PrincipalSQLServer Then
+                                            Me.ConnStatus = ConnStatusEnum.PrincipalOnline
+                                        Else
+                                            Me.ConnStatus = ConnStatusEnum.MirrorOnline
+                                        End If
+                                        Me.LastRefMirrSrvTime = Now
+                                    Else
+                                        Me.ConnStatus = ConnStatusEnum.Offline
+                                        Throw New Exception(Me.LastErr)
+                                    End If
+                                Else
+                                    Me.ConnStatus = ConnStatusEnum.Offline
+                                    Throw New Exception(Me.LastErr)
+                                End If
+                            End With
+                        End If
+                    End If
+                Case Else
+                    Throw New Exception("Unknow run mode")
+            End Select
+            Me.ClearErr()
+        Catch ex As Exception
+            Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
+            If Me.ConnStatus <> ConnStatusEnum.Offline Then Me.ConnStatus = ConnStatusEnum.Unknow
+        End Try
+    End Sub
+#End If
+
 
     ''' <summary>
     ''' Open or keep the database connection available|打开或保持数据库的连接状态

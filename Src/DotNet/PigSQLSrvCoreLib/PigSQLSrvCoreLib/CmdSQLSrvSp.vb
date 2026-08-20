@@ -4,7 +4,7 @@
 '* License: Copyright (c) 2020 Seow Phong, For more details, see the MIT LICENSE file included with this distribution.
 '* Describe: SqlCommand for SQL Server StoredProcedure
 '* Home Url: https://www.seowphong.com or https://en.seowphong.com
-'* Version: 1.17
+'* Version: 1.18
 '* Create Time: 17/4/2021
 '* 1.0.2	18/4/2021	Modify ActiveConnection
 '* 1.0.3	24/4/2021	Add mAdoDataType
@@ -32,8 +32,10 @@
 '* 1.15		5/6/2024	Modify mCacheQuery
 '* 1.16     28/7/2024   Modify PigStepLog to StruStepLog
 '* 1.17     16/12/2025  Modify mCacheQuery
+'* 1.18     20/8/2026  Add ExecuteNonQueryAsync,ExecuteAsync
 '**********************************
 Imports System.Data
+Imports System.Threading.Tasks
 #If NETFRAMEWORK Then
 Imports System.Data.SqlClient
 #Else
@@ -47,7 +49,7 @@ Imports PigToolsLiteLib
 ''' </summary>
 Public Class CmdSQLSrvSp
     Inherits PigBaseLocal
-    Private Const CLS_VERSION As String = "1." & "17" & "." & "2"
+    Private Const CLS_VERSION As String = "1." & "18" & "." & "28"
     Private moSqlCommand As SqlCommand
 
     Public Sub New(SpName As String)
@@ -116,8 +118,6 @@ Public Class CmdSQLSrvSp
             Return Nothing
         End Try
     End Function
-
-
 
     Public Property ParaValue(ParaName As String) As Object
         Get
@@ -247,6 +247,43 @@ Public Class CmdSQLSrvSp
             mlngRecordsAffected = value
         End Set
     End Property
+
+#If NET45_OR_GREATER Or NETCOREAPP3_1_OR_GREATER Then
+    Public Async Function ExecuteNonQueryAsync() As Task(Of String)
+        Const SUB_NAME As String = "ExecuteNonQueryAsync"
+        Try
+            Me.RecordsAffected = Await moSqlCommand.ExecuteNonQueryAsync()
+            Return "OK"
+        Catch ex As Exception
+            Me.RecordsAffected = -1
+            Me.PrintDebugLog(SUB_NAME, "Catch ex As Exception", Me.DebugStr)
+            Return Me.GetSubErrInf(SUB_NAME, ex)
+        End Try
+    End Function
+
+    Public Async Function ExecuteAsync() As Task(Of Recordset)
+        Dim LOG As New StruStepLog : LOG.SubName = "ExecuteAsync"
+        Try
+            LOG.StepName = "ExecuteReader"
+            Dim oSqlDataReader As SqlDataReader = Await moSqlCommand.ExecuteReaderAsync()
+            LOG.StepName = "New Recordset"
+            Dim oExecuteAsync As Recordset = New Recordset(oSqlDataReader)
+            If oExecuteAsync Is Nothing Then
+                LOG.Ret = "oExecuteAsync Is Nothing"
+                Throw New Exception(LOG.Ret)
+            End If
+            Me.RecordsAffected = -1
+            Me.ClearErr()
+            Return oExecuteAsync
+        Catch ex As Exception
+            Me.SetSubErrInf(LOG.SubName, LOG.StepName, ex)
+            Me.RecordsAffected = -1
+            Return Nothing
+        End Try
+    End Function
+
+#End If
+
 
     ''' <summary>
     ''' Executing stored procedures that do not return results|执行没有返回结果的存储过程
